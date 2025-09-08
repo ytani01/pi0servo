@@ -42,7 +42,7 @@ PyPI および TestPyPI のサイトで、プロジェクト専用のAPIトー�
 
 ```bash
 # TestPyPI へのアップロード
-uv run hatch publish -r test
+uv run hatch publish -r test -u __token__ -a $HATCH_INDEX_AUTH_TEST
 ```
 
 アップロード後、TestPyPIのプロジェクトページで内容を確認し、`pip install -i https://test.pypi.org/simple/ pi0servo` でインストールできることを確認します。
