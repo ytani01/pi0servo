@@ -1,6 +1,6 @@
-# piservo0
+# pi0servo
 
-`piservo0` は、Raspberry Piでサーボモーターを精密に制御するためのPythonライブラリです。
+`pi0servo` は、Raspberry Piでサーボモーターを精密に制御するためのPythonライブラリです。
 `pigpio`ライブラリを基盤とし、安価なサーボモーター(SG90など)を複数、同期させて動かすことに重点を置き、サーボモーターごとの個体差を吸収するためのキャリブレーション機能もあります。
 
 ![Software Architecture](docs/SoftwareArchitecture2.png)
@@ -50,12 +50,12 @@ mise use --g uv@latest
 *シェルを再起動後、`mise`のパス設定を促された場合は、指示に従ってください。*
 
 
-### **1.3. `piservo0`のインストール**
+### **1.3. `pi0servo`のインストール**
 
 ```bash
 # リポジトリをクローン
-git clone https://github.com/ytani01/piservo0.git
-cd piservo0
+git clone https://github.com/ytani01/pi0servo.git
+cd pi0servo
 
 # 仮想環境の作成 (有効化は不要！..その代わり「uv」を使う。)
 uv venv
@@ -75,7 +75,7 @@ T.B.D.
 
 ## 3. コマンドラインツールを使った使い方(例)
 
-`uv run piservo0`には、複数のサブコマンドがあり、キャリブレーションやAPIのサーバー/クライアントを実行することができます。
+`uv run pi0servo`には、複数のサブコマンドがあり、キャリブレーションやAPIのサーバー/クライアントを実行することができます。
 
 各サブコマンドに、'-h'をつけると、そのサブコマンドのコマンドラインに関するヘルプが表示されます。
 
@@ -96,7 +96,7 @@ T.B.D.
 **コマンド起動方法**
 
 ```bash
-uv run piservo0 calib 17
+uv run pi0servo calib 17
 ```
 
 起動後「h」でヘルプが表示されます。
@@ -136,7 +136,7 @@ GPIO17: 0 deg: pulse=1500>
 
 ```bash
 # サブコマンド一覧表示
-uv run piservo0 api-server 17 27 22 25
+uv run pi0servo api-server 17 27 22 25
 ```
 
 
@@ -149,7 +149,7 @@ JSONコマンドの詳細については、以下を参照してください。
 - [JSONCMD_SAMPLES.md](docs/JSONCMD_SAMPLES.md) 
 
 ```bash
-uv run piservo0 api-client
+uv run pi0servo api-client
 ```
 
 
@@ -163,11 +163,11 @@ uv run piservo0 api-client
 
 ```bash
 # ローカルでデフォルト設定の場合
-uv run piservo0
+uv run pi0servo
 
 # モーターの回転方向を指定する場合
-uv run piservo0 --angle_factor -1,-1,1,1
+uv run pi0servo --angle_factor -1,-1,1,1
 
 # リモート接続の例
-uv run piservo0 --angle_factor -1,-1,1,1 --url http://192.168.x.x:8000/cmd
+uv run pi0servo --angle_factor -1,-1,1,1 --url http://192.168.x.x:8000/cmd
 ``` 

@@ -16,7 +16,7 @@ from .command.cmd_strclient import CmdStrClient
 from .core.calibrable_servo import CalibrableServo
 
 
-def get_pi(debug=False):
+def get_pi(debug=False) -> pigpio.pi:
     """Initialize and return a pigpio.pi instance.
 
     If connection fails, log an error and return None.
@@ -26,7 +26,7 @@ def get_pi(debug=False):
     pi = pigpio.pi()
     if not pi.connected:
         __log.error("pigpio daemon not connected.")
-        return None
+        raise ConnectionError("pigpio daemon not connected.")
     return pi
 
 
@@ -64,8 +64,6 @@ def servo(
     __log.debug("cmd_name=%s", cmd_name)
 
     pi = get_pi(debug)
-    if not pi:
-        return
 
     app = None
     try:
@@ -116,8 +114,6 @@ def calib(ctx, pin, conf_file, debug):
         return
 
     pi = get_pi(debug)
-    if not pi:
-        return
 
     app = None
     try:
