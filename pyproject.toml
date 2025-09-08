@@ -71,8 +71,8 @@ ignore_missing_imports = true
 [tool.hatch.publish.test]
 repository = "https://test.pypi.org/legacy/"
 user = "__token__"
-password-env = "HATCH_TESTPYPI_TOKEN"
+password = { env = "HATCH_TESTPYPI_TOKEN" }
 
 [tool.hatch.publish.pypi]
 user = "__token__"
-password-env = "HATCH_PYPI_TOKEN"
+password = { env = "HATCH_PYPI_TOKEN" }
