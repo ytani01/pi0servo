@@ -18,15 +18,13 @@ PyPI および TestPyPI のサイトで、プロジェクト専用のAPIトー�
 
     - `PYTHON_KEYRING_BACKEND`: OSのパスワード管理機能(`keyring`)のエラーを回避するために設定します。
     - `HATCH_INDEX_USER`: ユーザー名を `__token__` に設定します。
-    - `HATCH_INDEX_AUTH_TEST`: TestPyPI用のトークンを設定します。(`-r test` オプションに対応)
-    - `HATCH_INDEX_AUTH`: 本番PyPI用のトークンを設定します。(デフォルトのPyPIに対応)
+    - `HATCH_INDEX_AUTH`: PyPIおよびTestPyPI用のトークンを設定します。
 
     ```bash
     # .env ファイルの中身の例
     export PYTHON_KEYRING_BACKEND="keyring.backends.null.Keyring"
     export HATCH_INDEX_USER="__token__"
-    export HATCH_INDEX_AUTH_TEST="ここにTestPyPI用のトークンを貼り付け"
-    export HATCH_INDEX_AUTH="ここにPyPI用のトークンを貼り付け"
+    export HATCH_INDEX_AUTH="ここにPyPI/TestPyPI用のトークンを貼り付け"
     ```
     この `.env` ファイルは `.gitignore` に登録されているため、誤ってGitリポジトリに登録されることはありません。
 
@@ -42,7 +40,7 @@ PyPI および TestPyPI のサイトで、プロジェクト専用のAPIトー�
 
 ```bash
 # TestPyPI へのアップロード
-uv run hatch publish -r test -u __token__ -a $HATCH_INDEX_AUTH_TEST
+uv run hatch publish -r test
 ```
 
 アップロード後、TestPyPIのプロジェクトページで内容を確認し、`pip install -i https://test.pypi.org/simple/ pi0servo` でインストールできることを確認します。

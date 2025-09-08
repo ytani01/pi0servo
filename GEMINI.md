@@ -38,6 +38,17 @@ Development rules for Gemini CLI.
 - **Safe file updates**: always create a new file and replace the old one.
 
 
+### 2.1 Learning and Debugging Principles
+
+To avoid repeating past failures and ensure efficient problem-solving:
+
+- **Prioritize Official Documentation:** Always consult primary sources for core functionality, configuration, and authentication. Avoid assumptions from secondary sources.
+- **Verify All Assumptions:** Question naming, implicit behaviors, and defaults. Avoid unconfirmed patterns.
+- **Systematic Problem Isolation:** Test each component (e.g., env vars, tool execution, subprocesses) to find root cause.
+- **Utilize Verbose Logging:** Use debug options (`-v`) for internal insights and failure identification.
+- **Value User Feedback:** Incorporate detailed reports for continuous learning and issue diagnosis.
+
+
 ## 3. Coding Rules
 
 - Source code comments should generally be in Japanese.
