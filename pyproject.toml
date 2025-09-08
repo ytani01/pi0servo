@@ -68,7 +68,7 @@ samples = [
 module = ['pigpio', 'fastapi', 'requests']
 ignore_missing_imports = true
 
-[tool.hatch.publish.testpypi]
+[tool.hatch.publish.test]
 repository = "https://test.pypi.org/legacy/"
 user = "__token__"
 password-env = "HATCH_TESTPYPI_TOKEN"
