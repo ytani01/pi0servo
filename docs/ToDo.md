@@ -2,7 +2,7 @@
 
 ## 2025-09-09
 
-- [ ] 下記のエラーの解消
+- [x] 下記のエラーの解消
 ```
 uv run hatch publish -r test
 dist/pi0servo-0.1.7.tar.gz ... failed

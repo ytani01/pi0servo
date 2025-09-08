@@ -5,7 +5,7 @@
 
 ## 1. 公開用トークンの準備
 
-PyPI および TestPyPI のサイトで、プロジェクト用のAPIトークンを事前に取得してください。
+PyPI および TestPyPI のサイトで、プロジェクト専用のAPIトークンを事前に取得してください。
 
 - [PyPI Account](https://pypi.org/manage/account/)
 - [TestPyPI Account](https://test.pypi.org/manage/account/)
@@ -14,13 +14,19 @@ PyPI および TestPyPI のサイトで、プロジェクト用のAPIトーク�
 
 毎回コマンドラインでトークンを入力する手間を省くため、プロジェクトルートの `.env` ファイルでトークンを管理します。
 
-1.  プロジェクトのルートにある `.env` ファイルに、取得したトークンを記述します。環境によってはOSのパスワード管理機能(`keyring`)がエラーを起こすため、`PYTHON_KEYRING_BACKEND`を設定して無効化しています。
+1.  プロジェクトのルートにある `.env` ファイルに、`hatch`が公式にサポートする環境変数を設定します。
+
+    - `PYTHON_KEYRING_BACKEND`: OSのパスワード管理機能(`keyring`)のエラーを回避するために設定します。
+    - `HATCH_INDEX_USER`: ユーザー名を `__token__` に設定します。
+    - `HATCH_INDEX_AUTH_TEST`: TestPyPI用のトークンを設定します。(`-r test` オプションに対応)
+    - `HATCH_INDEX_AUTH`: 本番PyPI用のトークンを設定します。(デフォルトのPyPIに対応)
 
     ```bash
-    # .env ファイルの中身
+    # .env ファイルの中身の例
     export PYTHON_KEYRING_BACKEND="keyring.backends.null.Keyring"
-    export HATCH_TESTPYPI_TOKEN="ここにTestPyPI用のトークンを貼り付け"
-    export HATCH_PYPI_TOKEN="ここにPyPI用のトークンを貼り付け"
+    export HATCH_INDEX_USER="__token__"
+    export HATCH_INDEX_AUTH_TEST="ここにTestPyPI用のトークンを貼り付け"
+    export HATCH_INDEX_AUTH="ここにPyPI用のトークンを貼り付け"
     ```
     この `.env` ファイルは `.gitignore` に登録されているため、誤ってGitリポジトリに登録されることはありません。
 
@@ -29,12 +35,10 @@ PyPI および TestPyPI のサイトで、プロジェクト用のAPIトーク�
     ```bash
     source .env
     ```
-    これで、現在のターミナルセッションでトークンが環境変数として設定されます。
 
 ## 3. TestPyPIへのアップロード (テスト)
 
-まず、TestPyPIへアップロードして、パッケージが正しく動作するか確認します。
-`.env` ファイルを読み込んだ後、以下のコマンドを実行します。
+`.env` ファイルを読み込んだ後、以下のシンプルなコマンドでアップロードできます。
 
 ```bash
 # TestPyPI へのアップロード
@@ -46,13 +50,11 @@ uv run hatch publish -r test
 ## 4. PyPIへのアップロード (本番)
 
 TestPyPIでの検証が完了したら、本番のPyPIへアップロードします。
-`.env` ファイルを読み込んだ後、以下のコマンドを実行します。
 
 ```bash
 # PyPI (本番) へのアップロード
 uv run hatch publish
 ```
-(`-r` オプションがない場合、`pyproject.toml` の `[tool.hatch.publish.pypi]` で設定されたリポジトリ、つまりデフォルトのPyPIに公開されます)
 
 ---
 **注意:** トークンは機密情報です。Gitなどのバージョン管理に含めないように注意してください。

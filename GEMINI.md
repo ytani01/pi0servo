@@ -13,6 +13,8 @@ Development rules for Gemini CLI.
 
 ## 2. Project-Wide Rules
 
+- Research thoroughly before experimenting.
+
 - **`git commit` is performed only by the user.**
   - When a commit is appropriate, prompt the user to commit.
   - Always suggest a short, one-line commit message in English.
