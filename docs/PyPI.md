@@ -14,10 +14,11 @@ PyPI および TestPyPI のサイトで、プロジェクト用のAPIトーク�
 
 毎回コマンドラインでトークンを入力する手間を省くため、プロジェクトルートの `.env` ファイルでトークンを管理します。
 
-1.  プロジェクトのルートにある `.env` ファイルに、取得したトークンを記述します。
+1.  プロジェクトのルートにある `.env` ファイルに、取得したトークンを記述します。環境によってはOSのパスワード管理機能(`keyring`)がエラーを起こすため、`PYTHON_KEYRING_BACKEND`を設定して無効化しています。
 
     ```bash
     # .env ファイルの中身
+    export PYTHON_KEYRING_BACKEND="keyring.backends.null.Keyring"
     export HATCH_TESTPYPI_TOKEN="ここにTestPyPI用のトークンを貼り付け"
     export HATCH_PYPI_TOKEN="ここにPyPI用のトークンを貼り付け"
     ```
