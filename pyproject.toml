@@ -3,8 +3,19 @@ name = "pi0servo"
 dynamic = ["version"]
 description = "Python library for servo motor control."
 readme = "README.md"
+license = { file = "LICENSE" }
 authors = [
     { name = "Yoichi Tanibayashi", email = "yoichi@tanibayashi.jp" }
+]
+urls = { "Homepage" = "https://github.com/ytani01/pi0servo" }
+keywords = ["pi0servo", "pigpio", "raspberry pi", "servo motor"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Topic :: System :: Hardware",
+    "Topic :: System :: Hardware :: Hardware Drivers",
 ]
 requires-python = ">=3.11"
 dependencies = [
