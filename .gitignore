@@ -2,6 +2,8 @@
 servo.json
 .markdown*
 
+.pypirc
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.pyc
@@ -52,3 +54,5 @@ flycheck_*
 *.swp
 *.bak
 *.log
+
+.env
