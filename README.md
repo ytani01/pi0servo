@@ -56,57 +56,50 @@ Raspberry Pi Zero 2W のような非力な機種で、
   ネットワーク越しの操作も可能です。
 
 
+## == 動作環境
+
+- **対応機種**: Raspberry Pi Zero 2W..4B (pigpioが動作する機種)
+- **非対応機種**: Raspberry Pi 5, Pico
+
+
 ## == インストール
 
-Raspbeery Pi OS のインストール・初期設定後、以下を行ってください。
-
-### === **`pigpio`のインストールと起動**
+### === `pigpio`のインストールと設定
 
 本ライブラリは`pigpio`デーモンが動作している必要があります。
+詳しくは、下記のドキュメントを参照してください。
 
-```bash
-# Raspberry Pi OSにはプリインストールされていることが多いです
-sudo apt update
-sudo apt install pigpio
+- [pigpiodのインストール・設定・自動起動設定](docs/setup-pigpiod.md)
 
-# pigpioデーモンの起動と自動起動設定
-sudo systemctl start pigpiod
-sudo systemctl enable pigpiod
+
+### === 本ライブラリ(`pi0servo`)のインストール
+
+作業用ディレクトリと、venv環境のアクティベート
+
+``` bash
+# 作業ディレクトリの作成
+mkdir work
+cd work
+
+# venv環境の作成とアクティベート
+python -m venv .env
+source ./.env/bin/activate
+
+# pipコマンドのアップデート
+pip install -U pip
+
+# 依存するライブラリのインストール
+pip install -U fastapi uvicorn
+
+# pi0servoのインストール
+pip install -U \
+--index-url https://test.pypi.org/simple/ \
+--extra-index-url https://pypi.org/simple \
+pi0servo
 ```
 
-
-### === **1.2. 開発環境のセットアップ**
-
-`mise` と `uv` を使って、プロジェクトのPython環境を管理することをお勧めします。
-
-```bash
-# mise (各種開発ツールの管理) のインストール
-curl https://mise.run | sh
-~/.local/bin/mise --version
-
-# uv (高速なPythonパッケージ管理ツール) のインストール
-mise use --g uv@latest
-```
-
-*シェルを再起動後、`mise`のパス設定を促された場合は、指示に従ってください。*
-
-
-### === **1.3. `pi0servo`のインストール**
-
-```bash
-# リポジトリをクローン
-git clone https://github.com/ytani01/pi0servo.git
-cd pi0servo
-
-# 仮想環境の作成 (有効化は不要！..その代わり「uv」を使う。)
-uv venv
-
-# 依存関係のインストール
-uv pip install -e .
-
-# 開発・テスト用
-uv pip install -e '.[dev]'
-```
+**(注)** このパッケージは現在**TestPyPI**(テスト用公開サイト)で公開されています。
+将来、本番用**PyPI**に公開した際は、**`pip install -U pi0servo`** で、依存するライブラリも含めてインストールすることができるようなる予定です。
 
 
 ## == ライブラリとしての利用
@@ -116,17 +109,26 @@ T.B.D.
 
 ## == 3. コマンドラインツールを使った使い方(例)
 
-`uv run pi0servo`には、複数のサブコマンドがあり、キャリブレーションやAPIのサーバー/クライアントを実行することができます。
+`pi0servo`ライブラリをインストールすると、
+コマンドとしても実行でるようになります。
 
-各サブコマンドに、'-h'をつけると、そのサブコマンドのコマンドラインに関するヘルプが表示されます。
+複数のサブコマンドがあり、
+キャリブレーションやAPIのサーバー/クライアントを実行することができます。
 
-| - sub-command - | - description -           |
-| :---            | :---                      |
-| calib           | calibration tool          |
-| api-server      | JSON API Server           |
-| api-client      | API Client (JSON)         |
-| str-client      | String Command API Client |
-| servo           | servo command             |
+各サブコマンドに、'-h'をつけると、
+そのサブコマンドのコマンドラインに関するヘルプが表示されます。
+
+``` bash
+pi0servo サブコマンド名 -h
+```
+
+> | **サブコマンド名** |    **機能**               |
+> | :---                | :---                      |
+> | calib               | calibration tool          |
+> | api-server          | JSON API Server           |
+> | api-client          | API Client (JSON)         |
+> | str-client          | String Command API Client |
+> | servo               | servo command             |
 
 
 ### 3.1. キャリブレーション方法
