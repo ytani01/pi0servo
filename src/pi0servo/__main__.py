@@ -4,11 +4,11 @@
 """__main__.py"""
 import os
 
-import click
 import pigpio
 import uvicorn
+from clickutils import click, click_common_opts
 
-from . import __version__, click_common_opts, get_logger
+from . import __version__, get_logger
 from .command.cmd_apiclient import CmdApiClient
 from .command.cmd_calib import CalibApp
 from .command.cmd_servo import CmdServo
@@ -30,10 +30,10 @@ def get_pi(debug=False) -> pigpio.pi:
     return pi
 
 
-@click.group(invoke_without_command=True, help="pyservo0 command")
+@click.group()
 @click_common_opts(__version__)
 def cli(ctx, debug):
-    """CLI top."""
+    """pi0servo CLI top."""
     cmd_name = ctx.info_name
     subcmd_name = ctx.invoked_subcommand
 
@@ -45,7 +45,7 @@ def cli(ctx, debug):
         print(ctx.get_help())
 
 
-@cli.command(help="servo command")
+@cli.command()
 @click.argument("pin", type=int, nargs=1)
 @click.argument("pulse", type=str, nargs=1)
 @click.option(
@@ -80,15 +80,7 @@ def servo(
             pi.stop()
 
 
-@cli.command(
-    help="""
-calibration tool
-
-* configuration search path:
-
-    Current dir --> Home dir --> /etc
-"""
-)
+@cli.command()
 @click.argument("pin", type=int, nargs=1)
 @click.option(
     "--conf_file", "-c", "-f", type=str,
@@ -97,7 +89,12 @@ calibration tool
 )
 @click_common_opts(__version__)
 def calib(ctx, pin, conf_file, debug):
-    """calibration command."""
+    """calibration tool
+
+* configuration search path:
+
+    Current dir --> Home dir --> /etc
+"""
     __log = get_logger(__name__, debug)
     __log.debug("pin=%s,conf_file=%s", pin, conf_file)
 
@@ -133,7 +130,7 @@ def calib(ctx, pin, conf_file, debug):
             pi.stop()
 
 
-@cli.command(help="JSON API Server")
+@cli.command()
 @click.argument("pins", type=int, nargs=-1)
 @click.option(
     "--server_host", "-s", type=str, default="0.0.0.0", show_default=True,
@@ -173,7 +170,7 @@ def api_server(ctx, pins, server_host, port, debug):
     )
 
 
-@cli.command(help="API Client (JSON)")
+@cli.command()
 @click.argument("cmdline", type=str, nargs=-1)
 @click.option(
     "--url", "-u", type=str,
@@ -187,7 +184,7 @@ def api_server(ctx, pins, server_host, port, debug):
 )
 @click_common_opts(__version__)
 def api_client(ctx, cmdline, url, history_file, debug):
-    """String API Server."""
+    """String API Client."""
     cmd_name = ctx.command.name
 
     __log = get_logger(__name__, debug)
@@ -210,7 +207,7 @@ def api_client(ctx, cmdline, url, history_file, debug):
         _app.end()
 
 
-@cli.command(help="String Command API Client")
+@cli.command()
 @click.argument("cmdline", type=str, nargs=-1)
 @click.option(
     "--url", "-u", type=str,

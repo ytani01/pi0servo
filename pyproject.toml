@@ -26,6 +26,7 @@ dependencies = [
     "fastapi",
     "uvicorn",
     "types-toml>=0.10.8.20240310",
+    "clickutils",
 ]
 
 [build-system]
@@ -69,7 +70,7 @@ samples = [
 module = ['pigpio', 'fastapi', 'requests']
 ignore_missing_imports = true
 
-[tool.hatch.publish.test]
-repository = "https://test.pypi.org/legacy/"
+[tool.uv.sources]
+clickutils = { path = "../clickutils" }
 
 [tool.hatch.publish.pypi]
