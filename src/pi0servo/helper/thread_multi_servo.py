@@ -47,7 +47,9 @@ class ThreadMultiServo:
         self.__log = get_logger(self.__class__.__name__, self._debug)
         self.__log.debug(
             "pins=%s, first_move=%s, conf_file=%s",
-            pins, first_move, conf_file
+            pins,
+            first_move,
+            conf_file,
         )
 
         # 同期的な処理を担当するMultiServoを内包する
@@ -128,7 +130,9 @@ class ThreadMultiServo:
         """
         self.__log.debug(
             "target_angle=%s, move_sec=%s, step_n=%s",
-            target_angles, move_sec, step_n
+            target_angles,
+            move_sec,
+            step_n,
         )
 
         cmd = {
@@ -158,7 +162,9 @@ class ThreadMultiServo:
         """
         self.__log.debug(
             "angle_diffs=%s, move_sec=%s, step_n=%s",
-            angle_diffs, move_sec, step_n
+            angle_diffs,
+            move_sec,
+            step_n,
         )
 
         cmd = {
@@ -219,11 +225,9 @@ class ThreadMultiServo:
     # --- 状態取得メソッド ---
 
     def get_all_pulses(self) -> list[int]:
-        """Get all pulses.
-        """
+        """Get all pulses."""
         return self._mservo.get_all_pulses()
 
     def get_all_angles(self) -> list[float]:
-        """Get all angles.
-        """
+        """Get all angles."""
         return self._mservo.get_all_angles()

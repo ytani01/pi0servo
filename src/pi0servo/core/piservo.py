@@ -2,6 +2,7 @@
 # (c) 2025 Yoichi Tanibayashi
 #
 """piservo.py"""
+
 from ..utils.my_logger import get_logger
 
 
@@ -42,7 +43,7 @@ class PiServo:
     @property
     def pin(self):
         return self._pin
-    
+
     def get_pulse(self):
         """Get pulse.
 
@@ -84,7 +85,7 @@ class PiServo:
 
         _cur_pulse = self.get_pulse()
         self.__log.debug("cur_pulse=%s", _cur_pulse)
-        
+
         if _cur_pulse == 0:
             return
 

@@ -25,6 +25,7 @@ dependencies = [
     "requests",
     "fastapi",
     "uvicorn",
+    "types-toml>=0.10.8.20240310",
 ]
 
 [build-system]

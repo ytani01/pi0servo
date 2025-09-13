@@ -2,6 +2,7 @@
 # (c) 2025 Yoichi Tanibayashi
 #
 """cmd_strclient.py."""
+
 from pi0servo import StrCmdToJson, get_logger
 
 from .cmd_apiclient import CmdApiClient

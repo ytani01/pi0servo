@@ -2,6 +2,7 @@
 # (c) 2025 Yoichi Tanibayashi
 #
 """API Client."""
+
 import requests
 
 from pi0servo import get_logger
@@ -10,11 +11,11 @@ from pi0servo import get_logger
 class ApiClient:
     """API Client.
 
-    POST method    
+    POST method
     """
 
     DEF_URL = "http://localhost:8000/cmd"
-    HEADERS = {'content-type': 'application/json'}
+    HEADERS = {"content-type": "application/json"}
 
     def __init__(self, url=DEF_URL, debug=False) -> None:
         """Constractor."""

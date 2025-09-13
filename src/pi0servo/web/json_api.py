@@ -4,6 +4,7 @@
 """
 pi0servo JSON API Server
 """
+
 import os
 from contextlib import asynccontextmanager
 from typing import Any, Dict, List, Union
@@ -29,7 +30,7 @@ class JsonApi:
         print("Initializing ...")
         self.pi = pigpio.pi()
 
-        self.mservo = MultiServo(self.pi, self.pins) #  debug=self._debug)
+        self.mservo = MultiServo(self.pi, self.pins)  #  debug=self._debug)
         self.thr_worker = ThreadWorker(self.mservo, debug=self._debug)
         self.thr_worker.start()
 
@@ -83,11 +84,11 @@ async def read_root():
 @app.post("/cmd")
 async def exec_cmd(
     request: Request,
-    cmd: Union[List[Dict[str, Any]], Dict[str, Any]] = Body()
+    cmd: Union[List[Dict[str, Any]], Dict[str, Any]] = Body(),
 ):
     """execute commands.
 
-       JSON配列を受け取り、コマンドを実行する。
+    JSON配列を受け取り、コマンドを実行する。
     """
     debug = request.app.state.debug
     _log = get_logger(__name__, debug)

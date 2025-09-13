@@ -2,6 +2,7 @@
 # (c) 2025 Yoichi Tanibayashi
 #
 """multi_servo.py"""
+
 import time
 
 from ..utils.my_logger import get_logger
@@ -44,7 +45,9 @@ class MultiServo:
         self.__log = get_logger(self.__class__.__name__, self._debug)
         self.__log.debug(
             "pins=%s, first_move=%s, conf_file=%s",
-            pins, first_move, conf_file
+            pins,
+            first_move,
+            conf_file,
         )
 
         self._pi = pi
@@ -73,8 +76,8 @@ class MultiServo:
 
         # 各サーボインスタンスに同じ名前のメソッドが存在するか確認
         if not all(
-                hasattr(s, name) and callable(getattr(s, name))
-                for s in self.servo
+            hasattr(s, name) and callable(getattr(s, name))
+            for s in self.servo
         ):
             msg = (
                 f"'{self.__class__.__name__}' object and its servos "
@@ -247,8 +250,7 @@ class MultiServo:
             s.off()
 
     def get_pulse(self, idx: int) -> int:
-        """Get pulse of servo[idx].
-        """
+        """Get pulse of servo[idx]."""
         _pulse = self.servo[idx].get_pulse()
         self.__log.debug("idx=%s, pulse=%s", idx, _pulse)
         return _pulse
@@ -266,8 +268,7 @@ class MultiServo:
         return pulses
 
     def move_pulse(self, idx, pulse, forced=False):
-        """Move one servo[idx].
-        """
+        """Move one servo[idx]."""
         self.servo[idx].move_pulse(pulse, forced)
 
     def move_all_pulses(self, pulses, forced=False):
@@ -285,8 +286,7 @@ class MultiServo:
             self.move_pulse(i, pulses[i], forced)
 
     def move_pulse_relative(self, idx: int, pulse_diff: int, forced=False):
-        """Relative move one servo[idx].
-        """
+        """Relative move one servo[idx]."""
         self.__log.debug(
             "idx=%s, pulse_diff=%s, forced=%s", idx, pulse_diff, forced
         )
@@ -366,7 +366,7 @@ class MultiServo:
         self,
         target_angles,
         move_sec: float = DEF_MOVE_SEC,
-        step_n: int = DEF_STEP_N
+        step_n: int = DEF_STEP_N,
     ):
         """
         すべてのサーボを目標角度まで同期的かつ滑らかに動かす。
@@ -386,7 +386,9 @@ class MultiServo:
         """
         self.__log.debug(
             "target_angles=%s, move_sec=%s, step_n=%s",
-            target_angles, move_sec, step_n
+            target_angles,
+            move_sec,
+            step_n,
         )
 
         if not self._validate_angle_list(target_angles):
@@ -452,13 +454,14 @@ class MultiServo:
         self,
         angle_diffs: list[float],
         move_sec: float = DEF_MOVE_SEC,
-        step_n: int = DEF_STEP_N
+        step_n: int = DEF_STEP_N,
     ):
-        """Relative Move.
-        """
+        """Relative Move."""
         self.__log.debug(
             "angle_diffs=%s, move_sec=%s, step_n=%s",
-            angle_diffs, move_sec, step_n
+            angle_diffs,
+            move_sec,
+            step_n,
         )
 
         _cur_angles = self.get_all_angles()

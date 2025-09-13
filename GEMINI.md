@@ -1,105 +1,82 @@
 # GEMINI.md
 
-Development rules for Gemini CLI.
+開発ルール
 
 
-## 1. Project Goals
+## 1. 目的
+- サーボ用 Python ドライバ
+- **Raspberry Pi Zero 2W** など低スペックでも動作
+- **pigpio** 使用
+- ライブラリ利用 + CLIで確認・デモ可能
 
-- Provide a Python driver for servo motors.
-- Must run reliably even on low-spec devices such as **Raspberry Pi Zero 2W**.
-- Must use **pigpio**.
-- Should work both as a library and as a CLI, so users can run checks and demos easily.
 
-
-## 2. Project-Wide Rules
-
-- Research thoroughly before experimenting.
-
-- **`git commit` is performed only by the user.**
-  - When a commit is appropriate, prompt the user to commit.
-  - Always suggest a short, one-line commit message in English.
-
-- **Project configuration and management** must be handled through `uv` and `pyproject.toml`.
-  - Always follow the latest `uv` specification.
-
-- **Command execution** should always use `uv run ...`.
-
-- **Installing/adding libraries** must be done with `uv add ...`.
-
-- **Linting** should be run with:
+## 2. 全体ルール
+- 安易に試行錯誤をせず、情報をしっかり調べること。
+- **`git commit`はユーザーのみ**
+- 必要時にコミット促し、1行英語メッセージ案を示す
+- 設定管理は `uv`, `pyproject.toml` を使用（最新版仕様確認）
+- コマンド実行: `uv run ...`
+- ライブラリ追加: `uv add ...`
+- リンティング:
   - `uv run ruff check ...`
   - `uv run mypy ...`
   - `uv run pyright ...`
-
-- **Test programs** must be created under the `tests` directory, numbered sequentially.
-- **Running tests** must be done with:  
-  `uv run python -m pytest -v ...`
-
-- **Safe file updates**: always create a new file and replace the old one.
+- テスト: `tests/`以下に作成、連番で番号付けし、実行は `uv run python -m pytest -v ...`
+- ファイル更新は新規作成→差替え
 
 
-### 2.1 Learning and Debugging Principles
+### 2.1 学習とデバッグの原則
 
-To avoid repeating past failures and ensure efficient problem-solving:
+過去の失敗を繰り返さず、効率的な問題解決を確実にするために：
 
-- **Prioritize Official Documentation:** Always consult primary sources for core functionality, configuration, and authentication. Avoid assumptions from secondary sources.
-- **Verify All Assumptions:** Question naming, implicit behaviors, and defaults. Avoid unconfirmed patterns.
-- **Systematic Problem Isolation:** Test each component (e.g., env vars, tool execution, subprocesses) to find root cause.
-- **Utilize Verbose Logging:** Use debug options (`-v`) for internal insights and failure identification.
-- **Value User Feedback:** Incorporate detailed reports for continuous learning and issue diagnosis.
-
-
-## 3. Coding Rules
-
-- Source code comments should generally be in Japanese.
-- Keep each line within 78 characters.
-- Use `get_logger()` from `my_logger.py` for debug logs.
-- Do not modify `my_logger.py`.
+- **公式ドキュメントの優先:** コア機能、設定、認証については、常に一次情報源を参照する。二次情報源からの推測は避ける。
+- **すべての仮説の検証:** 命名、暗黙の挙動、デフォルト設定に関する仮説を問い直し、検証する。未確認のパターンに基づいて進めない。
+- **体系的な問題の切り分け:** 予期せぬ挙動に遭遇した場合、各コンポーネント（例：環境変数、ツール実行、サブプロセス）をテストし、根本原因を特定する。
+- **詳細ログの活用:** 利用可能な場合、デバッグオプション（`-v`など）を使用し、内部の洞察を得て、失敗を特定する。
+- **ユーザーフィードバックの尊重:** 詳細な報告を継続的な学習と問題診断に活用する。
 
 
-## 4. Task Planning and Execution: `ToDo.md` and `Tasks.md`
-
-- `ToDo.md` is edited **only by the user**.
-- `Tasks.md` is created and managed by the AI.
-
-- First, check whether `ToDo.md` and `Tasks.md` exist in the project root.
-  - If neither exists, do nothing and ask the user what to do.
-
-- If either file exists, follow the rules below.
-
-- Before starting any work, always create a `Tasks.md`, and always ask the user for confirmation before executing.  
-  Do not proceed until the user explicitly says **"go ahead"**.
+## 3. コーディング
+- コメントは日本語
+- 行長 78文字以内
+- ログは `my_logger.py` の `get_logger()`使用（変更禁止）
 
 
-### 4.1 When `Tasks.md` exists
+## 4. タスク管理: `ToDo.md` / `Tasks.md`
 
-- Follow the tasks in order, starting from the first unchecked item.
-- After modifying source code, always:
-  - Run linting
-  - Create, update, and run test programs
+- `ToDo.md`: ユーザーのみが、作成・編集・管理する。AIは参照のみ可能。
+- `Tasks.md`: AIが作成・編集・管理する。
 
-- Mark completed tasks in `Tasks.md`.
+- `ToDo.md`と`Tasks.md`がプロジェクトルートに存在するか確認する。
+  - どちらも存在しない場合、何もしないでユーザーに指示を仰ぐ。
 
-- If new tasks are needed, add them to `Tasks.md` first, then execute.
+- 作業開始前に、必ず `Tasks.md` を作成
+  - 実行開始前に、必ずユーザーに確認を求める。
+  - ユーザーが '進めて' というまで、作業を進めない。
+  - 作業開始後、 `Tasks.md`の項目については、連続実行してよい。
 
-- When modifying `Tasks.md`:
-  1. Always ask the user for confirmation before executing.
-  2. Do not proceed until the user says **"go ahead"**.
+### 4.1 `Tasks.md` がある場合
 
-- When all tasks in `Tasks.md` are completed:
-  1. Update `ToDo.md` and check off completed items.
-  2. Run `uv run rename_task.py`.  
-     This script:
-     - Renames `Tasks.md` to `yyyymmdd-HHMM-Tasks-done.md`  
-       (`yyyymmdd` = date, `HHMM` = time).
-     - Moves the file into the `archives` directory.
+- `Tasks.md`のマークされてないタスクから順に実行
+- `Tasks.md`のタスク項目が一つ完了するごとにマークする。
+
+- コード変更時は、常に以下を実施:
+  - リンティング
+  - テストの作成・更新・実行
+
+- `Tasks.md` のすべてのタスクが完了した場合:- 
+  1. ユーザーに完了を報告し、ユーザーが `ToDo.md`を更新するよう促す。
+  2. `uv run rename_task.py` 実行
+     - このスクリプトは、`Tasks.md` を
+       -  `yyyymmdd-HHMM-Tasks-done.md` にリネームし
+       - `archives/`へ移動する。
+
+### 4.2 `Tasks.md` がない場合
+
+- `ToDo.md` マークされていない先頭の項目を特定する。
+- `ToDo.md`の項目1つを詳細なタスクに分割して、`Tasks.md`にチェックリスト作成。
+- `Tasks.md`は、必ず **日本語**で作成。
+- 原則として、`ToDo.md`の1項目につき1つの`Tasks.md`を作成する。
+- `Tasks.md`作成後、ユーザーが "進めて" と言うまで、実行を開始しない。
 
 
-### 4.2 When `Tasks.md` does not exist
-
-- Review `ToDo.md`:
-  - Identify the first unchecked item under **priority items**.
-  - Draft an execution plan, break it into detailed tasks, and create a checklist in `Tasks.md`.
-  - In principle, one item in `ToDo.md` = one `Tasks.md`.
-  - Once `Tasks.md` is created, always ask the user for confirmation before executing.
-  - If the user says **"go ahead"**, execute the tasks in order.

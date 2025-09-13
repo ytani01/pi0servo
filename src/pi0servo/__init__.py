@@ -22,7 +22,6 @@ __all__ = [
     "__version__",
     "get_logger",
     "click_common_opts",
-
     "ApiClient",
     "CalibrableServo",
     "MultiServo",

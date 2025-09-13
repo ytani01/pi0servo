@@ -2,6 +2,7 @@
 # (c) 2025 Yoichi Tanibayashi
 #
 """cmd_to_json.py."""
+
 import json
 from typing import Any, Dict, List, Optional, Union
 
@@ -10,7 +11,7 @@ from pi0servo.utils.my_logger import get_logger
 
 class StrCmdToJson:
     """String Command to JSON."""
-    
+
     # コマンド文字列とJSONコマンド名のマッピング
     COMMAND_MAP: Dict[str, str] = {
         # main move command
@@ -44,13 +45,13 @@ class StrCmdToJson:
         "sx": "max",
     }
 
-    def __init__(self, angle_factor: List =[], debug=False):
+    def __init__(self, angle_factor: List = [], debug=False):
         """constractor."""
         self._debug = debug
         self.__log = get_logger(self.__class__.__name__, self._debug)
         self.__log.debug("angle_factor=%s", angle_factor)
 
-        self._angle_factor = angle_factor #  property
+        self._angle_factor = angle_factor  #  property
 
     @property
     def angle_factor(self):
@@ -67,7 +68,7 @@ class StrCmdToJson:
         return {"err": strcmd}
 
     def _parse_angles(
-            self, param_str: str
+        self, param_str: str
     ) -> Optional[List[Union[int, str, None]]]:
         """Parse angle parameters.
         'mv'コマンドのパラメータ文字列をパースして角度のリストを返す.
@@ -108,7 +109,7 @@ class StrCmdToJson:
                     return None  # 数値に変換できない
 
         # self.__log.debug("angles=%s", angles)
-        
+
         # angle_factor に応じて符号反転
         for _i in range(len(angles)):
             if _i >= len(self._angle_factor):
@@ -161,7 +162,9 @@ class StrCmdToJson:
             cmd_param_str = cmd_parts[1]
         self.__log.debug(
             "cmd_key=%s, cmd_name=%s, cmd_param_str=%s",
-            cmd_key, cmd_name, cmd_param_str
+            cmd_key,
+            cmd_name,
+            cmd_param_str,
         )
 
         # _cmd_dataの初期化
@@ -213,7 +216,7 @@ class StrCmdToJson:
                         target = "min"
 
                 self.__log.debug("servo=%s, target=%s", servo, target)
-                    
+
                 _cmd_data["servo"] = servo
                 _cmd_data["target"] = target
 
@@ -223,7 +226,7 @@ class StrCmdToJson:
 
         except (ValueError, TypeError) as _e:
             self.__log.error("%s: %s", type(_e).__name__, _e)
-            return self._create_error_data(cmd_str)                
+            return self._create_error_data(cmd_str)
 
         self.__log.debug("_cmd_data=%s", _cmd_data)
         return _cmd_data
@@ -254,6 +257,6 @@ class StrCmdToJson:
         # XXX T.B.D. 必要か？
         if len(data) == 1:
             data = data[0]
-        
-        self.__log.debug("data=\"%s\"", data)
+
+        self.__log.debug('data="%s"', data)
         return json.dumps(data)

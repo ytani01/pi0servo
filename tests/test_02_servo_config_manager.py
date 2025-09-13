@@ -4,6 +4,7 @@
 """
 Test for ServoConfigManager
 """
+
 import json
 import os
 from pathlib import Path

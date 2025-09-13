@@ -24,7 +24,7 @@ class CalibApp:
         self.pi = pi
         self.pin = pin
         self.conf_file = conf_file
-        
+
         if not self.pi.connected:
             raise ConnectionError("pigpio daemon not connected.")
 
@@ -70,8 +70,8 @@ class CalibApp:
             # Move
             "w": lambda: self.move_diff(+20),
             "s": lambda: self.move_diff(-20),
-            "k": lambda: self.move_diff(+20), #  vi like
-            "j": lambda: self.move_diff(-20), #  vi like
+            "k": lambda: self.move_diff(+20),  #  vi like
+            "j": lambda: self.move_diff(-20),  #  vi like
             "KEY_UP": lambda: self.move_diff(+20),
             "KEY_DOWN": lambda: self.move_diff(-20),
             # Fine Tune
@@ -131,13 +131,9 @@ class CalibApp:
     def print_prompt(self):
         """Print Prompt string."""
         _cur_pulse = self.servo.get_pulse()
-        
+
         prompt_str = (
-            f"GPIO{self.pin}"
-            ": "
-            f"{self.cur_target} deg"
-            ": "
-            f"pulse={_cur_pulse}"
+            f"GPIO{self.pin}: {self.cur_target} deg: pulse={_cur_pulse}"
         )
 
         print(f"{prompt_str}> ", end="", flush=True)
@@ -166,7 +162,7 @@ class CalibApp:
             self.__log.debug("cur_target=%s", self.cur_target)
             print(f"target={self.cur_target} deg")
             self.servo.move_angle(self.cur_target)
-        
+
     def move_diff(self, diff_pulse):
         """パルス幅を相対的に変更する"""
 
@@ -195,7 +191,9 @@ class CalibApp:
                 print()
                 self.__log.warning(
                     "%s: out of range:%s..%s",
-                    cur_pulse, self.servo.pulse_min, self.servo.pulse_max
+                    cur_pulse,
+                    self.servo.pulse_min,
+                    self.servo.pulse_max,
                 )
                 return
         elif self.cur_target == self.TARGET_MIN:
@@ -205,7 +203,9 @@ class CalibApp:
                 print()
                 self.__log.warning(
                     "%s: out of range:%s..%s",
-                    cur_pulse, self.servo.MIN, self.servo.pulse_center
+                    cur_pulse,
+                    self.servo.MIN,
+                    self.servo.pulse_center,
                 )
                 return
         elif self.cur_target == self.TARGET_MAX:
@@ -215,7 +215,9 @@ class CalibApp:
                 print()
                 self.__log.warning(
                     "%s: out of range:%s..%s",
-                    cur_pulse, self.servo.pulse_center, self.servo.MAX
+                    cur_pulse,
+                    self.servo.pulse_center,
+                    self.servo.MAX,
                 )
                 return
         else:
