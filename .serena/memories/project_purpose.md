@@ -1,6 +1,1 @@
-# Project Purpose
-
-- Servo Python driver
-- Operates on low-spec devices like Raspberry Pi Zero 2W
-- Uses `pigpio`
-- Can be confirmed/demoed using libraries and CLI
+pi0servo is a Python library for controlling servo motors with Raspberry Pi, especially low-spec models like Raspberry Pi Zero 2W. It uses the `pigpio` library, supports multiple synchronized servos, includes calibration features, and offers remote control via REST API (JSON and string commands). It also provides CLI tools for direct operation.

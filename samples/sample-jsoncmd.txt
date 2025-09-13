@@ -1,0 +1,5 @@
+# sample
+{"cmd": "sleep", "sec": 1.5}
+{"cmd": "move", "angles": [10,20,30,40]}
+{"cmd": "sleep", "sec": 1.5}
+{"cmd": "move", "angles": [40,30,20,10]}

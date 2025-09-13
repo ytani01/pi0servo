@@ -3,6 +3,7 @@
 # (c) 2025 Yoichi Tanibayashi
 #
 """cmd_apiclient.py"""
+import json
 import os
 import readline  # input()でヒストリー機能が使える
 
@@ -35,7 +36,7 @@ class CmdApiClient:
 
     def print_response(self, _res):
         """print response in json format"""
-        print(f"* {self.url}> {_res.json()}")
+        print(f"* {self.url}> {json.dumps(_res.json())}")
 
     def parse_cmdline(self, cmdline):
         """parse command line string to json
@@ -78,19 +79,34 @@ class CmdApiClient:
         # start interactive mode
         print("* Ctrl-C (Interrput) or Ctrl-D (EOF) for quit")
 
-        while True:
-            try:
-                _line = input(self.cmd_name + self.PROMPT_STR)
-                self.__log.debug("_line=%s", _line)
-                readline.write_history_file(self.history_file)
+        try:
+            while True:
+                try:
+                    _line = input(self.cmd_name + self.PROMPT_STR)
+                    _line = _line.strip()
+                    self.__log.debug("_line=%a", _line)
+                    readline.write_history_file(self.history_file)
 
-            except (KeyboardInterrupt, EOFError):
-                break
+                except (KeyboardInterrupt, EOFError):
+                    break
 
-            _parsed_line = self.parse_cmdline(_line)
-            _res = self.api_client.post(_parsed_line)
-            self.print_response(_res)
+                if not _line:
+                    self.__log.debug("%a: ignored", _line)
+                    continue
+
+                if _line.startswith("#"):
+                    self.__log.debug("%a: ignored", _line)
+                    continue
+            
+                _parsed_line = self.parse_cmdline(_line)
+                _res = self.api_client.post(_parsed_line)
+                self.print_response(_res)
+
+        finally:
+            self.__log.debug("save history: %s", self.history_file)
+            readline.write_history_file(self.history_file)
 
     def end(self):
         """end"""
         print("\n* Bye\n")
+
