@@ -1,38 +1,34 @@
 #
 # (c) 2025 Yoichi Tanibayashi
 #
-import click
 import os
 import datetime
 
-from clickutils import click_common_opts, get_logger
+from clickutils import click, click_common_opts, get_logger
 
 @click.command()
-@click_common_opts()
-@click.option('--archive-path', default='archives', help='アーカイブ先のディレクトリ')
 @click.argument('target_file', type=click.Path())
-def main(ctx, debug, archive_path, target_file):
+@click.option('--archive-path', default='archives', help='アーカイブ先のディレクトリ')
+@click_common_opts()
+def main(ctx, archive_path, target_file, debug):
     """
     指定されたファイルをアーカイブディレクトリに移動し、リネームします。
     """
     log = get_logger(__name__, debug)
     log.debug("command name = %a", ctx.command.name)
-    log.debug(f"archive_path = {archive_path}")
-
-    print(f"Target file: {target_file}")
+    log.debug("archive_path = %s", archive_path)
 
     print(f"Target file: {target_file}")
 
     if not os.path.exists(target_file):
         log.error(f"Error: File not found: {target_file}")
-        print(f"Error: File '{target_file}' not found.")
         ctx.exit(1) # エラー終了
 
     # archives ディレクトリが存在しない場合は作成
-    archive_dir_to_use = archive_path # Use a new variable to avoid any potential shadowing
+    archive_dir_to_use = archive_path
     if not os.path.exists(archive_dir_to_use):
         os.makedirs(archive_dir_to_use)
-        log.debug(f"Created directory: {archive_dir_to_use}")
+        log.debug("Created directory: %s", archive_dir_to_use)
 
     # ファイル名と拡張子を分割
     base_name = os.path.basename(target_file)
@@ -51,7 +47,6 @@ def main(ctx, debug, archive_path, target_file):
         print(f"Archived '{target_file}' to '{new_path}'")
     except OSError as e:
         log.error(f"Error archiving file: {e}")
-        print(f"Error: Could not archive file '{target_file}'.")
         ctx.exit(1) # エラー終了
 
 if __name__ == "__main__":
