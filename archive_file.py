@@ -69,6 +69,3 @@ def main(ctx, src_file, stat, dstdir, debug):
     except OSError as e:
         log.error("%s: %s", type(e).__name__, e)
         sys.exit(3)
-
-if __name__ == "__main__":
-    main()
