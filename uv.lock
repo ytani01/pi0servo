@@ -189,29 +189,6 @@ wheels = [
 ]
 
 [[package]]
-name = "clickutils"
-source = { directory = "../clickutils" }
-dependencies = [
-    { name = "asyncclick" },
-    { name = "click" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "asyncclick", specifier = ">=8.2.2.2" },
-    { name = "click", specifier = ">=8.2.1" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "flake8", specifier = ">=7.3.0" },
-    { name = "mypy", specifier = ">=1.18.1" },
-    { name = "pyright", specifier = ">=1.1.405" },
-    { name = "pytest", specifier = ">=8.2.2" },
-    { name = "ruff", specifier = ">=0.13.0" },
-]
-
-[[package]]
 name = "colorama"
 version = "0.4.6"
 source = { registry = "https://pypi.org/simple" }
@@ -644,9 +621,9 @@ source = { editable = "." }
 dependencies = [
     { name = "blessed" },
     { name = "click" },
-    { name = "clickutils" },
     { name = "fastapi" },
     { name = "pigpio" },
+    { name = "pyclickutils" },
     { name = "requests" },
     { name = "types-toml" },
     { name = "uvicorn" },
@@ -669,9 +646,9 @@ dev = [
 requires-dist = [
     { name = "blessed" },
     { name = "click" },
-    { name = "clickutils", directory = "../clickutils" },
     { name = "fastapi" },
     { name = "pigpio" },
+    { name = "pyclickutils", directory = "../pyclickutils" },
     { name = "requests" },
     { name = "types-toml", specifier = ">=0.10.8.20240310" },
     { name = "uvicorn" },
@@ -725,6 +702,29 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/20/e5/16ff212c1e452235a90aeb09066144d0c5a6a8c0834397e03f5224495c4e/ptyprocess-0.7.0.tar.gz", hash = "sha256:5c5d0a3b48ceee0b48485e0c26037c0acd7d29765ca3fbb5cb3831d347423220", size = 70762, upload-time = "2020-12-28T15:15:30.155Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/22/a6/858897256d0deac81a172289110f31629fc4cee19b6f01283303e18c8db3/ptyprocess-0.7.0-py2.py3-none-any.whl", hash = "sha256:4b41f3967fce3af57cc7e94b888626c18bf37a083e3651ca8feeb66d492fef35", size = 13993, upload-time = "2020-12-28T15:15:28.35Z" },
+]
+
+[[package]]
+name = "pyclickutils"
+source = { directory = "../pyclickutils" }
+dependencies = [
+    { name = "asyncclick" },
+    { name = "click" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "asyncclick", specifier = ">=8.2.2.2" },
+    { name = "click", specifier = ">=8.2.1" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "flake8", specifier = ">=7.3.0" },
+    { name = "mypy", specifier = ">=1.18.1" },
+    { name = "pyright", specifier = ">=1.1.405" },
+    { name = "pytest", specifier = ">=8.2.2" },
+    { name = "ruff", specifier = ">=0.13.0" },
 ]
 
 [[package]]
