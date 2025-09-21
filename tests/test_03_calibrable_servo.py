@@ -4,8 +4,10 @@
 tests/test_03_calibrable_servo.py
 (リファクタリング修正版)
 """
+from unittest.mock import patch
+
 import pytest
-from unittest.mock import MagicMock, patch
+
 from pi0servo.core.calibrable_servo import CalibrableServo
 from pi0servo.core.piservo import PiServo
 
@@ -28,6 +30,9 @@ def mock_config_manager():
 @pytest.fixture
 def servo(mocker_pigpio, mock_config_manager):
     """CalibrableServoのテスト用インスタンスを生成するフィクスチャ"""
+
+    print(f"mock_config_manager={mock_config_manager}")
+
     pi = mocker_pigpio()
     servo_instance = CalibrableServo(pi, PIN, conf_file=CONF_FILE, debug=True)
     pi.reset_mock()
@@ -44,6 +49,8 @@ class TestCalibrableServoRefactored:
 
     def setup_method(self, method):
         """各テストメソッドの前に呼ばれるセットアップ"""
+        print(f"method={method}")
+
         self.PULSE_MIN = 600
         self.PULSE_CENTER = 1500
         self.PULSE_MAX = 2400
@@ -70,7 +77,7 @@ class TestCalibrableServoRefactored:
         """完全な設定ファイルでの初期化"""
         config_data = {"pin": PIN, "min": 700, "center": 1600, "max": 2500}
         mock_config_manager.get_config.return_value = config_data
-        
+
         pi = mocker_pigpio()
         servo = CalibrableServo(pi, PIN, conf_file=CONF_FILE, debug=True)
 
@@ -144,7 +151,9 @@ class TestCalibrableServoRefactored:
         (100, "self.PULSE_MAX"),
         (-100, "self.PULSE_MIN"),
     ])
-    def test_movement_move_angle_calibrated(self, servo, angle_in, expected_pulse_calc):
+    def test_movement_move_angle_calibrated(
+            self, servo, angle_in, expected_pulse_calc
+    ):
         """キャリブレーション値を考慮したmove_angleのテスト"""
         self._setup_servo_calibration(servo)
         expected_pulse = eval(expected_pulse_calc)
@@ -160,7 +169,9 @@ class TestCalibrableServoRefactored:
         """move_center/min/maxがキャリブレーション値を使うかのテスト"""
         self._setup_servo_calibration(servo)
         servo.move_center()
-        servo.pi.set_servo_pulsewidth.assert_called_with(PIN, self.PULSE_CENTER)
+        servo.pi.set_servo_pulsewidth.assert_called_with(
+            PIN, self.PULSE_CENTER
+        )
         servo.move_min()
         servo.pi.set_servo_pulsewidth.assert_called_with(PIN, self.PULSE_MIN)
         servo.move_max()

@@ -1,0 +1,3 @@
+- [x] `api_client`コマンドに`--file`または`-f`オプションを追加するために`src/pi0servo/__main__.py`を修正する。
+- [x] 新しい`file`オプションを処理するために`src/pi0servo/command/cmd_apiclient.py`を修正する。
+- [x] `src/pi0servo/` 以下のソースコードのリンティング

@@ -70,8 +70,8 @@ class CalibApp:
             # Move
             "w": lambda: self.move_diff(+20),
             "s": lambda: self.move_diff(-20),
-            "k": lambda: self.move_diff(+20),  #  vi like
-            "j": lambda: self.move_diff(-20),  #  vi like
+            "k": lambda: self.move_diff(+20),  # vi like
+            "j": lambda: self.move_diff(-20),  # vi like
             "KEY_UP": lambda: self.move_diff(+20),
             "KEY_DOWN": lambda: self.move_diff(-20),
             # Fine Tune
@@ -233,9 +233,9 @@ class CalibApp:
         """ヘルプメッセージを表示する"""
         print(
             """=== Usage ===
-            
+
 * Select target (Cyclic):
-            
+
  -90 deg ------[TAB]-----> 0 deg ------[TAB]-----> 90 deg
  -90 deg <-[Shift]+[TAB]-- 0 deg <-[Shift]+[TAB]-- 90 deg
 
@@ -244,7 +244,7 @@ class CalibApp:
         [w], [Up] ,[k]
               ^
               v
-        [s],[Down],[j]   
+        [s],[Down],[j]
 
 * Save: [ENTER],[SPACE] : save current pulse
 
