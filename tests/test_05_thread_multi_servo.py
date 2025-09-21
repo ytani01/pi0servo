@@ -4,8 +4,10 @@
 tests/test_05_thread_multi_servo.py
 (修正版)
 """
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
+
 from pi0servo.helper.thread_multi_servo import ThreadMultiServo
 
 PINS = [17, 18]
@@ -15,13 +17,16 @@ CONF_FILE = "test_thread_servo.json"
 @pytest.fixture
 def mock_multi_servo_class():
     """MultiServoクラスのモックを返すフィクスチャ"""
-    with patch("pi0servo.helper.thread_multi_servo.MultiServo", autospec=True) as mock_ms:
-        #返されるインスタンスのモックを設定
+    with patch(
+        "pi0servo.helper.thread_multi_servo.MultiServo", autospec=True
+    ) as mock_ms:
+        # 返されるインスタンスのモックを設定
         instance = mock_ms.return_value
         instance.pins = PINS
         instance.conf_file = CONF_FILE
         instance.servo = [MagicMock(), MagicMock()]
         yield mock_ms  # クラスのモックを返す
+
 
 @pytest.fixture
 def mock_thread_worker_class():
@@ -31,8 +36,11 @@ def mock_thread_worker_class():
     ) as mock_tw:
         yield mock_tw
 
+
 @pytest.fixture
-def thread_multi_servo(mocker_pigpio, mock_multi_servo_class, mock_thread_worker_class):
+def thread_multi_servo(
+    mocker_pigpio, mock_multi_servo_class, mock_thread_worker_class
+):
     """
     ThreadMultiServoのテスト用インスタンスと、
     それが内包するインスタンスモックを返すフィクスチャ
@@ -40,30 +48,37 @@ def thread_multi_servo(mocker_pigpio, mock_multi_servo_class, mock_thread_worker
     pi = mocker_pigpio()
     # このtmsは、内部で本物のMultiServoとThreadWorkerを作ってしまうが、
     # すぐに下の行でモックに差し替えるので問題ない。
-    tms = ThreadMultiServo(pi, PINS, first_move=False, conf_file=CONF_FILE, debug=True)
-    
+    tms = ThreadMultiServo(
+        pi, PINS, first_move=False, conf_file=CONF_FILE, debug=True
+    )
+
     # 実際に作られたインスタンスをモックで上書き
     mservo_instance = mock_multi_servo_class.return_value
     worker_instance = mock_thread_worker_class.return_value
     tms._mservo = mservo_instance
     tms._worker = worker_instance
-    
+
     return tms, mservo_instance, worker_instance
 
 
 class TestThreadMultiServo:
     """ThreadMultiServoクラスのテスト"""
 
-    def test_init(self, mocker_pigpio, mock_multi_servo_class, mock_thread_worker_class):
+    def test_init(
+        self, mocker_pigpio, mock_multi_servo_class, mock_thread_worker_class
+    ):
         """初期化のテスト"""
         pi = mocker_pigpio()
-        tms = ThreadMultiServo(pi, PINS, first_move=True, conf_file=CONF_FILE, debug=True)
+        tms = ThreadMultiServo(
+            pi, PINS, first_move=True, conf_file=CONF_FILE, debug=True
+        )
+        print(f"tms={tms}")
 
         # MultiServoが正しい引数で初期化されたか
         mock_multi_servo_class.assert_called_once_with(
             pi, PINS, True, CONF_FILE, debug=False
         )
-        
+
         # ThreadWorkerが正しい引数で初期化され、startが呼ばれたか
         mservo_instance = mock_multi_servo_class.return_value
         mock_thread_worker_class.assert_called_once_with(
@@ -99,10 +114,12 @@ class TestThreadMultiServo:
         """move_all_anglesが正しいコマンドを送信するかのテスト"""
         tms, _, worker = thread_multi_servo
         target_angles = [90, -90]
-        
+
         tms.move_all_angles(target_angles)
-        
-        expected_cmd = {"cmd": "move_all_angles", "target_angles": target_angles}
+
+        expected_cmd = {
+            "cmd": "move_all_angles", "target_angles": target_angles
+        }
         worker.send.assert_called_with(expected_cmd)
 
     def test_move_all_angles_sync(self, thread_multi_servo):

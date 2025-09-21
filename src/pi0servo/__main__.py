@@ -7,8 +7,8 @@ import os
 import uvicorn
 
 import pigpio
-
-from clickutils import click_common_opts
+import uvicorn
+from pyclickutils import click_common_opts, import_click
 
 from . import __version__, get_logger
 from .command.cmd_apiclient import CmdApiClient
