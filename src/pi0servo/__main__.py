@@ -2,7 +2,9 @@
 # (c) 2025 Yoichi Tanibayashi
 #
 """__main__.py"""
+import click
 import os
+import uvicorn
 
 import click
 import pigpio
