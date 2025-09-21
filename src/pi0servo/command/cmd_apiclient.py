@@ -32,11 +32,18 @@ class CmdApiClient:
         self.__log.debug("cmdline=%s", self.cmdline)
         self.__log.debug("history_file=%s", self.history_file)
 
-        self.api_client = ApiClient(self.url, self._debug)
+        try:
+            self.api_client = ApiClient(self.url, self._debug)
+        except Exception as _e:
+            self.__log.error("%s: %s", type(_e).__name__, _e)
 
     def print_response(self, _res):
         """print response in json format"""
-        print(f"* {self.url}> {json.dumps(_res.json())}")
+        self.__log.debug("_res='%s': %s", _res, type(_res))
+        try:
+            print(f"* {self.url}> {json.dumps(_res.json())}")
+        except Exception as _e:
+            print(f"* {_res}")
 
     def parse_cmdline(self, cmdline):
         """parse command line string to json
@@ -57,8 +64,11 @@ class CmdApiClient:
                 self.__log.debug("_l=%s", _l)
 
                 _parsed_line = self.parse_cmdline(_l)
-                _res = self.api_client.post(_parsed_line)
-                self.print_response(_res)
+                try:
+                    _res = self.api_client.post(_parsed_line)
+                    self.print_response(_res)
+                except Exception as _e:
+                    self.__log.error("%s: %s", type(_e).__name__, _e)
             return
 
         #
@@ -66,7 +76,11 @@ class CmdApiClient:
         #
         try:
             # read history file
-            readline.read_history_file(self.history_file)
+            try:
+                readline.read_history_file(self.history_file)
+            except Exception as _e:
+                self.__log.error("%s: %s", type(_e).__name__, _e)
+
             print(f"* history file: {self.history_file}")
             self.__log.debug(
                 "history_length=%s",
@@ -99,7 +113,11 @@ class CmdApiClient:
                     continue
             
                 _parsed_line = self.parse_cmdline(_line)
-                _res = self.api_client.post(_parsed_line)
+                try:
+                    _res = self.api_client.post(_parsed_line)
+                except Exception as _e:
+                    self.__log.error("%s: %s", type(_e).__name__, _e)
+                    _res = type(_e).__name__
                 self.print_response(_res)
 
         finally:
