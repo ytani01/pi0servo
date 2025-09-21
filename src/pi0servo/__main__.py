@@ -4,9 +4,10 @@
 """__main__.py"""
 import os
 
+import click
 import pigpio
 import uvicorn
-from pyclickutils import click_common_opts, import_click
+from pyclickutils import click_common_opts
 
 from . import __version__, get_logger
 from .command.cmd_apiclient import CmdApiClient
@@ -14,8 +15,6 @@ from .command.cmd_calib import CalibApp
 from .command.cmd_servo import CmdServo
 from .command.cmd_strclient import CmdStrClient
 from .core.calibrable_servo import CalibrableServo
-
-click = import_click()
 
 
 def get_pi(debug=False) -> pigpio.pi:

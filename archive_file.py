@@ -7,7 +7,6 @@ import sys
 
 from pyclickutils import click_common_opts, get_logger, import_click
 
-
 click = import_click()
 
 
