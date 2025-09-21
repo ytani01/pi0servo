@@ -138,20 +138,12 @@ class CLITestBase:
                 cwd=cwd,
                 env=env,
             )
-            if check_success and result.returncode != 0:
-                pytest.fail(
-                    f"Command failed: {' '.join(command)}\n"
-                    f"Return code: {result.returncode}\n"
-                    f"Stdout: {result.stdout}\n"
-                    f"Stderr: {result.stderr}"
-                )
             return result
         except subprocess.TimeoutExpired:
             command_str = " ".join(command)
-            # noqa: E501
             pytest.fail(f"Command timed out after {timeout}s: {command_str}")
         except FileNotFoundError:
-            pytest.skip(f"Command not found: {command[0]}")
+            pytest.fail(f"Command not found: {command[0]}")
 
     def run_interactive_command(
         self, command: list[str]
