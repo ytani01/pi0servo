@@ -51,7 +51,7 @@ class StrCmdToJson:
         self.__log = get_logger(self.__class__.__name__, self._debug)
         self.__log.debug("angle_factor=%s", angle_factor)
 
-        self._angle_factor = angle_factor  #  property
+        self._angle_factor = angle_factor  # property
 
     @property
     def angle_factor(self):

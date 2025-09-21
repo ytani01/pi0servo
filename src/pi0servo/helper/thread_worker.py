@@ -25,7 +25,7 @@ class ThreadWorker(threading.Thread):
     キューに溜まっているコマンドをすべてキャンセルできる。
 
     **コマンド一覧(例)**
-    
+
     {"cmd": "move_all_angles_sync",
      "angles": [30, None, "center"],   # mandatory
      "move_sec": 0.2, "step_n": 40}    # optional
@@ -296,9 +296,9 @@ class ThreadWorker(threading.Thread):
         """
         _servo = int(cmd["servo"])
         _target = cmd["target"]
-        
+
         self.__log.debug("set: servo:%s", _servo)
- 
+
         if _target == "center":
             self.mservo.set_pulse_center(_servo)
         elif _target == "min":

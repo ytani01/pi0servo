@@ -30,7 +30,7 @@ class JsonApi:
         print("Initializing ...")
         self.pi = pigpio.pi()
 
-        self.mservo = MultiServo(self.pi, self.pins)  #  debug=self._debug)
+        self.mservo = MultiServo(self.pi, self.pins)  # debug=self._debug)
         self.thr_worker = ThreadWorker(self.mservo, debug=self._debug)
         self.thr_worker.start()
 

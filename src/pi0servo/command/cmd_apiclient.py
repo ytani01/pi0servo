@@ -97,7 +97,7 @@ class CmdApiClient:
                 if _line.startswith("#"):
                     self.__log.debug("%a: ignored", _line)
                     continue
-            
+
                 _parsed_line = self.parse_cmdline(_line)
                 _res = self.api_client.post(_parsed_line)
                 self.print_response(_res)
@@ -109,4 +109,3 @@ class CmdApiClient:
     def end(self):
         """end"""
         print("\n* Bye\n")
-
