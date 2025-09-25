@@ -248,3 +248,46 @@ def str_client(ctx, cmdline, url, history_file, angle_factor, debug):
 
     finally:
         _app.end()
+
+
+@cli.command()
+@click.argument("pins", type=int, nargs=-1)
+@click.option(
+    "--server_host", "-s", type=str, default="0.0.0.0", show_default=True,
+    help="server hostname or IP address"
+)
+@click.option(
+    "--port", "-p", type=int, default=8000, show_default=True,
+    help="port number"
+)
+@click_common_opts(click, __version__)
+def jsonrpc_server(ctx, pins, server_host, port, debug):
+    """JSON-RPC Server ."""
+    cmd_name = ctx.command.name
+
+    __log = get_logger(__name__, debug)
+    __log.debug("cmd_name=%s", cmd_name)
+    __log.debug("pins=%s", pins)
+    __log.debug("server_host=%s, port=%s", server_host, port)
+
+    if pins:
+        os.environ["PI0SERVO_PINS"] = ",".join([str(p) for p in pins])
+    else:
+        click.echo()
+        click.echo("Error: Please specify GPIO pins.")
+        click.echo()
+        click.echo(f"  e.g. pi0servo {cmd_name} 17 27")
+        click.echo()
+        click.echo(f"{ctx.get_help()}")
+        click.echo()
+        return
+
+    os.environ["PI0SERVO_DEBUG"] = "1" if debug else "0"
+
+    click.echo("** WIP **")
+
+    # uvicorn.run(
+    #     "pi0servo.web.jsonrpc_api:app",
+    #     host=server_host, port=port, reload=True
+    # )
+       
