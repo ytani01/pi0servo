@@ -3,6 +3,7 @@
 #
 """API Client."""
 import json
+
 import requests
 
 from pi0servo import get_logger
@@ -31,8 +32,14 @@ class ApiClient:
         try:
             res = requests.post(self.url, data=data_str, headers=self.HEADERS)
             self.__log.debug("res=%s", res)
-        except Exception as _e:
+
+        except requests.exceptions.ConnectionError as _e:
             _msg = f"{type(_e).__name__}: {_e}"
+            self.__log.debug(_msg)
+            return {"error": _msg}
+
+        except Exception as _e:
+            _msg = f"{type(_e)}: {_e}"
             self.__log.error(_msg)
             return {"error": _msg}
 
@@ -43,8 +50,11 @@ class ApiClient:
         try:
             result_json = result.json()
         except Exception as _e:
-            result_json = json.loads(
-                f'{"error": "{type(_e).__name__}: {_e}"}'
-            )
+            if isinstance(result, dict) and result.get("error"):
+                err_msg = result.get("error")
+            else:
+                err_msg = f"{type(_e).__name__}: {_e}"
+            result_json = {"error": err_msg}
+
         self.__log.debug("result_json=%s", result_json)
         return result_json

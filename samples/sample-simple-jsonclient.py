@@ -18,7 +18,7 @@ sv = ApiClient(URL, debug=DEBUG_FLAG)
 print("* JSONコマンド: 配列で複数可能")
 cmd_json = [
     {"cmd": "move", "angles": [30, -30]},
-    {"cmd": "move", "angles": [0, 0]},
+    {"cmd": "movea", "angles": [0, 0]},
 ]
 print(f"cmd_json = {cmd_json}\n")
 
