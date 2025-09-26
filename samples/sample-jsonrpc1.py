@@ -4,15 +4,22 @@ import json
 # 呼び出したいメソッドを定義
 def move(angle_diffs, move_sec, step_n):
     # 本来はロボット制御とか処理を書く
-    print(f"move(angle_diffs={angle_diffs}, move_sec={move_sec}, step_n={step_n})")
+    print(
+        f"move(angle_diffs={angle_diffs},"
+        f"move_sec={move_sec}, "
+        f"step_n={step_n})"
+    )
     return [1, 2, 3, 4]
+
 
 # 利用可能なメソッドをディスパッチ用にまとめる
 methods = {
     "move": move,
 }
 
+
 def handle_request(json_str):
+    request = {}
     try:
         request = json.loads(json_str)
 
@@ -36,6 +43,7 @@ def handle_request(json_str):
             "result": result,
             "id": req_id,
         }
+
     except Exception as e:
         # エラーレスポンス
         response = {
@@ -48,6 +56,7 @@ def handle_request(json_str):
         }
 
     return json.dumps(response)
+
 
 # --- 動作テスト ---
 if __name__ == "__main__":

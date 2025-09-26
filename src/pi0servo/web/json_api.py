@@ -109,5 +109,7 @@ async def exec_cmd(
         _log.debug("c=%s, _res1=%s", c, _res1)
         _res.append(_res1)
 
+    if len(_res) == 1:
+        _res = _res[0]
     _log.debug("_res=%s", _res)
     return _res

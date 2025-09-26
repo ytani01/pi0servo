@@ -290,4 +290,3 @@ def jsonrpc_server(ctx, pins, server_host, port, debug):
     #     "pi0servo.web.jsonrpc_api:app",
     #     host=server_host, port=port, reload=True
     # )
-       

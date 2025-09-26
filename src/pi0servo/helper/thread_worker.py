@@ -27,7 +27,7 @@ class ThreadWorker(threading.Thread):
 
     # コマンド一覧(例)
     # コマンドチェックにも使う
-    CMD_SAMPLES_ALL = [
+    CMD_SAMPLES_ALL: list[dict] = [
         {"cmd": "move_all_angles_sync",
          "angles": [30, None, "center"],   # mandatory
          "move_sec": 0.2, "step_n": 40},    # optional
@@ -148,13 +148,16 @@ class ThreadWorker(threading.Thread):
         return self.clear_cmdq()
 
     def mk_reply_json(
-        self, status, cmddata: str | dict, retval: str | dict = None
+        self,
+        status: str,
+        cmddata: str | dict,
+        retval: str | dict | None = None
     ) -> str:
-        """Make replay message data (JSON)"""
+        """Make replay message data (JSON string)"""
 
         if isinstance(cmddata, str):
             cmddata = json.loads(cmddata)
-            
+
         _reply = {
             "status": status,
             "cmddata": cmddata,

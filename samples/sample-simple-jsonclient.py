@@ -15,22 +15,24 @@ print(f"* URL = {URL}\n")
 sv = ApiClient(URL, debug=DEBUG_FLAG)
 
 
-print("* JSONコマンド: 配列で複数可能")
+print("* JSONコマンド: 配列で複数一括送信可能")
 cmd_json = [
     {"cmd": "move", "angles": [30, -30]},
-    {"cmd": "movea", "angles": [0, 0]},
+    {"cmd": "mova", "angles": [0, 0]},  # あえて、コマンド名を間違える
 ]
 print(f"cmd_json = {cmd_json}\n")
 
+
 print("* 配列をそのまま送る")
-result = sv.post(json.dumps(cmd_json))
-result_json = sv.get_result_json(result)
-print(f"result = {result_json}\n")
+print(f">>> {cmd_json}")
+result = sv.post(json.dumps(cmd_json))  # 送信
+result_json = sv.get_result_json(result)  # 返信の解読
+print(f"<<< {result_json}\n")
 
 
 print("* 配列要素を一つずつ送る")
-for j in cmd_json:
-    print(f"- j = {j}")
-    result = sv.post(json.dumps(j))
+for cmd in cmd_json:
+    print(f">>> {cmd}")
+    result = sv.post(json.dumps(cmd))
     result_json = sv.get_result_json(result)
-    print(f"  result = {result_json}")
+    print(f"<<< {result_json}\n")

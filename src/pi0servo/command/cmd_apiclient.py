@@ -42,7 +42,7 @@ class CmdApiClient:
         self.__log.debug("_res='%s': %s", _res, type(_res))
         try:
             print(f"* {self.url}> {json.dumps(_res.json())}")
-        except Exception as _e:
+        except Exception:
             print(f"* {_res}")
 
     def parse_cmdline(self, cmdline):
