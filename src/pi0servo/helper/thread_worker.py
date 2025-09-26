@@ -23,29 +23,31 @@ class ThreadWorker(threading.Thread):
 
     コマンドをキャンセルしたい場合は、`clear_cmdq()`で、
     キューに溜まっているコマンドをすべてキャンセルできる。
-
-    **コマンド一覧(例)**
-
-    {"cmd": "move_all_angles_sync",
-     "angles": [30, None, "center"],   # mandatory
-     "move_sec": 0.2, "step_n": 40}    # optional
-
-    {"cmd": "move",                    # "move_all_angles_sync"の省略形
-     "angles": [30, None, "center"],   # mandatory
-     "move_sec": 0.2, "step_n": 40}    # optional
-
-    {"cmd": "move_all_angles", "angles": [30, None, "center"]}
-    {"cmd": "move_all_pulses", "pulses": [1000, 2000, None, 0]}
-
-    {"cmd": "move_sec", "sec": 1.5}
-    {"cmd": "step_n", "n": 40}
-    {"cmd": "interval", "sec": 0.5}
-    {"cmd": "sleep", "sec": 1.0}
-
-    # for calibration
-    {"cmd": "move_pulse_relative", "servo": 2, "pulse_diff": -20}
-    {"cmd": "set", "servo": 1, "target": "center"}
     """
+
+    # コマンド一覧(例)
+    # コマンドチェックにも使う
+    CMD_SAMPLES_ALL = [
+        {"cmd": "move_all_angles_sync",
+         "angles": [30, None, "center"],   # mandatory
+         "move_sec": 0.2, "step_n": 40},    # optional
+
+        {"cmd": "move",                    # "move_all_angles_sync"の省略形
+         "angles": [30, None, "center"],   # mandatory
+         "move_sec": 0.2, "step_n": 40},    # optional
+
+        {"cmd": "move_all_angles", "angles": [30, None, "center"]},
+        {"cmd": "move_all_pulses", "pulses": [1000, 2000, None, 0]},
+
+        {"cmd": "move_sec", "sec": 1.5},
+        {"cmd": "step_n", "n": 40},
+        {"cmd": "interval", "sec": 0.5},
+        {"cmd": "sleep", "sec": 1.0},
+
+        # for calibration
+        {"cmd": "move_pulse_relative", "servo": 2, "pulse_diff": -20},
+        {"cmd": "set", "servo": 1, "target": "center"},
+    ]
 
     DEF_RECV_TIMEOUT = 0.2  # sec
     DEF_INTERVAL_SEC = 0.0  # sec
@@ -87,6 +89,11 @@ class ThreadWorker(threading.Thread):
 
         self._cmdq: queue.Queue = queue.Queue()
         self._active = False
+
+        self._cmd_list = []
+        for _c in self.CMD_SAMPLES_ALL:
+            self._cmd_list.append(_c.get("cmd"))
+        self.__log.debug("cmd_list=%s", self._cmd_list)
 
         self._command_handlers = {
             "move":
@@ -140,15 +147,46 @@ class ThreadWorker(threading.Thread):
         self.__log.debug("")
         return self.clear_cmdq()
 
+    def mk_reply_json(
+        self, status, cmddata: str | dict, retval: str | dict = None
+    ) -> str:
+        """Make replay message data (JSON)"""
+
+        if isinstance(cmddata, str):
+            cmddata = json.loads(cmddata)
+            
+        _reply = {
+            "status": status,
+            "cmddata": cmddata,
+            "retval": retval,
+        }
+        return json.dumps(_reply)
+
     def send(self, cmd_data):
-        """send"""
+        """Send cmd_data(JSON)"""
         try:
             if isinstance(cmd_data, str):
                 cmd_data = json.loads(cmd_data)
 
-            if cmd_data.get("cmd") == self.CMD_CANCEL:
+            # コマンド名チェック
+            cmd_name = cmd_data.get("cmd")
+            if cmd_name is None:
+                err_msg = "Not a command"
+                _ret = self.mk_reply_json("ERR", cmd_data, err_msg)
+                self.__log.debug("_ret=%s", _ret)
+                return _ret
+
+            if cmd_name not in self._cmd_list:
+                err_msg = f"Invalid command: {cmd_name}"
+                _ret = self.mk_reply_json("ERR", cmd_data, err_msg)
+                self.__log.debug("_ret=%s", _ret)
+                return _ret
+
+            if cmd_name == self.CMD_CANCEL:
+                # キャンセルコマンドの場合、キューをクリアする。
                 cmd_data["count"] = self.clear_cmdq()
             else:
+                # 通常のコマンドは、コマンドキューに入れる。
                 self._cmdq.put(cmd_data)
 
             self.__log.debug(
@@ -158,7 +196,8 @@ class ThreadWorker(threading.Thread):
         except Exception as _e:
             self.__log.error("%s: %s", type(_e).__name__, _e)
 
-        return cmd_data
+        _ret = self.mk_reply_json("OK", cmd_data)
+        return _ret
 
     def recv(self, timeout=DEF_RECV_TIMEOUT):
         """recv"""
