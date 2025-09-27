@@ -119,9 +119,9 @@ class ThreadWorker(threading.Thread):
         }
 
     @property
-    def qsize(self):
+    def qsize(self) -> int:
         """Size of command queue."""
-        return self._cmdq.qsize
+        return self._cmdq.qsize()
 
     def __del__(self):
         """del"""
@@ -170,35 +170,37 @@ class ThreadWorker(threading.Thread):
         }
         return json.dumps(_reply)
 
-    def send(self, cmd_data):
+    def send(self, cmd_data: str | dict):
         """Send cmd_data(JSON)"""
         try:
             if isinstance(cmd_data, str):
-                cmd_data = json.loads(cmd_data)
+                cmd_json = json.loads(cmd_data)
+            else:
+                cmd_json = cmd_data
 
             # コマンド名チェック
-            cmd_name = cmd_data.get("cmd")
+            cmd_name = cmd_json.get("cmd")
             if cmd_name is None:
                 err_msg = "Not a command"
-                _ret = self.mk_reply_json("ERR", cmd_data, err_msg)
+                _ret = self.mk_reply_json("ERR", cmd_json, err_msg)
                 self.__log.debug("_ret=%s", _ret)
                 return _ret
 
             if cmd_name not in self._cmd_list:
                 err_msg = f"Invalid command: {cmd_name}"
-                _ret = self.mk_reply_json("ERR", cmd_data, err_msg)
+                _ret = self.mk_reply_json("ERR", cmd_json, err_msg)
                 self.__log.debug("_ret=%s", _ret)
                 return _ret
 
             if cmd_name == self.CMD_CANCEL:
                 # キャンセルコマンドの場合、キューをクリアする。
-                cmd_data["count"] = self.clear_cmdq()
+                cmd_json["count"] = self.clear_cmdq()
             else:
                 # 通常のコマンドは、コマンドキューに入れる。
-                self._cmdq.put(cmd_data)
+                self._cmdq.put(cmd_json)
 
             self.__log.debug(
-                "cmd_data=%s, qsize=%s", cmd_data, self._cmdq.qsize()
+                "cmd_json=%s, qsize=%s", cmd_json, self._cmdq.qsize()
             )
 
         except Exception as _e:

@@ -79,7 +79,7 @@ class ThreadMultiServo:
     @property
     def qsize(self) -> int:
         """Size of command queue."""
-        return self._worker.qsize()
+        return self._worker.qsize
 
     def end(self):
         """End.

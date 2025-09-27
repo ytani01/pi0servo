@@ -2,20 +2,22 @@ import time
 
 import pigpio
 
-from pi0servo import ThreadMultiServo
+from pi0servo import MultiServo, ThreadWorker
 
 PINS = [25, 27]
 DEBUG_FLAG = False
 
-ANGLES: list[list[int | None]] = [
-    [60, 60],
-    [0, 0],
-    [-60, -60],
-    [0, 0],
-    [60, -60],
-    [0, 0],
-    [-60, 60],
-    [0, 0],
+CMDS = [
+    {"cmd": "step_n", "n": 20},
+    {"cmd": "move_sec", "sec": 1.0},
+    {"cmd": "move", "angles": [50, 50]},
+    {"cmd": "move", "angles": [-50, 50]},
+    {"cmd": "move_sec", "sec": 0.1},
+    {"cmd": "sleep", "sec": 1},
+    {"cmd": "move", "angles": [50, -50]},
+    {"cmd": "move", "angles": [-50, -50]},
+    {"cmd": "move_sec", "sec": MultiServo.DEF_MOVE_SEC},
+    {"cmd": "move", "angles": [0, 0]},
 ]
 
 
@@ -28,23 +30,30 @@ def main():
     if not pi.connected:
         return
 
-    sv = None
+    # servo = None
+    worker = None
     try:
-        sv = ThreadMultiServo(pi, PINS, debug=DEBUG_FLAG)
+        # オブジェクトの初期化
+        servo = MultiServo(pi, PINS, debug=DEBUG_FLAG)
+        worker = ThreadWorker(servo, debug=DEBUG_FLAG)
+        worker.start()
 
-        for angles in ANGLES:
-            sv.move_all_angles_sync(angles)
-            print(f"called: move_all_angles_sync({angles})")
+        # コマンド呼び出し
+        # - 非同期実行されるので、すぐに戻ってくるが、処理は未完了
+        for cmd in CMDS:
+            worker.send(cmd)
+            print(f"called: {cmd}")
 
         # **Important**
-        while sv.qsize > 0:
-            print(f"qsize = {sv.qsize}")
-            time.sleep(0.5)
-        print(f"qsize = {sv.qsize}")
+        # スレッドの処理がすべて完了するのを待つ
+        while worker.qsize > 0:
+            print(f"qsize = {worker.qsize}")
+            time.sleep(1)
+        print(f"qsize = {worker.qsize}")
 
     finally:
-        if sv:
-            sv.end()
+        if worker:
+            worker.end()
         if pi:
             pi.stop()
 
