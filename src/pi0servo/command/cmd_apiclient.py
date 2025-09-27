@@ -41,17 +41,18 @@ class CmdApiClient:
         """print response in json format"""
         self.__log.debug("_res='%s': %s", _res, type(_res))
         try:
-            print(f"* {self.url}> {json.dumps(_res.json())}")
+            print(f"* {self.url}> {_res.json()}")
         except Exception:
             print(f"* {_res}")
 
-    def parse_cmdline(self, cmdline):
+    def parse_cmdline(self, cmdline: str) -> str:
         """parse command line string to json
 
         *** To Be Override ***
 
         """
-        return cmdline
+        # {"cmd": "move"} を {'cmd': 'move'} のように誤入力した場合の対応
+        return cmdline.replace("'", "\"")
 
     def main(self):
         """main loop"""
