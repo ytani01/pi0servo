@@ -1,6 +1,9 @@
 #
 # (c) 2025 Yoichi Tanibayashi
 #
+# **WIP**
+#   すべての関数レパートリーを見直す必要あり
+#
 from typing import Optional
 
 from ..core.calibrable_servo import CalibrableServo
@@ -73,6 +76,11 @@ class ThreadMultiServo:
         """使用している設定ファイルのパス。"""
         return self._mservo.conf_file
 
+    @property
+    def qsize(self) -> int:
+        """Size of command queue."""
+        return self._worker.qsize()
+
     def end(self):
         """End.
         ワーカースレッドを安全に停止させ、
@@ -100,20 +108,20 @@ class ThreadMultiServo:
 
     # --- 非同期制御メソッド ---
 
-    def move_all_angles(self, target_angles: list[Optional[float]]):
+    def move_all_angles(self, angles: list[Optional[int]]):
         """Move all servo.
         即座に移動する。
 
         Args:
-            target_angles (list[Optional[float]]):
+            angles (list[Optional[float]]):
             各サーボの目標角度のリスト。
         """
-        cmd = {"cmd": "move_all_angles", "target_angles": target_angles}
+        cmd = {"cmd": "move_all_angles", "angles": angles}
         self.send_cmd(cmd)
 
     def move_all_angles_sync(
         self,
-        target_angles: list[Optional[float]],
+        angles: list[Optional[int]],
         move_sec: Optional[float] = None,
         step_n: Optional[int] = None,
     ):
@@ -121,7 +129,7 @@ class ThreadMultiServo:
         目標角度まで滑らかに移動するコマンドを非同期で送信します。
 
         Args:
-            target_angles (list[Optional[float]]):
+            angles (list[int | str | None):
                 各サーボの目標角度のリスト。
             move_sec (Optional[float], optional):
                 移動時間(秒)。Noneの場合は現在の設定値が使われます。
@@ -129,15 +137,15 @@ class ThreadMultiServo:
                 分割ステップ数。Noneの場合は現在の設定値が使われます。
         """
         self.__log.debug(
-            "target_angle=%s, move_sec=%s, step_n=%s",
-            target_angles,
+            "angle=%s, move_sec=%s, step_n=%s",
+            angles,
             move_sec,
             step_n,
         )
 
         cmd = {
             "cmd": "move_all_angles_sync",
-            "target_angles": target_angles,
+            "angles": angles,
             "move_sec": move_sec,
             "step_n": step_n,
         }
@@ -145,7 +153,7 @@ class ThreadMultiServo:
 
     def move_all_angles_sync_relative(
         self,
-        angle_diffs: list[Optional[float]],
+        angle_diffs: list[Optional[int]],
         move_sec: Optional[float] = None,
         step_n: Optional[int] = None,
     ):
@@ -228,6 +236,6 @@ class ThreadMultiServo:
         """Get all pulses."""
         return self._mservo.get_all_pulses()
 
-    def get_all_angles(self) -> list[float]:
+    def get_all_angles(self) -> list[int]:
         """Get all angles."""
         return self._mservo.get_all_angles()

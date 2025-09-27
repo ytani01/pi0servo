@@ -179,14 +179,14 @@ class CalibrableServo(PiServo):
 
         return pulse_int
 
-    def pulse2deg(self, pulse: int) -> float:
+    def pulse2deg(self, pulse: int) -> int:
         """Pulse to degree."""
         if pulse >= self.pulse_center:
             d = self.pulse_max - self.pulse_center
         else:
             d = self.pulse_center - self.pulse_min
 
-        deg = (pulse - self.pulse_center) / d * self.ANGLE_MAX
+        deg = round((pulse - self.pulse_center) / d * self.ANGLE_MAX)
         self.__log.debug("pulse=%s,deg=%s", pulse, deg)
 
         return deg

@@ -118,6 +118,11 @@ class ThreadWorker(threading.Thread):
             "set": self._handle_set,
         }
 
+    @property
+    def qsize(self):
+        """Size of command queue."""
+        return self._cmdq.qsize
+
     def __del__(self):
         """del"""
         self._active = False
