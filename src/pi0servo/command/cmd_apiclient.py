@@ -3,7 +3,6 @@
 # (c) 2025 Yoichi Tanibayashi
 #
 """cmd_apiclient.py"""
-import json
 import os
 import readline  # input()でヒストリー機能が使える
 

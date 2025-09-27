@@ -1,5 +1,5 @@
 #
-# JSONクリアンとのサンプルプログラム
+# JSONクライアントのサンプルプログラム
 #
 import json
 
@@ -19,6 +19,7 @@ print("* JSONコマンド: 配列で複数一括送信可能")
 cmd_json = [
     {"cmd": "move", "angles": [30, -30]},
     {"cmd": "mova", "angles": [0, 0]},  # あえて、コマンド名を間違える
+    {"cmd": "move", "angles": [0, 0]},
 ]
 print(f"cmd_json = {cmd_json}\n")
 
