@@ -1,6 +1,5 @@
-Comments are in Japanese.
-Line length is 78 characters or less.
-Logging uses `my_logger.py`'s `get_logger()`.
-`git commit` is user-only, with 1-line English message suggestions from the AI.
-File updates are done by creating new files and then replacing.
-Type hints and docstrings are used.
+- Line length: 78 characters
+- Linter: `ruff`, `flake8`, `pylint`
+- Type Checking: `mypy`, `pyright`
+- Comments: Japanese
+- Logging: `my_logger.py`'s `get_logger()`

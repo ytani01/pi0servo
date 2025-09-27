@@ -2,6 +2,7 @@
 
 ## == Serena MCP server
 
+Read the initial instructions of serena MCP.
 @serena activate current directory
 @serena onboarding
 @serena switch_mode ["planning", "one-shot"]
@@ -76,7 +77,8 @@
 ### === `Tasks.md` がある場合
 
 - `Tasks.md`のマークされてないタスクから順に実行
-- `Tasks.md`のタスク項目が一つ完了するごとにマークする。
+- `Tasks.md`のタスク項目が一つ完了したら、
+  次の項目に進む前に完了した項目にマークすること
 
 - コード変更時は、常に以下を実施:
   - リンティング
@@ -84,9 +86,9 @@
 
 - `Tasks.md` のすべてのタスクが完了した場合:- 
   1. ユーザーに完了を報告し、ユーザーが `ToDo.md`を更新するよう促す。
-  2. `uv run rename_task.py` 実行
+  2. `uv run archive_file.py` 実行
      - このスクリプトは、`Tasks.md` を
-       -  `yyyymmdd-HHMM-Tasks-done.md` にリネームし
+       -  `yyyymmdd-HHMMSS-Tasks-done.md` にリネームし
        - `archives/`へ移動する。
 
 ### === `Tasks.md` がない場合

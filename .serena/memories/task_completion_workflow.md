@@ -1,4 +1,4 @@
-`Tasks.md` is created and managed by AI.
-Tasks are executed sequentially from `Tasks.md`.
-After each code change: linting, test creation/update/execution.
-Upon completion of all tasks in `Tasks.md`: report to user, prompt user to update `ToDo.md`, then run `uv run rename_task.py` to rename `Tasks.md` to `yyyymmdd-HHMM-Tasks-done.md` and move it to `archives/`.
+1.  Check for `Tasks.md`.
+2.  If it exists, execute tasks and mark them as done.
+3.  If not, read `ToDo.md`, create `Tasks.md`, and ask for user confirmation.
+4.  After all tasks in `Tasks.md` are done, report to the user and run `uv run rename_task.py`.

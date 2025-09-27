@@ -1,5 +1,4 @@
-Emphasis on official documentation.
-Verification of all hypotheses.
-Systematic problem isolation.
-Use of detailed logs.
-User feedback respect.
+- Use `uv` for package management.
+- Run linters and tests after code changes.
+- Commit messages should be in English.
+- `ToDo.md` is managed by the user, `Tasks.md` is managed by the AI.

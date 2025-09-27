@@ -10,6 +10,7 @@ PIN = 15
 KEY_TAB = '\x09'
 KEY_C_C = '\x03'  # Ctrl-C
 
+
 class TestBasic:
     """Basic tests."""
     @pytest.mark.parametrize(
@@ -26,22 +27,23 @@ class TestBasic:
     ):
         """servo command"""
         cmdline = f"{CMD} {arg} {opt}"
-        print(f"\n* cmdline='{cmdline}'")
-        
+        print(f'''
+* cmdline='{cmdline}''')
+
         session = cli_runner.run_interactive_command(cmdline.split())
         time.sleep(1)
 
         if inkey1:
-            print(f"* inkey1='{inkey1}'")
+            print(f'''* inkey1='{inkey1}''')
             session.send_key(inkey1)
             assert session.expect(expect1)
             time.sleep(1)
 
         if inkey2:
-            print(f"* inkey2='{inkey2}'")
+            print(f'''* inkey2='{inkey2}''')
             session.send_key(inkey2)
             assert session.expect(expect2)
-            #time.sleep(1)
+            # time.sleep(1)
 
         session.close()
         time.sleep(1)
@@ -57,8 +59,9 @@ class TestBasic:
     ):
         """servo command"""
         cmdline = f"{CMD} {arg} {opt}"
-        print(f"\n* cmdline='{cmdline}', sig={sig}")
-        
+        print(f'''
+* cmdline='{cmdline}', sig={sig}''')
+
         session = cli_runner.run_interactive_command(cmdline.split())
         time.sleep(1)
 
@@ -68,9 +71,9 @@ class TestBasic:
         proc.wait(timeout=3)
 
         ret = proc.returncode
-        print(f"ret={ret}")
+        print(f'''ret={ret}''')
 
-        if ret  > 128:
+        if ret > 128:
             assert ret - 128 == int(sig)
         elif ret < 0:
             assert -ret == int(sig)

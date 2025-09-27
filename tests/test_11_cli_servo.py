@@ -3,6 +3,7 @@ import pytest
 
 CMD = "uv run pi0servo servo"
 
+
 class TestBasic:
     """Basic tests."""
     @pytest.mark.parametrize(
@@ -41,4 +42,8 @@ class TestBasic:
         print(f"stdout='{result.stdout}'")
         print(f"stderr='{result.stderr}'")
 
-        cli_runner.assert_output_contains(result, stdout=stdout, stderr=stderr)
+        cli_runner.assert_output_contains(
+            result,
+            stdout=stdout,
+            stderr=stderr
+        )

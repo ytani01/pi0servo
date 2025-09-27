@@ -1,7 +1,4 @@
-Language: Python
-Servo Control: `pigpio` library
-Web Framework: `fastapi`, `uvicorn`
-CLI: `click`
-Terminal Interaction: `blessed`
-HTTP Requests: `requests`
-Package Management: `uv`, `pyproject.toml`
+- **Programming Language:** Python >=3.11
+- **Main Libraries:** `pigpio`, `click`, `blessed`, `requests`, `fastapi`, `uvicorn`
+- **Development Tools:** `hatch`, `ruff`, `pyright`, `pytest`, `mypy`, `flake8`, `isort`, `pylint`
+- **Package Manager:** `uv`
