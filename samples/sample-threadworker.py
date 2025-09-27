@@ -7,7 +7,7 @@ from pi0servo import MultiServo, ThreadWorker
 PINS = [25, 27]
 DEBUG_FLAG = False
 
-CMDS = [
+CMD_JSONS = [
     {"cmd": "step_n", "n": 20},
     {"cmd": "move_sec", "sec": 1.0},
     {"cmd": "move", "angles": [50, 50]},
@@ -40,9 +40,10 @@ def main():
 
         # コマンド呼び出し
         # - 非同期実行されるので、すぐに戻ってくるが、処理は未完了
-        for cmd in CMDS:
-            worker.send(cmd)
-            print(f"called: {cmd}")
+        for cmd in CMD_JSONS:
+            print(f">>> {cmd}")
+            result = worker.send(cmd)
+            print(f"    <<< {result}")
 
         # **Important**
         # スレッドの処理がすべて完了するのを待つ
