@@ -3,6 +3,9 @@ servo.json
 .markdown*
 .serena/
 
+.env
+
+
 .pypirc
 
 # Byte-compiled / optimized / DLL files
@@ -55,5 +58,3 @@ flycheck_*
 *.swp
 *.bak
 *.log
-
-.env

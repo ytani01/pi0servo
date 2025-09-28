@@ -1,9 +1,0 @@
-- `src/pi0servo`: Main source code.
-    - `core`: Core servo control logic (`piservo.py`, `multi_servo.py`, `calibrable_servo.py`).
-    - `command`: CLI command implementations.
-    - `helper`: Helper modules, including threading.
-    - `utils`: Utility modules like logging and config management.
-    - `web`: Web API related code (`json_api.py`, `api_client.py`).
-- `tests`: Tests for the project.
-- `docs`: Documentation.
-- `samples`: Sample code.

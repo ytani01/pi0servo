@@ -1,1 +1,0 @@
-`pi0servo` is a Python library for controlling servo motors on a Raspberry Pi. It is based on the `pigpio` library and allows multiple cheap servo motors (like SG90) to be synchronized and run on low-power devices like the Raspberry Pi Zero 2W. It also has a calibration function to absorb individual differences between servo motors.

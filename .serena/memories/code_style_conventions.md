@@ -1,5 +1,0 @@
-- Line length: 78 characters
-- Linter: `ruff`, `flake8`, `pylint`
-- Type Checking: `mypy`, `pyright`
-- Comments: Japanese
-- Logging: `my_logger.py`'s `get_logger()`

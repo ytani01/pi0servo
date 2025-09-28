@@ -1,4 +1,0 @@
-- **Programming Language:** Python >=3.11
-- **Main Libraries:** `pigpio`, `click`, `blessed`, `requests`, `fastapi`, `uvicorn`
-- **Development Tools:** `hatch`, `ruff`, `pyright`, `pytest`, `mypy`, `flake8`, `isort`, `pylint`
-- **Package Manager:** `uv`

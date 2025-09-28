@@ -1,9 +1,0 @@
-- `uv run pi0servo calib <gpio>`
-- `uv run pi0servo api-server <gpio1> <gpio2> ...`
-- `uv run pi0servo api-client`
-- `uv run pi0servo`
-- `uv run ruff check .`
-- `uv run mypy .`
-- `uv run pyright .`
-- `uv run flake8 .`
-- `uv run python -m pytest -v`
