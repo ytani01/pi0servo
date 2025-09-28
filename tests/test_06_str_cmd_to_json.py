@@ -81,12 +81,12 @@ class TestStrCmdToJson:
                     '}'
                 ),
             ),
-            ("mv:100", '{"err": "mv:100"}'), # 角度範囲外
-            ("mv:abc", '{"err": "mv:abc"}'), # 数値に変換できない
-            ("unknown:10", '{"err": "unknown:10"}'), # 未知のコマンド
-            ("sl:abc", '{"err": "sl:abc"}'), # 数値に変換できない
-            ("ca:1", '{"err": "ca:1"}'), # パラメータがあってはならない
-            ("mv:", '{"err": "mv:"}'), # パラメータがない
+            ("mv:100", '{"err": "mv:100"}'),  # 角度範囲外
+            ("mv:abc", '{"err": "mv:abc"}'),  # 数値に変換できない
+            ("unknown:10", '{"err": "unknown:10"}'),  # 未知のコマンド
+            ("sl:abc", '{"err": "sl:abc"}'),  # 数値に変換できない
+            ("ca:1", '{"err": "ca:1"}'),  # パラメータがあってはならない
+            ("mv:", '{"err": "mv:"}'),  # パラメータがない
         ],
     )
     def test_cmdstr_to_jsonliststr(

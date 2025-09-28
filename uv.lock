@@ -677,6 +677,7 @@ dev = [
     { name = "pytest" },
     { name = "pytest-mock" },
     { name = "ruff" },
+    { name = "types-jsonschema" },
 ]
 
 [package.metadata]
@@ -703,6 +704,7 @@ dev = [
     { name = "pytest", specifier = ">=8.4.1" },
     { name = "pytest-mock" },
     { name = "ruff", specifier = ">=0.12.3" },
+    { name = "types-jsonschema", specifier = ">=4.25.1.20250822" },
 ]
 samples = []
 
@@ -1194,6 +1196,18 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/3c/5f/971620e58d01e22f14e461bf5319bba41d1bdcf5a4fca638822f58808ee7/trove_classifiers-2025.9.8.13.tar.gz", hash = "sha256:2de91c8f286b7fea55072061924f69e7f3bdf7a9cb63719c90090e41c6657d3a", size = 16955, upload-time = "2025-09-08T13:52:35.82Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/2a/7a/77c26691f16056708551a85884e871dddf75f3fdafa2a4051030ef9e1aa8/trove_classifiers-2025.9.8.13-py3-none-any.whl", hash = "sha256:f784db2f859ee1ffa168adaf0868006c20dee5e673a3ff813a2cd51ef2c465f9", size = 14130, upload-time = "2025-09-08T13:52:34.573Z" },
+]
+
+[[package]]
+name = "types-jsonschema"
+version = "4.25.1.20250822"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "referencing" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/64/7f/369b54dad6eb6b5adc1fb1c53edbed18e6c32cbc600357135308902fdbdc/types_jsonschema-4.25.1.20250822.tar.gz", hash = "sha256:aac69ed4b23f49aaceb7fcb834141d61b9e4e6a7f6008cb2f0d3b831dfa8464a", size = 15628, upload-time = "2025-08-22T03:04:18.293Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b1/3d/bc1d171f032fcf63cedd4ade241f3f4e66d7e3bb53ee1da3c8f2f043eb0b/types_jsonschema-4.25.1.20250822-py3-none-any.whl", hash = "sha256:f82c2d7fa1ce1c0b84ba1de4ed6798469768188884db04e66421913a4e181294", size = 15923, upload-time = "2025-08-22T03:04:17.346Z" },
 ]
 
 [[package]]
