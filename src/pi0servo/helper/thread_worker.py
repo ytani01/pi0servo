@@ -28,25 +28,72 @@ class ThreadWorker(threading.Thread):
     # コマンド一覧(例)
     # コマンドチェックにも使う
     CMD_SAMPLES_ALL: list[dict] = [
-        {"cmd": "move_all_angles_sync",
-         "angles": [30, None, "center"],   # mandatory
-         "move_sec": 0.2, "step_n": 40},    # optional
-
-        {"cmd": "move",                    # "move_all_angles_sync"の省略形
-         "angles": [30, None, "center"],   # mandatory
-         "move_sec": 0.2, "step_n": 40},    # optional
-
-        {"cmd": "move_all_angles", "angles": [30, None, "center"]},
-        {"cmd": "move_all_pulses", "pulses": [1000, 2000, None, 0]},
-
-        {"cmd": "move_sec", "sec": 1.5},
-        {"cmd": "step_n", "n": 40},
-        {"cmd": "interval", "sec": 0.5},
-        {"cmd": "sleep", "sec": 1.0},
-
-        # for calibration
-        {"cmd": "move_pulse_relative", "servo": 2, "pulse_diff": -20},
-        {"cmd": "set", "servo": 1, "target": "center"},
+        {
+            "method": "move_all_angles_sync",
+            "params": {
+                "angles": [30, None, "center"],
+                "move_sec": 0.2,
+                "step_n": 40
+            }
+        },
+        {
+            "method": "move",
+            "params": {
+                "angles": [30, None, "center"],
+                "move_sec": 0.2,
+                "step_n": 40
+            }
+        },
+        {
+            "method": "move_all_angles",
+            "params": {
+                "angles": [30, None, "center"]
+            }
+        },
+        {
+            "method": "move_all_pulses",
+            "params": {
+                "pulses": [1000, 2000, None, 0]
+            }
+        },
+        {
+            "method": "move_sec",
+            "params": {
+                "sec": 1.5
+            }
+        },
+        {
+            "method": "step_n",
+            "params": {
+                "n": 40
+            }
+        },
+        {
+            "method": "interval",
+            "params": {
+                "sec": 0.5
+            }
+        },
+        {
+            "method": "sleep",
+            "params": {
+                "sec": 1.0
+            }
+        },
+        {
+            "method": "move_pulse_relative",
+            "params": {
+                "servo": 2,
+                "pulse_diff": -20
+            }
+        },
+        {
+            "method": "set",
+            "params": {
+                "servo": 1,
+                "target": "center"
+            }
+        },
     ]
 
     DEF_RECV_TIMEOUT = 0.2  # sec
@@ -92,7 +139,7 @@ class ThreadWorker(threading.Thread):
 
         self._cmd_list = []
         for _c in self.CMD_SAMPLES_ALL:
-            self._cmd_list.append(_c.get("cmd"))
+            self._cmd_list.append(_c.get("method"))
         self.__log.debug("cmd_list=%s", self._cmd_list)
 
         self._command_handlers = {
@@ -102,19 +149,19 @@ class ThreadWorker(threading.Thread):
             "move_all_angles_sync":
             self._handle_move_all_angles_sync,
 
-            "move_all_angles_sync_relative":
-            self._handle_move_all_angles_sync_relative,
-
             "move_all_angles":
             self._handle_move_all_angles,
 
-            "move_all_pulses_relative":
-            self._handle_move_all_pulses_relative,
+            "move_all_pulses":
+            self._handle_move_all_pulses,
 
             "move_sec": self._handle_move_sec,
             "step_n": self._handle_step_n,
             "interval": self._handle_interval,
             "sleep": self._handle_sleep,
+            "move_pulse_relative":
+            self._handle_move_pulse_relative,
+
             "set": self._handle_set,
         }
 
@@ -179,7 +226,7 @@ class ThreadWorker(threading.Thread):
                 cmd_json = cmd_data
 
             # コマンド名チェック
-            cmd_name = cmd_json.get("cmd")
+            cmd_name = cmd_json.get("method")
             if cmd_name is None:
                 err_msg = "Not a command"
                 _ret = self.mk_reply_json("ERR", cmd_json, err_msg)
@@ -226,13 +273,13 @@ class ThreadWorker(threading.Thread):
           "step_n": 40  # optional
         }
         """
-        _angles = cmd["angles"]
+        _angles = cmd["params"]["angles"]
 
-        _move_sec = cmd.get("move_sec")
+        _move_sec = cmd["params"].get("move_sec")
         if _move_sec is None:
             _move_sec = self.move_sec
 
-        _step_n = cmd.get("step_n")
+        _step_n = cmd["params"].get("step_n")
         if _step_n is None:
             _step_n = self.step_n
 
@@ -249,13 +296,13 @@ class ThreadWorker(threading.Thread):
           "step_n": 40  # optional
         }
         """
-        _angle_diffs = cmd["angle_diffs"]
+        _angle_diffs = cmd["params"]["angle_diffs"]
 
-        _move_sec = cmd.get("move_sec")
+        _move_sec = cmd["params"].get("move_sec")
         if _move_sec is None:
             _move_sec = self.move_sec
 
-        _step_n = cmd.get("step_n")
+        _step_n = cmd["params"].get("step_n")
         if _step_n is None:
             _step_n = self.step_n
 
@@ -269,8 +316,20 @@ class ThreadWorker(threading.Thread):
 
         e.g. {"cmd": "move_all_angles", "angles": [30, None, -30, 0]}
         """
-        _angles = cmd["angles"]
+        _angles = cmd["params"]["angles"]
         self.mservo.move_all_angles(_angles)
+        self._sleep_interval()
+
+    def _handle_move_all_pulses(self, cmd: dict):
+        """Handle move_all_pulses().
+
+        e.g. {
+               "cmd": "move_all_pulses",
+               "pulses": [2000, 1000, None, 0]
+             }
+        """
+        _pulses = cmd["params"]["pulses"]
+        self.mservo.move_all_pulses(_pulses)
         self._sleep_interval()
 
     def _handle_move_all_pulses_relative(self, cmd: dict):
@@ -281,7 +340,7 @@ class ThreadWorker(threading.Thread):
                "pulse_diffs": [2000, 1000, None, 0]
              }
         """
-        _pulse_diffs = cmd["pulse_diffs"]
+        _pulse_diffs = cmd["params"]["pulse_diffs"]
         self.mservo.move_all_pulses_relative(_pulse_diffs, forced=True)
         self._sleep_interval()
 
@@ -290,7 +349,7 @@ class ThreadWorker(threading.Thread):
 
         e.g. {"cmd": "move_sec", "sec": 1.5}
         """
-        self.move_sec = float(cmd["sec"])
+        self.move_sec = float(cmd["params"]["sec"])
         self.__log.debug("move_sec=%s", self.move_sec)
 
     def _handle_step_n(self, cmd: dict):
@@ -298,7 +357,7 @@ class ThreadWorker(threading.Thread):
 
         e.g. {"cmd": "step_n", "n": 40}
         """
-        self.step_n = int(cmd["n"])
+        self.step_n = int(cmd["params"]["n"])
         self.__log.debug("step_n=%s", self.step_n)
 
     def _handle_interval(self, cmd: dict):
@@ -306,7 +365,7 @@ class ThreadWorker(threading.Thread):
 
         e.g. {"cmd": "interval", "sec": 0.5}
         """
-        self.interval_sec = float(cmd["sec"])
+        self.interval_sec = float(cmd["params"]["sec"])
         self.__log.debug("set interval_sec=%s", self.interval_sec)
 
     def _handle_sleep(self, cmd: dict):
@@ -314,7 +373,7 @@ class ThreadWorker(threading.Thread):
 
         e.g. {"cmd": "sleep", "sec": 1.0}
         """
-        _sec = float(cmd["sec"])
+        _sec = float(cmd["params"]["sec"])
         self.__log.debug("sleep: %s sec", _sec)
         if _sec > 0.0:
             time.sleep(_sec)
@@ -330,8 +389,8 @@ class ThreadWorker(threading.Thread):
 
         e.g. {"cmd": "move_pulse_relative", "servo": 2, "pulse_diff": -20}
         """
-        servo = int(cmd["servo"])
-        pulse_diff = int(cmd["pulse_diff"])
+        servo = int(cmd["params"]["servo"])
+        pulse_diff = int(cmd["params"]["pulse_diff"])
         self.__log.debug("servo=%s, pulse_diff=%s", servo, pulse_diff)
 
         self.mservo.move_pulse_relative(servo, pulse_diff, forced=True)
@@ -343,8 +402,8 @@ class ThreadWorker(threading.Thread):
 
         * pulse is current value.
         """
-        _servo = int(cmd["servo"])
-        _target = cmd["target"]
+        _servo = int(cmd["params"]["servo"])
+        _target = cmd["params"]["target"]
 
         self.__log.debug("set: servo:%s", _servo)
 
@@ -361,7 +420,7 @@ class ThreadWorker(threading.Thread):
         """Dispatch command."""
         self.__log.debug("cmd_data=%a", cmd_data)
 
-        _cmd_str = cmd_data.get("cmd")
+        _cmd_str = cmd_data.get("method")
         if not _cmd_str:
             self.__log.error("invalid command (no 'cmd' key): %s", cmd_data)
             return

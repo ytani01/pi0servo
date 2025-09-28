@@ -168,7 +168,7 @@ class StrCmdToJson:
         )
 
         # _cmd_dataの初期化
-        _cmd_data: Dict[str, Any] = {"cmd": cmd_name}
+        _cmd_data: Dict[str, Any] = {"method": cmd_name}
 
         # コマンド別の処理
         try:
@@ -180,21 +180,24 @@ class StrCmdToJson:
                 if angles is None:
                     return self._create_error_data(cmd_str)
 
-                _cmd_data["angles"] = angles
+                _cmd_data["params"] = {}
+                _cmd_data["params"]["angles"] = angles
 
             elif cmd_key in ["sl", "ms", "is"]:
                 sec = float(cmd_param_str)
                 if sec < 0:
                     return self._create_error_data(cmd_str)
 
-                _cmd_data["sec"] = sec
+                _cmd_data["params"] = {}
+                _cmd_data["params"]["sec"] = sec
 
             elif cmd_key == "st":
                 _n = int(cmd_param_str)
                 if _n < 1:
                     return self._create_error_data(cmd_str)
 
-                _cmd_data["n"] = _n
+                _cmd_data["params"] = {}
+                _cmd_data["params"]["n"] = _n
 
             elif cmd_key == "mp":
                 pulse_diffs = [
@@ -203,7 +206,8 @@ class StrCmdToJson:
                 ]
                 self.__log.debug("pulse_diffs=%s", pulse_diffs)
 
-                _cmd_data["pulse_diffs"] = pulse_diffs
+                _cmd_data["params"] = {}
+                _cmd_data["params"]["pulse_diffs"] = pulse_diffs
 
             elif cmd_key in ("sc", "sn", "sx"):
                 servo = int(cmd_param_str)
@@ -217,8 +221,9 @@ class StrCmdToJson:
 
                 self.__log.debug("servo=%s, target=%s", servo, target)
 
-                _cmd_data["servo"] = servo
-                _cmd_data["target"] = target
+                _cmd_data["params"] = {}
+                _cmd_data["params"]["servo"] = servo
+                _cmd_data["params"]["target"] = target
 
             elif cmd_key in ["ca", "zz"]:
                 if cmd_param_str:  # パラメータがあってはならない

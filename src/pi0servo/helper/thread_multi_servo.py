@@ -116,7 +116,7 @@ class ThreadMultiServo:
             angles (list[Optional[float]]):
             各サーボの目標角度のリスト。
         """
-        cmd = {"cmd": "move_all_angles", "angles": angles}
+        cmd = {"method": "move_all_angles", "params": {"angles": angles}}
         self.send_cmd(cmd)
 
     def move_all_angles_sync(
@@ -144,10 +144,12 @@ class ThreadMultiServo:
         )
 
         cmd = {
-            "cmd": "move_all_angles_sync",
-            "angles": angles,
-            "move_sec": move_sec,
-            "step_n": step_n,
+            "method": "move_all_angles_sync",
+            "params": {
+                "angles": angles,
+                "move_sec": move_sec,
+                "step_n": step_n
+            }
         }
         self.send_cmd(cmd)
 
@@ -176,10 +178,12 @@ class ThreadMultiServo:
         )
 
         cmd = {
-            "cmd": "move_all_angles_sync_relative",
-            "angle_diffs": angle_diffs,
-            "move_sec": move_sec,
-            "step_n": step_n,
+            "method": "move_all_angles_sync_relative",
+            "params": {
+                "angle_diffs": angle_diffs,
+                "move_sec": move_sec,
+                "step_n": step_n
+            }
         }
         self.send_cmd(cmd)
 
@@ -190,7 +194,7 @@ class ThreadMultiServo:
         Args:
             sec (float): 移動時間(秒)。
         """
-        cmd = {"cmd": "move_sec", "sec": sec}
+        cmd = {"method": "move_sec", "params": {"sec": sec}}
         self.send_cmd(cmd)
 
     def set_step_n(self, n: int):
@@ -200,7 +204,7 @@ class ThreadMultiServo:
         Args:
             n (int): ステップ数。
         """
-        cmd = {"cmd": "step_n", "n": n}
+        cmd = {"method": "step_n", "params": {"n": n}}
         self.send_cmd(cmd)
 
     def set_interval(self, sec: float):
@@ -210,7 +214,7 @@ class ThreadMultiServo:
         Args:
             sec (float): インターバル時間(秒)。
         """
-        cmd = {"cmd": "interval", "sec": sec}
+        cmd = {"method": "interval", "params": {"sec": sec}}
         self.send_cmd(cmd)
 
     def sleep(self, sec: float):
@@ -220,7 +224,7 @@ class ThreadMultiServo:
         Args:
             sec (float): スリープ時間(秒)。
         """
-        cmd = {"cmd": "sleep", "sec": sec}
+        cmd = {"method": "sleep", "params": {"sec": sec}}
         self.send_cmd(cmd)
 
     def off(self):
