@@ -1,0 +1,5 @@
+- [x] `tests/test_07_threadworker.py` ファイルを作成する。
+- [x] `tests/test_07_threadworker.py` に `ThreadWorker` のテストコードを記述する。
+- [x] `tests/test_07_threadworker.py` のみを実行する。
+- [x] 他のファイルが変更されていないことを確認する。
+- [x] 新しいテストファイルに対してリンティングを実行する。
