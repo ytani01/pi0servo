@@ -28,25 +28,72 @@ class ThreadWorker(threading.Thread):
     # コマンド一覧(例)
     # コマンドチェックにも使う
     CMD_SAMPLES_ALL: list[dict] = [
-        {"cmd": "move_all_angles_sync",
-         "angles": [30, None, "center"],   # mandatory
-         "move_sec": 0.2, "step_n": 40},    # optional
-
-        {"cmd": "move",                    # "move_all_angles_sync"の省略形
-         "angles": [30, None, "center"],   # mandatory
-         "move_sec": 0.2, "step_n": 40},    # optional
-
-        {"cmd": "move_all_angles", "angles": [30, None, "center"]},
-        {"cmd": "move_all_pulses", "pulses": [1000, 2000, None, 0]},
-
-        {"cmd": "move_sec", "sec": 1.5},
-        {"cmd": "step_n", "n": 40},
-        {"cmd": "interval", "sec": 0.5},
-        {"cmd": "sleep", "sec": 1.0},
-
+        {
+            "method": "move_all_angles_sync",
+            "params": {
+                "angles": [30, None, "center"],   # mandatory
+                "move_sec": 0.2,  # optional
+                "step_n": 40  # optional
+            }
+        },
+        {
+            "method": "move",  # "move_all_angles_sync"の省略形
+            "params": {
+                "angles": [30, None, "center"],   # mandatory
+                "move_sec": 0.2, "step_n": 40    # optional
+            }
+        },
+        {
+            "method": "move_all_angles",
+            "params": {
+                "angles": [30, None, "center"]
+            }
+        },
+        {
+            "method": "move_all_pulses",
+            "params": {
+                "pulses": [1000, 2000, None, 0]
+            }
+        },
+        {
+            "method": "move_sec",
+            "params": {
+                "sec": 1.5
+            }
+        },
+        {
+            "method": "step_n",
+            "params": {
+                "n": 40
+            }
+        },
+        {
+            "method": "interval",
+            "params": {
+                "sec": 0.5
+            }
+        },
+        {
+            "method": "sleep",
+            "params": {
+                "sec": 1.0
+            }
+        },
         # for calibration
-        {"cmd": "move_pulse_relative", "servo": 2, "pulse_diff": -20},
-        {"cmd": "set", "servo": 1, "target": "center"},
+        {
+            "method": "move_pulse_relative",
+            "params": {
+                "servo": 2,
+                "pulse_diff": -20
+            }
+        },
+        {
+            "method": "set",
+            "params": {
+                "servo": 1,
+                "target": "center"
+            }
+        },
     ]
 
     DEF_RECV_TIMEOUT = 0.2  # sec
