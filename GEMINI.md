@@ -86,7 +86,7 @@ Read the initial instructions of serena MCP.
 
 - `Tasks.md` のすべてのタスクが完了した場合:- 
   1. ユーザーに完了を報告し、ユーザーが `ToDo.md`を更新するよう促す。
-  2. `uv run archive_file.py` 実行
+  2. `archivefile` 実行
      - このスクリプトは、`Tasks.md` を
        -  `yyyymmdd-HHMMSS-Tasks-done.md` にリネームし
        - `archives/`へ移動する。
