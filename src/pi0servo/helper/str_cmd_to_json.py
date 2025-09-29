@@ -87,6 +87,7 @@ class StrCmdToJson:
 
         for part in parts:
             _p = part.strip().lower()
+            self.__log.debug("_p=%s", _p)
             if not _p:  # 空の要素は不正
                 return None
 
@@ -108,7 +109,7 @@ class StrCmdToJson:
                 except ValueError:
                     return None  # 数値に変換できない
 
-        # self.__log.debug("angles=%s", angles)
+        self.__log.debug("angles=%s", angles)
 
         # angle_factor に応じて符号反転
         for _i in range(len(angles)):

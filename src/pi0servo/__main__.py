@@ -10,9 +10,11 @@ import uvicorn
 from pyclickutils import click_common_opts
 
 from . import __version__, get_logger
+from .command.cmd_apicli import CmdApiCli
 from .command.cmd_apiclient import CmdApiClient
 from .command.cmd_calib import CalibApp
 from .command.cmd_servo import CmdServo
+from .command.cmd_strcli import CmdStrCli
 from .command.cmd_strclient import CmdStrClient
 from .core.calibrable_servo import CalibrableServo
 
@@ -129,6 +131,80 @@ def calib(ctx, pin, conf_file, debug):
             app.end()
         if pi:
             pi.stop()
+
+
+@cli.command()
+@click.argument("pins", type=int, nargs=-1)
+@click.option(
+    "--history_file", type=str,
+    default="~/.pi0servo_apiclient_history", show_default=True,
+    help="History file"
+)
+@click_common_opts(click, __version__)
+def api_cli(ctx, pins, history_file, debug):
+    """API CLI"""
+    cmd_name = ctx.command.name
+
+    __log = get_logger(__name__, debug)
+    __log.debug("cmd_name=%s", cmd_name)
+    __log.debug("pins=%s, history_file=%s", pins, history_file)
+
+    pi = get_pi(debug)
+
+    app = None
+    try:
+        app = CmdApiCli(cmd_name, pi, pins, history_file, debug=debug)
+        app.main()
+
+    except Exception as _e:
+        __log.error("%s: $%s", type(_e).__name__, _e)
+
+    finally:
+        if app:
+            app.end()
+
+
+@cli.command()
+@click.argument("pins", type=int, nargs=-1)
+@click.option(
+    "--history_file", type=str,
+    default="~/.pi0servo_strclient_history", show_default=True,
+    help="History file"
+)
+@click.option(
+    "--angle_factor", "-a", type=str, default="1,1,1,1", show_default=True,
+    help="Angle Factor"
+)
+@click_common_opts(click, __version__)
+def str_cli(ctx, pins, history_file, angle_factor, debug):
+    """String command CLI"""
+    cmd_name = ctx.command.name
+
+    __log = get_logger(__name__, debug)
+    __log.debug("cmd_name=%s", cmd_name)
+    __log.debug(
+        "pins=%s, history_file=%s, angle_factor=%s",
+        pins, history_file, angle_factor
+    )
+
+    af_list = [int(i) for i in angle_factor.split(',')]
+    __log.debug("af_list=%s", af_list)
+
+    pi = get_pi(debug)
+
+    app = None
+    try:
+        app = CmdStrCli(
+            cmd_name, pi, pins, history_file, af_list, debug=debug
+        )
+        app.main()
+
+    except Exception as _e:
+        __log.error("%s: $%s", type(_e).__name__, _e)
+
+    finally:
+        if app:
+            app.end()
 
 
 @cli.command()
