@@ -22,17 +22,17 @@ def str_to_json(cmdstr: str): -> str
   '{"err": **元のコマンド文字列**}'
 
 - コマンドの種類は以下の通り
-  - 'mv': {"cmd": "move_all_angles_sync"}
-  - 'sl': {"cmd": "sleep"}
-  - 'ms': {"cmd": "move_sec"}
-  - 'st': {"cmd": "step_n"}
-  - 'is': {"cmd": "interval"}
-  - 'mp': {"cmd": "move_pulse_relative"}
-  - 'sc': {"cmd": "set"}  # set center
-  - 'sn': {"cmd": "set"}  # set min
-  - 'sx': {"cmd": "set"}  # set max
-  - 'ca': {"cmd": "cancel"}
-  - 'zz': {"cmd": "cancel"}
+  - 'mv': {"method": "move_all_angles_sync"}
+  - 'sl': {"method": "sleep"}
+  - 'ms': {"method": "move_sec"}
+  - 'st': {"method": "step_n"}
+  - 'is': {"method": "interval"}
+  - 'mp': {"method": "move_pulse_relative"}
+  - 'sc': {"method": "set"}  # set center
+  - 'sn': {"method": "set"}  # set min
+  - 'sx': {"method": "set"}  # set max
+  - 'ca': {"method": "cancel"}
+  - 'zz': {"method": "cancel"}
 
 ## 補足ルール
 
@@ -43,52 +43,52 @@ def str_to_json(cmdstr: str): -> str
 ## 例
 
 入力: 'mv:40,30,20,10'
-出力: '{"cmd": "move_all_angles_sync", "angles": [40,30,20,10]}'
+出力: '{"method": "move_all_angles_sync", "params": {"angles": [40,30,20,10]}}'
 
 入力: 'mv:-40,.,.'
-出力: '{"cmd": "move_all_angles_sync", "angles": [-40,null,null]}'
+出力: '{"method": "move_all_angles_sync", "params": {"angles": [-40,null,null]}}'
 
 入力: 'mv:max,min,center'
-出力: '{"cmd": "move_all_angles_sync", "angles": ["max","min","center"]}'
+出力: '{"method": "move_all_angles_sync", "params": {"angles": ["max","min","center"]}}'
 
 入力: 'mv:x,n,c'
-出力: '{"cmd": "move_all_angles_sync", "angles": ["max","min","center"]}'
+出力: '{"method": "move_all_angles_sync", "params": {"angles": ["max","min","center"]}}'
 
 入力: 'mv:x,.,center,20'
-出力: '{"cmd": "move_all_angles_sync", "angles": ["max",null,"center",20]}'
+出力: '{"method": "move_all_angles_sync", "params": {"angles": ["max",null,"center",20]}}'
 
 入力: 'sl:0.5'
-出力: '{"cmd": "sleep", "sec": 0.5}'
+出力: '{"method": "sleep", "params": {"sec": 0.5}}'
 
 入力: 'sl:1'
-出力: '{"cmd": "sleep", "sec": 1}'
+出力: '{"method": "sleep", "params": {"sec": 1}}'
 
 入力: 'ms:1.5'
-出力: '{"cmd": "move_sec", "sec": 1.5}'
+出力: '{"method": "move_sec", "params": {"sec": 1.5}}'
 
 入力: 'st:1'
-出力: '{"cmd": "step_n", "n": 1}'
+出力: '{"method": "step_n", "params": {"n": 1}}'
 
 入力: 'st:40'
-出力: '{"cmd": "step_n", "n": 40}'
+出力: '{"method": "step_n", "params": {"n": 40}}'
 
 入力: 'is:0.5'
-出力: '{"cmd": "interval", "sec": 0.5}'
+出力: '{"method": "interval", "params": {"sec": 0.5}}'
 
 入力: 'mp:2,-20'
-出力: '{"cmd": "move_pulse_relative", "servo": 2, "pulse_diff": -20}
+出力: '{"method": "move_pulse_relative", "params": {"servo": 2, "pulse_diff": -20}}'
 
 入力: 'sc:1'
-出力: '{"cmd": "set", "servo": 1, "target": "center"}
+出力: '{"method": "set", "params": {"servo": 1, "target": "center"}}'
 
 入力: 'sn:2'
-出力: '{"cmd": "set", "servo": 2, "target": "min"}
+出力: '{"method": "set", "params": {"servo": 2, "target": "min"}}'
 
 入力: 'sx:0'
-出力: '{"cmd": "set", "servo": 0, "target": "max"}
+出力: '{"method": "set", "params": {"servo": 0, "target": "max"}}'
 
 入力: 'ca'
-出力: '{"cmd": "cancel"}
+出力: '{"method": "cancel"}
 
 入力: 'zz'
-出力: '{"cmd": "cancel"}
+出力: '{"method": "cancel"}

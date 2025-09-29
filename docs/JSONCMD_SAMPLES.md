@@ -1,6 +1,14 @@
 ### `ThreadWorker` で使用可能なJSONコマンドパターン
 
-`ThreadWorker`は、JSON形式の文字列またはPythonの辞書オブジェクトをコマンドとしてキューを介して受け取ります。各コマンドの基本的な構造は `{"cmd": "コマンド名", ...}` です。
+`ThreadWorker`は、
+JSON形式の文字列またはPythonの辞書オブジェクトを
+コマンドとしてキューを介して受け取ります。
+各コマンドの基本的な構造は 
+`{"method": "コマンド名", "params": {...}}` です。
+
+**重要**
+"method","params"については、JSON-RPCのフォーマットに従います。
+
 
 以下に、利用可能なコマンドとそのJSONサンプルを示します。
 
@@ -14,18 +22,22 @@
 **基本形**
 ```json
 {
-  "cmd": "move",
-  "angles": [30, -30, 0, 90]
+  "method": "move",
+  "params": {
+    "angles": [30, -30, 0, 90]
+  }
 }
 ```
 
 **オプション付き（移動時間とステップ数を指定）**
 ```json
 {
-  "cmd": "move_all_angles_sync",
-  "angles": [45, null, "center", -45],
-  "move_sec": 0.5,
-  "step_n": 50
+  "method": "move_all_angles_sync",
+  "params": {
+    "angles": [45, null, "center", -45],
+    "move_sec": 0.5,
+    "step_n": 50
+  }
 }
 ```
 * `angles`内の `null` は `None` と同じ意味です。`"center"` のような文字列も使用できます。
@@ -41,8 +53,10 @@
 
 ```json
 {
-  "cmd": "move_all_angles",
-  "angles": [-90, 90, null, 0]
+  "method": "move_all_angles",
+  "params": {
+    "angles": [-90, 90, null, 0]
+  }
 }
 ```
 
@@ -51,8 +65,8 @@
 
 ```json
 {
-  "cmd": "move_all_pulses",
-  "pulses": [500, 2500, 1500, 0]
+  "method": "move_all_pulses",
+  "params": {"pulses": [500, 2500, 1500, 0]}
 }
 ```
 
@@ -67,8 +81,8 @@
 
 ```json
 {
-  "cmd": "move_sec",
-  "sec": 0.8
+  "method": "move_sec",
+  "params": {"sec": 0.8}
 }
 ```
 
@@ -77,8 +91,8 @@
 
 ```json
 {
-  "cmd": "step_n",
-  "n": 100
+  "method": "step_n",
+  "params": {"n": 100}
 }
 ```
 
@@ -87,8 +101,8 @@
 
 ```json
 {
-  "cmd": "interval",
-  "sec": 0.5
+  "method": "interval",
+  "params": {"sec": 0.5}
 }
 ```
 
@@ -103,8 +117,8 @@
 
 ```json
 {
-  "cmd": "sleep",
-  "sec": 2.0
+  "method": "sleep",
+  "params": {"sec": 2.0}
 }
 ```
 
@@ -113,7 +127,7 @@
 
 ```json
 {
-  "cmd": "cancel"
+  "method": "cancel"
 }
 ```
 
@@ -128,9 +142,11 @@
 
 ```json
 {
-  "cmd": "move_pulse_relative",
-  "servo": 0,
-  "pulse_diff": -20
+  "method": "move_pulse_relative",
+  "params": {
+    "servo": 0,
+    "pulse_diff": -20
+  }
 }
 ```
 
@@ -142,26 +158,32 @@
 **中央位置(center)の設定**
 ```json
 {
-  "cmd": "set",
-  "servo": 0,
-  "target": "center"
+  "method": "set",
+  "params": {
+    "servo": 0,
+    "target": "center"
+  }
 }
 ```
 
 **最小位置(min)の設定**
 ```json
 {
-  "cmd": "set",
-  "servo": 1,
-  "target": "min"
+  "method": "set",
+  "params": {
+    "servo": 1,
+    "target": "min"
+  }
 }
 ```
 
 **最大位置(max)の設定**
 ```json
 {
-  "cmd": "set",
-  "servo": 2,
-  "target": "max"
+  "method": "set",
+  "params" {
+    "servo": 2,
+    "target": "max"
+  }
 }
 ```

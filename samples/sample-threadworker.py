@@ -8,16 +8,16 @@ PINS = [25, 27]
 DEBUG_FLAG = False
 
 CMD_JSONS = [
-    {"cmd": "step_n", "n": 20},
-    {"cmd": "move_sec", "sec": 1.0},
-    {"cmd": "move", "angles": [50, 50]},
-    {"cmd": "move", "angles": [-50, 50]},
-    {"cmd": "move_sec", "sec": 0.1},
-    {"cmd": "sleep", "sec": 1},
-    {"cmd": "move", "angles": [50, -50]},
-    {"cmd": "move", "angles": [-50, -50]},
-    {"cmd": "move_sec", "sec": MultiServo.DEF_MOVE_SEC},
-    {"cmd": "move", "angles": [0, 0]},
+    {"method": "step_n", "params": {"n": 20}},
+    {"method": "move_sec", "params": {"sec": 1.0}},
+    {"method": "move", "params": {"angles": [50, 50]}},
+    {"method": "move", "params": {"angles": [-50, 50]}},
+    {"method": "move_sec", "params": {"sec": 0.1}},
+    {"method": "sleep", "params": {"sec": 1}},
+    {"method": "move", "params": {"angles": [50, -50]}},
+    {"method": "move", "params": {"angles": [-50, -50]}},
+    {"method": "move_sec", "params": {"sec": MultiServo.DEF_MOVE_SEC}},
+    {"method": "move", "params": {"angles": [0, 0]}},
 ]
 
 
@@ -43,7 +43,7 @@ def main():
         for cmd in CMD_JSONS:
             print(f">>> {cmd}")
             result = worker.send(cmd)
-            print(f"    <<< {result}")
+            print(f"    <<<{result}")
 
         # **Important**
         # スレッドの処理がすべて完了するのを待つ
