@@ -2,6 +2,7 @@
 # (c) 2025 Yoichi Tanibayashi
 #
 """CLI base"""
+import os
 import readline
 
 from pi0servo import get_logger
@@ -25,7 +26,10 @@ class CliBase:
         )
 
         self.prompt_prefix = prompt_prefix
-        self.history_file = history_file
+        self.history_file = (
+            os.path.expanduser(os.path.expandvars(history_file))
+        )
+        self.__log.debug("history_file=%a", self.history_file)
 
         try:
             readline.read_history_file(self. history_file)
