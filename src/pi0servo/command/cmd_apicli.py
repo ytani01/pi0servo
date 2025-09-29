@@ -29,6 +29,12 @@ class CmdAppCliBase(CliBase):
         # {"method": "move", ..} を {'method': 'move', ..}
         # のように誤入力した場合の対応
         parsed_line = line.replace("'", "\"")
+
+        parsed_line_json = json.loads(parsed_line)
+
+        if not isinstance(parsed_line_json, list):
+            parsed_line = json.dumps([parsed_line_json])
+
         self.__log.debug("parsed_line=%a", parsed_line)
         return parsed_line
 
@@ -37,11 +43,13 @@ class CmdAppCliBase(CliBase):
         self.__log.debug("line=%a", line)
 
         line_json = json.loads(line)
+        self.__log.debug("line_json=%s", line_json)
+
         try:
             for _j in line_json:
-                print(f"> {_j}")
+                print(f"> {_j}", flush=True)
                 _res = self.thworker.send(_j)
-                print(f"* {json.loads(_res)}")
+                print(f"* {json.loads(_res)}", flush=True)
 
         except Exception as _e:
             self.__log.error("%s: %s", type(_e).__name__, _e)

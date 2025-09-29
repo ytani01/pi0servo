@@ -2,6 +2,7 @@
 # (c) 2025 Yoichi Tanibayashi
 #
 """CLI base"""
+import json
 import os
 import readline
 
@@ -32,9 +33,17 @@ class CliBase:
         self.__log.debug("history_file=%a", self.history_file)
 
         try:
-            readline.read_history_file(self. history_file)
+            readline.read_history_file(self.history_file)
         except FileNotFoundError:
             self.__log.debug("no history file: %s", self.history_file)
+        except OSError:
+            self.__log.warning(
+                "invalid history file .. remove: %s", self.history_file
+            )
+            # ヒストリーファイルが壊れていると思うので、削除する。
+            os.remove(self.history_file)
+        except Exception as _e:
+            self.__log.error("%s: %s", type(_e).__name__, _e)
 
     def send(self, line):
         """Send.
@@ -56,10 +65,19 @@ class CliBase:
 
         try:
             while True:
-                _line = input(self.prompt_prefix + self.PROMPT_STR)
-                _line = _line.strip()
-                self.__log.debug("line=%a", _line)
-                readline.write_history_file(self.history_file)
+                try: 
+                    _line = input(self.prompt_prefix + self.PROMPT_STR)
+                    _line = _line.strip()
+                    self.__log.debug("line=%a", _line)
+                    readline.write_history_file(self.history_file)
+
+                except (KeyboardInterrupt, EOFError) as _e:
+                    self.__log.debug("%s: %s", type(_e).__name__, _e)
+                    break
+
+                except Exception as _e:
+                    self.__log.error("%s: %s", type(_e).__name__, _e)
+                    continue
 
                 if not _line:
                     continue
@@ -68,17 +86,24 @@ class CliBase:
                     self.__log.debug("comment line: ignored")
                     continue
 
-                _parsed_line = self.parse_line(_line)
-                self.__log.debug("parsed_line=%a", _parsed_line)
+                try:
+                    _parsed_line = self.parse_line(_line)
+                    self.__log.debug("parsed_line=%a", _parsed_line)
 
-                self.send(_parsed_line)
+                    self.send(_parsed_line)
+
+                except json.JSONDecodeError as _e:
+                    self.__log.warning("%s: %s", type(_e).__name__, _e)
 
         except (KeyboardInterrupt, EOFError) as _e:
             self.__log.debug("%s: %s", type(_e).__name__, _e)
 
         finally:
             self.__log.debug("save history: %s", self.history_file)
-            readline.write_history_file(self.history_file)
+            try:
+                readline.write_history_file(self.history_file)
+            except Exception as _e:
+                self.__log.error("%s: %s", type(_e).__name__, _e)
 
 
 # for simple test
