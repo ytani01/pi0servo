@@ -42,7 +42,7 @@ class CliBase:
         To be override.
         """
         self.__log.debug("line=%a", line)
-        
+
     def parse_line(self, line: str) -> str:
         """Parse line.
 
@@ -72,7 +72,7 @@ class CliBase:
                 self.__log.debug("parsed_line=%a", _parsed_line)
 
                 self.send(_parsed_line)
-                
+
         except (KeyboardInterrupt, EOFError) as _e:
             self.__log.debug("%s: %s", type(_e).__name__, _e)
 
@@ -95,6 +95,7 @@ def main():
     cli = MyCli("test", "/tmp/hist", debug=True)
 
     cli.loop()
+
 
 if __name__ == "__main__":
     main()
