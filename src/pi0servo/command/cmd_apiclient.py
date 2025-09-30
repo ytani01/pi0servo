@@ -66,9 +66,9 @@ class CmdApiClientInteractive(CliBase):
         """print response in json format"""
         self.__log.debug("_res='%s': %s", _res, type(_res))
         try:
-            print(f"* {self.url}> {_res.json()}")
+            print(f" <<< {self.url}> {_res.json()}")
         except Exception:
-            print(f"* {_res}")
+            print(f" <<< {_res}")
 
 
 class CmdApiClient:

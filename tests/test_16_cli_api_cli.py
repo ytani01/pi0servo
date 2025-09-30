@@ -74,7 +74,12 @@ class TestCmdApiCli:
             ),
             (
                 '{"method": "cancel"}\n',
-                "OK",
+                "'value': 0",
+                f"{CMDNAME}>"
+            ),
+            (
+                '{"method": "qsize"}\n',
+                "'value': ",
                 f"{CMDNAME}>"
             ),
             (

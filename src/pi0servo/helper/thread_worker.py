@@ -109,12 +109,19 @@ class ThreadWorker(threading.Thread):
                 "comment": "special command"
             }
         },
+        {
+            "method": "qsize",
+            "params": {
+                "comment": "special command"
+            }
+        },
     ]
+
+    CMD_CANCEL = "cancel"
+    CMD_QSIZE = "qsize"
 
     DEF_RECV_TIMEOUT = 0.2  # sec
     DEF_INTERVAL_SEC = 0.0  # sec
-
-    CMD_CANCEL = "cancel"
 
     def __init__(
         self,
@@ -158,25 +165,15 @@ class ThreadWorker(threading.Thread):
         self.__log.debug("cmd_list=%s", self._cmd_list)
 
         self._command_handlers = {
-            "move":
-            self._handle_move_all_angles_sync,
-
-            "move_all_angles_sync":
-            self._handle_move_all_angles_sync,
-
-            "move_all_angles":
-            self._handle_move_all_angles,
-
-            "move_all_pulses":
-            self._handle_move_all_pulses,
-
+            "move": self._handle_move_all_angles_sync,
+            "move_all_angles_sync": self._handle_move_all_angles_sync,
+            "move_all_angles": self._handle_move_all_angles,
+            "move_all_pulses": self._handle_move_all_pulses,
             "move_sec": self._handle_move_sec,
             "step_n": self._handle_step_n,
             "interval": self._handle_interval,
             "sleep": self._handle_sleep,
-            "move_pulse_relative":
-            self._handle_move_pulse_relative,
-
+            "move_pulse_relative": self._handle_move_pulse_relative,
             "set": self._handle_set,
         }
 
@@ -280,11 +277,19 @@ class ThreadWorker(threading.Thread):
                 return _ret
 
             if cmd_name == self.CMD_CANCEL:
-                # キャンセルコマンドの場合、キューをクリアする。
-                cmd_json["count"] = self.clear_cmdq()
-            else:
-                # 通常のコマンドは、コマンドキューに入れる。
-                self._cmdq.put(cmd_json)
+                _count = self.clear_cmdq()  # キューをクリアする。 
+                _ret = self.mk_reply_result(_count, cmd_data)
+                self.__log.debug("_ret=%s", _ret)
+                return _ret
+
+            if cmd_name == self.CMD_QSIZE:
+                _qsize = self.qsize
+                _ret = self.mk_reply_result(_qsize, cmd_data)
+                self.__log.debug("_ret=%s", _ret)
+                return _ret
+
+            # 通常のコマンドは、コマンドキューに入れる。
+            self._cmdq.put(cmd_json)
 
             self.__log.debug(
                 "cmd_json=%s, qsize=%s", cmd_json, self._cmdq.qsize()

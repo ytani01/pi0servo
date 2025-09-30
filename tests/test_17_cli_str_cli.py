@@ -71,7 +71,12 @@ class TestCmdStrCli:
             (
                 'zz\n',
                 "cancel",
-                "OK"
+                "'value': 0"
+            ),
+            (
+                'qq\n',
+                "result",
+                "'value': 0"
             ),
             (
                 "mv:0\n",
