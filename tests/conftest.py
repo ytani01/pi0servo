@@ -75,11 +75,21 @@ class InteractiveSession:
                 try:
                     data = os.read(self.master_fd, 1024).decode()
                     self.output += data
-                    print(f"Current output: {self.output!r}")  # Debug print
                     if pattern in self.output:
+                        # print(f"* output: {self.output!r}")
+                        print(f"* output: '''{self.output}'''")
+                        print(f"* pattern: '''{pattern}'''")
                         return True
-                except OSError:
+                except OSError as _e:
+                    print(f"{type(_e).__name__}: {_e}")
                     break
+        # print(f"* output: {self.output!r}")
+        print(f"* output: '''{self.output}'''")
+        print(f"* pattern: '''{pattern}'''")
+        if pattern in self.output:
+            return True
+
+        self.close()
         return False
 
     def get_output(self) -> str:

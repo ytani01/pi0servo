@@ -1,9 +1,7 @@
 #
 # (c) 2025 Yoichi Tanibayashi
 #
-"""
-pi0servo JSON API Server
-"""
+"""pi0servo JSON API Server."""
 
 import os
 from contextlib import asynccontextmanager
@@ -27,16 +25,19 @@ class JsonApi:
 
         self.__log.debug("pins=%s", self.pins)
 
-        print("Initializing ...")
         self.pi = pigpio.pi()
+        if not self.pi.connected:
+            raise ConnectionError("pigpio daemon")
 
         self.mservo = MultiServo(self.pi, self.pins)  # debug=self._debug)
         self.thr_worker = ThreadWorker(self.mservo, debug=self._debug)
         self.thr_worker.start()
+        self.__log.info("Ready")
 
     def end(self):
         """end"""
         self.thr_worker.end()
+        self.__log.info("done")
 
     def send_cmdjson(self, cmdjson):
         """send JSON command to thread worker"""

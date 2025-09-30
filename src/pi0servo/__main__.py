@@ -6,12 +6,12 @@ import os
 
 import click
 import pigpio
-import uvicorn
 from pyclickutils import click_common_opts
 
 from . import __version__, get_logger
 from .command.cmd_apicli import CmdApiCli
 from .command.cmd_apiclient import CmdApiClient
+from .command.cmd_apiserver import CmdApiServer
 from .command.cmd_calib import CalibApp
 from .command.cmd_servo import CmdServo
 from .command.cmd_strcli import CmdStrCli
@@ -21,7 +21,6 @@ from .core.calibrable_servo import CalibrableServo
 
 def get_pi(debug=False) -> pigpio.pi:
     """Initialize and return a pigpio.pi instance.
-
     If connection fails, log an error and return None.
     """
     __log = get_logger(__name__, debug)
@@ -31,6 +30,14 @@ def get_pi(debug=False) -> pigpio.pi:
         __log.error("pigpio daemon not connected.")
         raise ConnectionError("pigpio daemon not connected.")
     return pi
+
+
+def print_pins_error(ctx):
+    """Print error message and help."""
+    click.echo()
+    click.echo(click.style("Error: Please specify GPIO pins.", fg="red"))
+    click.echo()
+    click.echo(f"{ctx.get_help()}")
 
 
 @click.group()
@@ -45,7 +52,7 @@ def cli(ctx, debug):
     ___log.debug("cmd_name=%s, subcmd_name=%s", cmd_name, subcmd_name)
 
     if subcmd_name is None:
-        print(ctx.get_help())
+        click.echo(ctx.get_help())
 
 
 @cli.command()
@@ -60,16 +67,15 @@ def servo(
     ctx, pin: int, pulse: int, wait_sec: float, debug: bool
 ) -> None:
     """servo command."""
+    cmd_name = ctx.command.name
     __log = get_logger(__name__, debug)
+    __log.debug("cmd_name=%s", cmd_name)
     __log.debug('pin=%s, pulse="%s", wait_sec=%s', pin, pulse, wait_sec)
 
-    cmd_name = ctx.command.name
-    __log.debug("cmd_name=%s", cmd_name)
-
-    pi = get_pi(debug)
-
+    pi = None
     app = None
     try:
+        pi = get_pi(debug)
         app = CmdServo(pi, pin, pulse, wait_sec, debug=debug)
         app.main(ctx)
 
@@ -98,25 +104,19 @@ def calib(ctx, pin, conf_file, debug):
 
     Current dir --> Home dir --> /etc
 """
+    cmd_name = ctx.command.name
     __log = get_logger(__name__, debug)
+    __log.debug("cmd_name=%s", cmd_name)
     __log.debug("pin=%s,conf_file=%s", pin, conf_file)
 
-    cmd_name = ctx.command.name
-    __log.debug("cmd_name=%s", cmd_name)
-
     if not pin:
-        print()
-        print("Error: Please specify GPIO pins.")
-        print()
-        print("  e.g. pi0servo calib 17 27")
-        print()
-        print(f"{ctx.get_help()}")
+        print_pins_error(ctx)
         return
 
-    pi = get_pi(debug)
-
+    pi = None
     app = None
     try:
+        pi = get_pi(debug)
         app = CalibApp(pi, pin, conf_file, debug=debug)
         app.main()
 
@@ -144,15 +144,17 @@ def calib(ctx, pin, conf_file, debug):
 def api_cli(ctx, pins, history_file, debug):
     """API CLI"""
     cmd_name = ctx.command.name
-
     __log = get_logger(__name__, debug)
     __log.debug("cmd_name=%s", cmd_name)
     __log.debug("pins=%s, history_file=%s", pins, history_file)
 
-    pi = get_pi(debug)
+    if not pins:
+        print_pins_error(ctx)
+        return
 
     app = None
     try:
+        pi = get_pi(debug)
         app = CmdApiCli(cmd_name, pi, pins, history_file, debug=debug)
         app.main()
 
@@ -179,7 +181,6 @@ def api_cli(ctx, pins, history_file, debug):
 def str_cli(ctx, pins, history_file, angle_factor, debug):
     """String command CLI"""
     cmd_name = ctx.command.name
-
     __log = get_logger(__name__, debug)
     __log.debug("cmd_name=%s", cmd_name)
     __log.debug(
@@ -188,16 +189,15 @@ def str_cli(ctx, pins, history_file, angle_factor, debug):
     )
 
     if not pins:
-        print(ctx.get_help())
+        print_pins_error(ctx)
         return
 
     af_list = [int(i) for i in angle_factor.split(',')]
     __log.debug("af_list=%s", af_list)
 
-    pi = get_pi(debug)
-
     app = None
     try:
+        pi = get_pi(debug)
         app = CmdStrCli(
             cmd_name, pi, pins, history_file, af_list, debug=debug
         )
@@ -225,30 +225,23 @@ def str_cli(ctx, pins, history_file, angle_factor, debug):
 def api_server(ctx, pins, server_host, port, debug):
     """API (JSON) Server ."""
     cmd_name = ctx.command.name
-
     __log = get_logger(__name__, debug)
     __log.debug("cmd_name=%s", cmd_name)
     __log.debug("pins=%s", pins)
     __log.debug("server_host=%s, port=%s", server_host, port)
 
-    if pins:
-        os.environ["PI0SERVO_PINS"] = ",".join([str(p) for p in pins])
-    else:
-        print()
-        print("Error: Please specify GPIO pins.")
-        print()
-        print(f"  e.g. pi0servo {cmd_name} 17 27")
-        print()
-        print(f"{ctx.get_help()}")
-        print()
+    if not pins:
+        print_pins_error(ctx)
         return
 
-    os.environ["PI0SERVO_DEBUG"] = "1" if debug else "0"
+    app = None
+    try:
+        app = CmdApiServer(pins, server_host, port, debug=debug)
+        app.main()
 
-    uvicorn.run(
-        "pi0servo.web.json_api:app",
-        host=server_host, port=port, reload=True
-    )
+    finally:
+        if app:
+            app.end()
 
 
 @cli.command()
@@ -267,25 +260,25 @@ def api_server(ctx, pins, server_host, port, debug):
 def api_client(ctx, cmdline, url, history_file, debug):
     """String API Client."""
     cmd_name = ctx.command.name
-
     __log = get_logger(__name__, debug)
     __log.debug(
         "cmd_name=%s, url=%s, history_file=%s",
         cmd_name, url, history_file
     )
 
-    # cmdline = " ".join(cmdline)
     __log.debug("cmdline=%a", cmdline)
 
-    _app = CmdApiClient(cmd_name, url, cmdline, history_file, debug)
+    app = None
     try:
-        _app.main()
+        app = CmdApiClient(cmd_name, url, cmdline, history_file, debug)
+        app.main()
 
     except (KeyboardInterrupt, EOFError):
         pass
 
     finally:
-        _app.end()
+        if app:
+            app.end()
 
 
 @cli.command()
@@ -308,7 +301,6 @@ def api_client(ctx, cmdline, url, history_file, debug):
 def str_client(ctx, cmdline, url, history_file, angle_factor, debug):
     """String Command API Client."""
     cmd_name = ctx.command.name
-
     __log = get_logger(__name__, debug)
     __log.debug(
         "cmd_name=%s, url=%s, history_file=%s, angle_factor=%s",
@@ -319,15 +311,19 @@ def str_client(ctx, cmdline, url, history_file, angle_factor, debug):
     af_list = [int(i) for i in angle_factor.split(',')]
     __log.debug("af_list=%s", af_list)
 
-    _app = CmdStrClient(cmd_name, url, cmdline, history_file, af_list, debug)
+    app = None
     try:
-        _app.main()
+        app = CmdStrClient(
+            cmd_name, url, cmdline, history_file, af_list, debug
+        )
+        app.main()
 
     except (KeyboardInterrupt, EOFError):
         pass
 
     finally:
-        _app.end()
+        if app:
+            app.end()
 
 
 @cli.command()
@@ -344,22 +340,13 @@ def str_client(ctx, cmdline, url, history_file, angle_factor, debug):
 def jsonrpc_server(ctx, pins, server_host, port, debug):
     """JSON-RPC Server ."""
     cmd_name = ctx.command.name
-
     __log = get_logger(__name__, debug)
     __log.debug("cmd_name=%s", cmd_name)
     __log.debug("pins=%s", pins)
     __log.debug("server_host=%s, port=%s", server_host, port)
 
-    if pins:
-        os.environ["PI0SERVO_PINS"] = ",".join([str(p) for p in pins])
-    else:
-        click.echo()
-        click.echo("Error: Please specify GPIO pins.")
-        click.echo()
-        click.echo(f"  e.g. pi0servo {cmd_name} 17 27")
-        click.echo()
-        click.echo(f"{ctx.get_help()}")
-        click.echo()
+    if not pins:
+        print_pins_error(ctx)
         return
 
     os.environ["PI0SERVO_DEBUG"] = "1" if debug else "0"

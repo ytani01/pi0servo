@@ -9,23 +9,22 @@ CMD = "uv run pi0servo api-client --history_file /tmp/testhist"
 class TestBasic:
     """Basic tests."""
     @pytest.mark.parametrize(
-        "instr, expect",
+        "instr, expect1, expect2",
         [
-            ("\n",  "api-client>"),
-            ("a\n", "api-client>"),
-            ("a\n", "Error"),
+            ('{"method": "cancel"}\n', "ConnectionError", "api-client"),
+            ("a\n", "JSONDecodeError", "api-client>"),
         ],
     )
-    def test_servo(self, cli_runner, instr, expect):
+    def test_servo(self, cli_runner, instr, expect1, expect2):
         """servo command"""
         cmdline = f"{CMD}"
-        print(f'''
-* cmdline='{cmdline}''')
+        print(f"* cmdline='{cmdline}'")
 
         session = cli_runner.run_interactive_command(cmdline.split())
 
         session.send_key(instr)
-        assert session.expect(expect)
+        assert session.expect(expect1)
+        assert session.expect(expect2)
 
         session.close()
-        time.sleep(2)
+        time.sleep(3)

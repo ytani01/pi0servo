@@ -36,11 +36,13 @@ class TestBasic:
     def test_servo(self, cli_runner, args, stdout, stderr):
         """servo command"""
         cmdline = f"{CMD} {args}"
-        print(f"\ncmdline='{cmdline}'")
+        print(f"\n* cmdline='{cmdline}'")
 
         result = cli_runner.run_command(cmdline.split())
-        print(f"stdout='{result.stdout}'")
-        print(f"stderr='{result.stderr}'")
+        print(f"* stdout='''{result.stdout}'''")
+        print(f"** expect='{stdout}'")
+        print(f"* stderr='''{result.stderr}'''")
+        print(f"** expect='{stderr}'")
 
         cli_runner.assert_output_contains(
             result,
