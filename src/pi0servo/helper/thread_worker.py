@@ -94,6 +94,12 @@ class ThreadWorker(threading.Thread):
                 "target": "center"
             }
         },
+        {
+            "method": "cancel",
+            "params": {
+                "comment": "special command"
+            }
+        },
     ]
 
     DEF_RECV_TIMEOUT = 0.2  # sec

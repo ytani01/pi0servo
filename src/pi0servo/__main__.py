@@ -187,6 +187,10 @@ def str_cli(ctx, pins, history_file, angle_factor, debug):
         pins, history_file, angle_factor
     )
 
+    if not pins:
+        print(ctx.get_help())
+        return
+
     af_list = [int(i) for i in angle_factor.split(',')]
     __log.debug("af_list=%s", af_list)
 

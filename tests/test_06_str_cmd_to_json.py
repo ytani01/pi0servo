@@ -30,63 +30,63 @@ class TestStrCmdToJson:
             (
                 "mv:40,30,20,10",
                 (
-                    '{'
+                    '[{'
                     '"method": "move_all_angles_sync", '
                     '"params": {"angles": [40, 30, 20, 10]}'
-                    '}'
+                    '}]'
                 ),
             ),
             (
                 "mv:x,n,c",
                 (
-                    '{'
+                    '[{'
                     '"method": "move_all_angles_sync", '
                     '"params": {"angles": ["max", "min", "center"]}'
-                    '}'
+                    '}]'
                 ),
             ),
-            ("sl:0.5", '{"method": "sleep", "params": {"sec": 0.5}}'),
+            ("sl:0.5", '[{"method": "sleep", "params": {"sec": 0.5}}]'),
             (
                 "mp:100,-50",
                 (
-                    '{'
+                    '[{'
                     '"method": "move_all_pulses_relative", '
                     '"params": {"pulse_diffs": [100, -50]}'
-                    '}'
+                    '}]'
                 ),
             ),
             (
                 "sc:0",
                 (
-                    '{'
+                    '[{'
                     '"method": "set", '
                     '"params": {"servo": 0, "target": "center"}'
-                    '}'
+                    '}]'
                 )
             ),
-            ("ca", '{"method": "cancel"}'),
+            ("ca", '[{"method": "cancel"}]'),
             (
                 "mv:.",
-                '{'
+                '[{'
                 '"method": "move_all_angles_sync", '
                 '"params": {"angles": [null]}'
-                '}'
+                '}]'
             ),
             (
                 "mv:x,.,c,20",
                 (
-                    '{'
+                    '[{'
                     '"method": "move_all_angles_sync", '
                     '"params": {"angles": ["max", null, "center", 20]}'
-                    '}'
+                    '}]'
                 ),
             ),
-            ("mv:100", '{"err": "mv:100"}'),  # 角度範囲外
-            ("mv:abc", '{"err": "mv:abc"}'),  # 数値に変換できない
-            ("unknown:10", '{"err": "unknown:10"}'),  # 未知のコマンド
-            ("sl:abc", '{"err": "sl:abc"}'),  # 数値に変換できない
-            ("ca:1", '{"err": "ca:1"}'),  # パラメータがあってはならない
-            ("mv:", '{"err": "mv:"}'),  # パラメータがない
+            ("mv:100", '[{"err": "mv:100"}]'),  # 角度範囲外
+            ("mv:abc", '[{"err": "mv:abc"}]'),  # 数値に変換できない
+            ("unknown:10", '[{"err": "unknown:10"}]'),  # 未知のコマンド
+            ("sl:abc", '[{"err": "sl:abc"}]'),  # 数値に変換できない
+            ("ca:1", '[{"err": "ca:1"}]'),  # パラメータがあってはならない
+            ("mv:", '[{"err": "mv:"}]'),  # パラメータがない
         ],
     )
     def test_cmdstr_to_jsonliststr(
@@ -101,10 +101,10 @@ class TestStrCmdToJson:
         instance = StrCmdToJson(angle_factor=[1, -1, 1, -1], debug=True)
         cmd_str = "mv:40,30,20,10"
         expected_json_str = (
-            '{'
+            '[{'
             '"method": "move_all_angles_sync", '
             '"params": {"angles": [40, -30, 20, -10]}'
-            '}'
+            '}]'
         )
         result = instance.cmdstr_to_jsonliststr(cmd_str)
         assert result == expected_json_str
@@ -112,10 +112,12 @@ class TestStrCmdToJson:
         cmd_str_alias = "mv:x,n,c,x"
         expected_json_str_alias = (
             (
+                '['
                 '{'
                 '"method": "move_all_angles_sync", '
                 '"params": {"angles": ["max", "max", "center", "min"]}'
                 '}'
+                ']'
             )
         )
         result_alias = instance.cmdstr_to_jsonliststr(cmd_str_alias)
@@ -128,10 +130,10 @@ class TestStrCmdToJson:
         # servo 0 (angle_factor=1) -> target: center
         cmd_str_sc0 = "sc:0"
         expected_json_str_sc0 = (
-            '{'
+            '[{'
             '"method": "set", '
             '"params": {"servo": 0, "target": "center"}'
-            '}'
+            '}]'
         )
         result_sc0 = instance.cmdstr_to_jsonliststr(cmd_str_sc0)
         assert result_sc0 == expected_json_str_sc0
@@ -139,10 +141,10 @@ class TestStrCmdToJson:
         # servo 1 (angle_factor=-1) -> target: min -> max
         cmd_str_sn1 = "sn:1"
         expected_json_str_sn1 = (
-            '{'
+            '[{'
             '"method": "set", '
             '"params": {"servo": 1, "target": "max"}'
-            '}'
+            '}]'
         )
         result_sn1 = instance.cmdstr_to_jsonliststr(cmd_str_sn1)
         assert result_sn1 == expected_json_str_sn1
@@ -150,10 +152,10 @@ class TestStrCmdToJson:
         # servo 1 (angle_factor=-1) -> target: max -> min
         cmd_str_sx1 = "sx:1"
         expected_json_str_sx1 = (
-            '{'
+            '[{'
             '"method": "set", '
             '"params": {"servo": 1, "target": "min"}'
-            '}'
+            '}]'
         )
         result_sx1 = instance.cmdstr_to_jsonliststr(cmd_str_sx1)
         assert result_sx1 == expected_json_str_sx1

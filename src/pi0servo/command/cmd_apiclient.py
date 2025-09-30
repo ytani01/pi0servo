@@ -1,38 +1,64 @@
-
 #
 # (c) 2025 Yoichi Tanibayashi
 #
 """cmd_apiclient.py"""
-import os
-import readline  # input()でヒストリー機能が使える
+import json
 
 from pi0servo import ApiClient, get_logger
 
+from ..utils.clibase import CliBase
 
-class CmdApiClient:
-    """CmdApiClient."""
 
-    PROMPT_STR = "> "
+class CmdApiClientInteractive(CliBase):
+    """CmdApiClient Ineractive base."""
 
-    def __init__(
-            self, cmd_name, url, cmdline: tuple, history_file, debug=False
-    ) -> None:
-        """constractor."""
-        self._debug = debug
-        self.__log = get_logger(self.__class__.__name__, self._debug)
-        self.__log.debug("cmd_name=%s, url=%s", cmd_name, url)
-        self.__log.debug("cmdline=%a", cmdline)
+    def __init__(self, prefix, hist, cmdline, url, debug=False):
+        """Constractor."""
 
-        self.cmd_name = cmd_name
+        super().__init__(prefix, hist, debug=debug)
+
+        self.__debug = debug
+        self.__log = get_logger(__class__.__name__, self.__debug)
+        self.__log.debug("cmdline=%s", cmdline)
+        self.__log.debug("url=%s", url)
+
         self.url = url
         self.cmdline = cmdline
-        self.history_file = os.path.expanduser(history_file)
-        self.__log.debug("cmd_name=%s, url=%s", self.cmd_name, self.url)
-        self.__log.debug("cmdline=%s", self.cmdline)
-        self.__log.debug("history_file=%s", self.history_file)
+        try:
+            self.api_client = ApiClient(self.url, debug=self.__debug)
+        except Exception as _e:
+            self.__log.error("%s: %s", type(_e).__name__, _e)
+
+    def parse_line(self, line: str) -> str:
+        """parse command line string to json
+
+        *** To Be Override ***
+
+        Return:
+            リスト形式のコマンド列を文字列に変換
+        """
+        # {"method": "move"} を {'cmd': 'move'} のように誤入力した場合の対応
+        parsed_line = line.replace("'", "\"")
+        parsed_line_json = json.loads(parsed_line)
+
+        # リスト形式にしてから、文字列に変換
+        if not isinstance(parsed_line_json, list):
+            parsed_line = json.dumps([parsed_line_json])
+
+        self.__log.debug("parsed_line=%a", parsed_line)
+        return parsed_line
+
+    def send(self, line: str):
+        """Send line."""
+        self.__log.debug("line=%a", line)
+
+        line_json = json.loads(line)
 
         try:
-            self.api_client = ApiClient(self.url, self._debug)
+            for _j in line_json:
+                print(f">>> {_j}", flush=True)
+                _res = self.api_client.post(json.dumps(_j))
+                self.print_response(_res)
         except Exception as _e:
             self.__log.error("%s: %s", type(_e).__name__, _e)
 
@@ -44,85 +70,33 @@ class CmdApiClient:
         except Exception:
             print(f"* {_res}")
 
-    def parse_cmdline(self, cmdline: str) -> str:
-        """parse command line string to json
 
-        *** To Be Override ***
+class CmdApiClient:
+    """CmdApiClient."""
 
-        """
-        # {"cmd": "move"} を {'cmd': 'move'} のように誤入力した場合の対応
-        return cmdline.replace("'", "\"")
+    def __init__(
+            self, cmd_name, url, cmdline: tuple, history_file, debug=False
+    ) -> None:
+        """constractor."""
+        self.__debug = debug
+        self.__log = get_logger(self.__class__.__name__, self.__debug)
+        self.__log.debug("cmd_name=%s, url=%s", cmd_name, url)
+        self.__log.debug("cmdline=%a", cmdline)
+        self.__log.debug("history_file=%a", history_file)
+
+        self.cmd_name = cmd_name
+        self.url = url
+        self.cmdline = cmdline
+        self.history_file = history_file
+
+        self.cli = CmdApiClientInteractive(
+            self.cmd_name, self.history_file, self.cmdline, self.url,
+            debug=self.__debug
+        )
 
     def main(self):
         """main loop"""
-
-        if self.cmdline:
-            #
-            # command arguments mode
-            #
-            for _l in self.cmdline:
-                self.__log.debug("_l=%s", _l)
-
-                _parsed_line = self.parse_cmdline(_l)
-                try:
-                    _res = self.api_client.post(_parsed_line)
-                    self.print_response(_res)
-                except Exception as _e:
-                    self.__log.error("%s: %s", type(_e).__name__, _e)
-            return
-
-        #
-        # interactive mode
-        #
-        try:
-            # read history file
-            try:
-                readline.read_history_file(self.history_file)
-            except Exception as _e:
-                self.__log.error("%s: %s", type(_e).__name__, _e)
-
-            print(f"* history file: {self.history_file}")
-            self.__log.debug(
-                "history_length=%s",
-                readline.get_current_history_length()
-            )
-
-        except FileNotFoundError:
-            self.__log.debug("no history file: %s", self.history_file)
-
-        # start interactive mode
-        print("* Ctrl-C (Interrput) or Ctrl-D (EOF) for quit")
-
-        try:
-            while True:
-                try:
-                    _line = input(self.cmd_name + self.PROMPT_STR)
-                    _line = _line.strip()
-                    self.__log.debug("_line=%a", _line)
-                    readline.write_history_file(self.history_file)
-
-                except (KeyboardInterrupt, EOFError):
-                    break
-
-                if not _line:
-                    self.__log.debug("%a: ignored", _line)
-                    continue
-
-                if _line.startswith("#"):
-                    self.__log.debug("%a: ignored", _line)
-                    continue
-
-                _parsed_line = self.parse_cmdline(_line)
-                try:
-                    _res = self.api_client.post(_parsed_line)
-                except Exception as _e:
-                    self.__log.error("%s: %s", type(_e).__name__, _e)
-                    _res = type(_e).__name__
-                self.print_response(_res)
-
-        finally:
-            self.__log.debug("save history: %s", self.history_file)
-            readline.write_history_file(self.history_file)
+        self.cli.loop()
 
     def end(self):
         """end"""

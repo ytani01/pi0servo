@@ -260,8 +260,8 @@ class StrCmdToJson:
         _json_data: List[dict] | dict = self._cmdstr_to_jsonlist(cmd_line)
 
         # もし、配列要素が一つだけなら、その要素だけを取り出す。
-        if len(_json_data) == 1:
-            _json_data = _json_data[0]
+        # if len(_json_data) == 1:
+        #     _json_data = _json_data[0]
 
         self.__log.debug('_json_data="%s"', _json_data)
         return json.dumps(_json_data)

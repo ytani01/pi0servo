@@ -58,8 +58,6 @@ class CmdAppCliBase(CliBase):
 class CmdApiCli:
     """CmdApiCli."""
 
-    PROMPT_STR = "> "
-
     def __init__(
             self, cmd_name, pi, pins, history_file, debug=False
     ) -> None:

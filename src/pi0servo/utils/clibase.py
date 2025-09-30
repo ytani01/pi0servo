@@ -2,7 +2,6 @@
 # (c) 2025 Yoichi Tanibayashi
 #
 """CLI base"""
-import json
 import os
 import readline
 
@@ -65,7 +64,7 @@ class CliBase:
 
         try:
             while True:
-                try: 
+                try:
                     _line = input(self.prompt_prefix + self.PROMPT_STR)
                     _line = _line.strip()
                     self.__log.debug("line=%a", _line)
@@ -92,7 +91,7 @@ class CliBase:
 
                     self.send(_parsed_line)
 
-                except json.JSONDecodeError as _e:
+                except Exception as _e:
                     self.__log.warning("%s: %s", type(_e).__name__, _e)
 
         except (KeyboardInterrupt, EOFError) as _e:
