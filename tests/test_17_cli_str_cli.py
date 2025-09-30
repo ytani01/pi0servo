@@ -81,7 +81,7 @@ class TestCmdStrCli:
             (
                 "a\n",
                 "err",
-                "ERR",
+                "METHOD_NOT_FOUND",
             ),
         ],
     )

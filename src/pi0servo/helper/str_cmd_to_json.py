@@ -63,9 +63,12 @@ class StrCmdToJson:
         """Set angle_factor."""
         self._angle_factor = af
 
-    def _create_error_data(self, strcmd: str) -> dict:
+    def _create_error_data(self, code_key: str, strcmd: str) -> dict:
         """Create error data."""
-        return {"err": strcmd}
+        return {
+            "error": code_key,
+            "data": strcmd
+        }
 
     def _parse_angles(
         self, param_str: str
@@ -142,7 +145,7 @@ class StrCmdToJson:
 
         # 不正な文字列はエラー
         if not isinstance(cmd_str, str) or " " in cmd_str:
-            return self._create_error_data(cmd_str)
+            return self._create_error_data("INVALID_REQUEST", cmd_str)
 
         # e.g. "mv:10,20,30,40" --> cmd_parts = ["mv", "10,20,30,40"]
         cmd_parts = cmd_str.split(":", 1)
@@ -151,7 +154,7 @@ class StrCmdToJson:
         cmd_key = cmd_parts[0].lower()
 
         if cmd_key not in self.COMMAND_MAP:
-            return self._create_error_data(cmd_str)
+            return self._create_error_data("METHOD_NOT_FOUND", cmd_str)
 
         # コマンド名の取得 e.g. "mv" --> "move_all_angles_sync"
         cmd_name = self.COMMAND_MAP[cmd_key]
@@ -175,11 +178,11 @@ class StrCmdToJson:
         try:
             if cmd_key == "mv":
                 if not cmd_param_str:
-                    return self._create_error_data(cmd_str)
+                    return self._create_error_data("INVALID_PARAM", cmd_str)
 
                 angles = self._parse_angles(cmd_param_str)
                 if angles is None:
-                    return self._create_error_data(cmd_str)
+                    return self._create_error_data("INVALID_PARAM", cmd_str)
 
                 _cmd_data["params"] = {}
                 _cmd_data["params"]["angles"] = angles
@@ -187,7 +190,7 @@ class StrCmdToJson:
             elif cmd_key in ["sl", "ms", "is"]:
                 sec = float(cmd_param_str)
                 if sec < 0:
-                    return self._create_error_data(cmd_str)
+                    return self._create_error_data("INVALID_PARAM", cmd_str)
 
                 _cmd_data["params"] = {}
                 _cmd_data["params"]["sec"] = sec
@@ -195,7 +198,7 @@ class StrCmdToJson:
             elif cmd_key == "st":
                 _n = int(cmd_param_str)
                 if _n < 1:
-                    return self._create_error_data(cmd_str)
+                    return self._create_error_data("INVALID_PARAM", cmd_str)
 
                 _cmd_data["params"] = {}
                 _cmd_data["params"]["n"] = _n
@@ -227,12 +230,11 @@ class StrCmdToJson:
                 _cmd_data["params"]["target"] = target
 
             elif cmd_key in ["ca", "zz"]:
-                if cmd_param_str:  # パラメータがあってはならない
-                    return self._create_error_data(cmd_str)
+                pass
 
         except (ValueError, TypeError) as _e:
             self.__log.error("%s: %s", type(_e).__name__, _e)
-            return self._create_error_data(cmd_str)
+            return self._create_error_data("INVALID_PARAM", cmd_str)
 
         self.__log.debug("_cmd_data=%s", _cmd_data)
         return _cmd_data

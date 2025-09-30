@@ -81,12 +81,14 @@ class TestStrCmdToJson:
                     '}]'
                 ),
             ),
-            ("mv:100", '[{"err": "mv:100"}]'),  # 角度範囲外
-            ("mv:abc", '[{"err": "mv:abc"}]'),  # 数値に変換できない
-            ("unknown:10", '[{"err": "unknown:10"}]'),  # 未知のコマンド
-            ("sl:abc", '[{"err": "sl:abc"}]'),  # 数値に変換できない
-            ("ca:1", '[{"err": "ca:1"}]'),  # パラメータがあってはならない
-            ("mv:", '[{"err": "mv:"}]'),  # パラメータがない
+            ("mv:100", '[{"error": "INVALID_PARAM", "data": "mv:100"}]'),
+            ("mv:abc", '[{"error": "INVALID_PARAM", "data": "mv:abc"}]'),
+            (
+                "unknown:10",
+                '[{"error": "METHOD_NOT_FOUND", "data": "unknown:10"}]'
+            ),
+            ("sl:abc", '[{"error": "INVALID_PARAM", "data": "sl:abc"}]'),
+            ("mv:", '[{"error": "INVALID_PARAM", "data": "mv:"}]'),
         ],
     )
     def test_cmdstr_to_jsonliststr(
@@ -188,7 +190,10 @@ class TestStrCmdToJson:
             '"method": "move_all_angles_sync", '
             '"params": {"angles": [40, 30]}'
             '}, '
-            '{"err": "unknown:10"}'
+            '{'
+            '"error": "METHOD_NOT_FOUND", "data": "unknown:10"'
+            '}, '
+            '{"method": "sleep", "params": {"sec": 0.1}}'
             ']'
         )
         result = str_cmd_to_json_instance.cmdstr_to_jsonliststr(cmd_line)

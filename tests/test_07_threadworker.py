@@ -124,8 +124,8 @@ class TestThreadWorker:
         time.sleep(0.5)  # コマンド処理を待つ
 
         reply_json = json.loads(reply)
-        assert reply_json["status"] == "ERR"
-        assert "Invalid command" in reply_json["retval"]
+        assert reply_json["error"]["code"] == -32601
+        assert "Invalid command" in reply_json["error"]["message"]
         assert thread_worker.qsize == 0
 
     def test_clear_cmdq(self, thread_worker):

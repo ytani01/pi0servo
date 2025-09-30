@@ -25,6 +25,15 @@ class ThreadWorker(threading.Thread):
     キューに溜まっているコマンドをすべてキャンセルできる。
     """
 
+    ERROR_CODE = {
+        "INVALID_JSON": -32700,
+        "INVALID_REQUEST": -32600,
+        "METHOD_NOT_FOUND": -32601,
+        "INVALID_PARAM": -32602,
+        "INTERNAL_ERROR": -32603,
+        "UNKOWN": -32000,
+    }
+
     # コマンド一覧(例)
     # コマンドチェックにも使う
     CMD_SAMPLES_ALL: list[dict] = [
@@ -205,23 +214,38 @@ class ThreadWorker(threading.Thread):
         self.__log.debug("")
         return self.clear_cmdq()
 
-    def mk_reply_json(
-        self,
-        status: str,
-        cmddata: str | dict,
-        retval: str | dict | None = None
+    def mk_reply_result(
+        self, result: int | str | dict, req: str | dict
     ) -> str:
-        """Make replay message data (JSON string)"""
+        """Make reply JSON string."""
+        self.__log.debug("result=%s", result)
 
-        if isinstance(cmddata, str):
-            cmddata = json.loads(cmddata)
-
-        _reply = {
-            "status": status,
-            "cmddata": cmddata,
-            "retval": retval,
+        reply = {
+            "result": {
+                "value": result,
+                "request": req
+            }
         }
-        return json.dumps(_reply)
+        self.__log.debug("reply=%s", reply)
+        return json.dumps(reply)
+
+    def mk_reply_error(self, code_key: str, message: str, data=None) -> str:
+        """Make error reply JSON string."""
+        self.__log.debug(
+            "code_key=%s, message=%s, data=%s", code_key, message, data
+        )
+
+        reply = {
+            "error": {
+                "code": self.ERROR_CODE[code_key],
+                "message": message,
+            }
+        }
+        if data:
+            reply["error"]["data"] = data
+
+        self.__log.debug("reply=%s", reply)
+        return json.dumps(reply)
 
     def send(self, cmd_data: str | dict):
         """Send cmd_data(JSON)"""
@@ -231,17 +255,27 @@ class ThreadWorker(threading.Thread):
             else:
                 cmd_json = cmd_data
 
+            # 最初にエラーキーチェック
+            error_key = cmd_json.get("error")
+            if error_key:
+                _ret = self.mk_reply_error(
+                    error_key, error_key, cmd_json.get("data")
+                )
+                return _ret
+
             # コマンド名チェック
             cmd_name = cmd_json.get("method")
             if cmd_name is None:
                 err_msg = "Not a command"
-                _ret = self.mk_reply_json("ERR", cmd_json, err_msg)
+                _ret = self.mk_reply_error("INVALID_JSON", err_msg, cmd_json)
                 self.__log.debug("_ret=%s", _ret)
                 return _ret
 
             if cmd_name not in self._cmd_list:
                 err_msg = f"Invalid command: {cmd_name}"
-                _ret = self.mk_reply_json("ERR", cmd_json, err_msg)
+                _ret = self.mk_reply_error(
+                    "METHOD_NOT_FOUND", err_msg, cmd_json
+                )
                 self.__log.debug("_ret=%s", _ret)
                 return _ret
 
@@ -259,7 +293,7 @@ class ThreadWorker(threading.Thread):
         except Exception as _e:
             self.__log.error("%s: %s", type(_e).__name__, _e)
 
-        _ret = self.mk_reply_json("OK", cmd_data)
+        _ret = self.mk_reply_result("OK", cmd_data)
         return _ret
 
     def recv(self, timeout=DEF_RECV_TIMEOUT):

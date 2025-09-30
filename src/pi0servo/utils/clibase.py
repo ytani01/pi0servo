@@ -13,6 +13,9 @@ class CliBase:
 
     PROMPT_STR = "> "
     COMMENT_STR = "#"
+    SPECIAL_COMMAND_PREFIX = "/"
+
+    HIST_LEN = 1000
 
     def __init__(
         self, prompt_prefix, history_file, debug=False
@@ -33,6 +36,11 @@ class CliBase:
 
         try:
             readline.read_history_file(self.history_file)
+            readline.set_history_length(self.HIST_LEN)
+            _hist_len = readline.get_history_length()
+            self.__log.debug("hist_len=%s", _hist_len)
+            _cur_hist_len = readline.get_current_history_length()
+            self.__log.debug("cur_hist_len=%s", _cur_hist_len)
         except FileNotFoundError:
             self.__log.debug("no history file: %s", self.history_file)
         except OSError:
@@ -59,9 +67,16 @@ class CliBase:
         self.__log.debug("line=%a", line)
         return line
 
+    def handle_special(self, line: str):
+        """Handle special command."""
+        self.__log.debug("line=%a", line)
+
+        self.__log.info("WIP: macro etc.")
+
+        return
+
     def loop(self):
         """loop"""
-
         try:
             while True:
                 try:
@@ -73,7 +88,6 @@ class CliBase:
                 except (KeyboardInterrupt, EOFError) as _e:
                     self.__log.debug("%s: %s", type(_e).__name__, _e)
                     break
-
                 except Exception as _e:
                     self.__log.error("%s: %s", type(_e).__name__, _e)
                     continue
@@ -85,10 +99,14 @@ class CliBase:
                     self.__log.debug("comment line: ignored")
                     continue
 
+                if _line.startswith(self.SPECIAL_COMMAND_PREFIX):
+                    # Special command
+                    self.handle_special(_line)
+                    continue
+
                 try:
                     _parsed_line = self.parse_line(_line)
                     self.__log.debug("parsed_line=%a", _parsed_line)
-
                     self.send(_parsed_line)
 
                 except Exception as _e:
