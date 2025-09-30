@@ -1,14 +1,13 @@
 #
 import pytest
 
-CMDNAME = "api-cli"
+CMDNAME = "str-cli"
 CMD = f"uv run pi0servo {CMDNAME} --history_file /tmp/testhist"
 PINS = "25 27"
 
 
-class TestCmdApiCli:
-    """Test."""
-
+class TestCmdStrCli:
+    """Test CmdStrCli."""
     @pytest.mark.parametrize(
         "args, stdout, stderr",
         [
@@ -60,27 +59,29 @@ class TestCmdApiCli:
                 f"{CMDNAME}>"
             ),
             (
-                '{"method": "move", "params": {"angles": [30, 30]}}\n',
-                "OK",
-                f"{CMDNAME}"
+                'mv:-30,-30\n',
+                "method",
+                "[-30, -30]",
             ),
             (
-                '['
-                '{"method": "move", "params": {"angles": [30, 30]}},'
-                '{"method": "move", "params": {"angles": [0, 0]}}'
-                ']\n',
-                "OK",
-                f"{CMDNAME}>"
+                'mv:30,30 mv:0,0\n',
+                "[30, 30]",
+                "[0, 0]"
             ),
             (
-                '{"method": "cancel"}\n',
+                'zz\n',
+                "cancel",
+                "OK"
+            ),
+            (
+                "mv:0\n",
                 "OK",
-                f"{CMDNAME}>"
+                "ERROR",
             ),
             (
                 "a\n",
-                "JSONDecodeError",
-                f"{CMDNAME}>"
+                "err",
+                "ERR",
             ),
         ],
     )
@@ -91,12 +92,13 @@ class TestCmdApiCli:
 
         session = cli_runner.run_interactive_command(cmdline.split())
 
+        print(f"* instr={instr!r}")
         session.send_key(instr)
         if expect1:
-            print(f"expect1={expect1}")
+            print(f"* expect1={expect1}")
             assert session.expect(expect1)
         if expect2:
-            print(f"expect2={expect2}")
+            print(f"* expect2={expect2}")
             assert session.expect(expect2)
 
         session.close()

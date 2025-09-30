@@ -118,7 +118,6 @@ class CLITestBase:
         timeout: int = DEFAULT_TIMEOUT,
         cwd: Optional[str] = None,
         env: Optional[dict[str, str]] = None,
-        check_success: bool = True,
     ) -> subprocess.CompletedProcess:
         """コマンドを実行し、結果を返します。
 
@@ -175,7 +174,6 @@ class CLITestBase:
         stdout: Optional[str] = None,
         stderr: Optional[str] = None,
     ) -> None:
-        """標準出力または標準エラー出力に特定の文字列が含まれていることを表明します。"""
         if stdout is not None:
             assert stdout in result.stdout, (
                 f"Expected '{stdout}' in stdout, got: {result.stdout!r}"
@@ -191,7 +189,6 @@ class CLITestBase:
         stdout: Optional[str] = None,
         stderr: Optional[str] = None,
     ) -> None:
-        """stdout, stderrが特定の内容と完全に一致することを確認"""
         if stdout is not None:
             assert result.stdout == stdout, (
                 f"Expected stdout: {stdout!r}, got: {result.stdout!r}"
@@ -204,7 +201,6 @@ class CLITestBase:
     def assert_return_code(
         self, result: subprocess.CompletedProcess, expected: int
     ) -> None:
-        """コマンドの終了コードが期待値と一致することを表明します。"""
         assert result.returncode == expected, (
             f"Expected return code {expected}, got {result.returncode}\n"
             f"Stdout: {result.stdout}\n"
