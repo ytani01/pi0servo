@@ -3,7 +3,7 @@ import time
 
 import pytest
 
-CMD = "uv run pi0servo api-client"
+CMD = "uv run pi0servo api-client --history_file /tmp/testhist"
 
 
 class TestBasic:

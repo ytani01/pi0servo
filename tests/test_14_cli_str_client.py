@@ -3,7 +3,7 @@ import time
 
 import pytest
 
-CMD = "uv run pi0servo str-client"
+CMD = "uv run pi0servo str-client --history_file /tmp/testhist"
 
 
 class TestBasic:
