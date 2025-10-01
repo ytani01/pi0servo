@@ -216,7 +216,7 @@ class ThreadWorker(threading.Thread):
 
     def mk_reply_result(
         self, result: int | str | dict | None, req: str | dict
-    ) -> str:
+    ) -> dict:
         """Make reply JSON string."""
         self.__log.debug("result=%s", result)
 
@@ -229,9 +229,9 @@ class ThreadWorker(threading.Thread):
             }
         }
         self.__log.debug("reply=%s", reply)
-        return json.dumps(reply)
+        return reply
 
-    def mk_reply_error(self, code_key: str, message: str, data=None) -> str:
+    def mk_reply_error(self, code_key: str, message: str, data=None) -> dict:
         """Make error reply JSON string."""
         self.__log.debug(
             "code_key=%s, message=%s, data=%s", code_key, message, data
@@ -247,9 +247,9 @@ class ThreadWorker(threading.Thread):
             reply["error"]["data"] = data
 
         self.__log.debug("reply=%s", reply)
-        return json.dumps(reply)
+        return reply
 
-    def send(self, cmd_data: str | dict):
+    def send(self, cmd_data: str | dict) -> dict:
         """Send cmd_data(JSON)"""
         try:
             if isinstance(cmd_data, str):
@@ -582,7 +582,7 @@ class ThreadWorker(threading.Thread):
 
     def _dispatch_cmd(self, cmd_data: dict):
         """Dispatch command."""
-        self.__log.debug("cmd_data=%a", cmd_data)
+        self.__log.debug("cmd_data=%s", json.dumps(cmd_data))
 
         _cmd_str = cmd_data.get("method")
         if not _cmd_str:

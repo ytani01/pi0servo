@@ -10,21 +10,35 @@ print(f"* URL = {URL}\n")
 
 
 # API Client オブジェクト生成
-sv = ApiClient(URL, debug=DEBUG_FLAG)
-s2j = StrCmdToJson(angle_factor=[1, -1], debug=DEBUG_FLAG)
+api_client = ApiClient(URL, debug=DEBUG_FLAG)
+parser = StrCmdToJson(angle_factor=[1, -1], debug=DEBUG_FLAG)
 
-print("* JSONコマンド: 配列で複数一括送信可能")
-strcmds = [
+str_cmds = [
     "mv:30,-30",
     "mv:0,0",
     "mv:-30,30 mv:0,0",
+    "ww"
 ]
-print(f"strcmds = {strcmds}")
+print(f"strcmds = {str_cmds}")
 
-for cmd in strcmds:
+
+print("# 個別送信")
+for cmd in str_cmds:
     print(f">>> {cmd}")
-    jsoncmd = s2j.cmdstr_to_jsonliststr(cmd)
+
+    jsoncmd = parser.cmdstr_to_jsonlist(cmd)
     print(f" jsoncmd={jsoncmd}")
-    result = sv.post(jsoncmd)
-    result_json = sv.get_result_json(result)
-    print(f"<<< {result_json}\n")
+
+    result_json = api_client.post(jsoncmd)
+    print(f"   <<< {result_json}\n")
+
+
+print("# 一括送信")
+cmdline = " ".join(str_cmds)
+print(f">>> {cmdline}")
+
+cmdjson = parser.cmdstr_to_jsonlist(cmdline)
+print(f"cmdjson={cmdjson}")
+
+result_json = api_client.post(cmdjson)
+print(f"   <<< {result_json}\n")

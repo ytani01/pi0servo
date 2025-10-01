@@ -5,20 +5,19 @@ from pi0servo import MultiServo, StrCmdToJson, ThreadWorker
 PINS = [25, 27]
 DEBUG_FLAG = False
 
-STRCMDS = [
+STR_CMDS = [
     "ms:0.5",
     "mv:45,45", "mv:0,0",
     "sl:2.0",
     "mv:45,-45", "mv:0,0",
     "ms:0.2",
     "mv:-45,45", "mv:0,0", "mv:-45,-45", "mv:0,0",
-    "wa",
+    "wa",  # workerスレッドのすべての動作が完了するまで待つ
 ]
 
 
 def main():
     """main"""
-
     print("START")
 
     # pigpioの初期化
@@ -27,28 +26,19 @@ def main():
         print("ERROR: pigpio connection")
         return
 
+    servo = None
     worker = None
-    try:  # 異常終了のための備え
+    try:
         # オブジェクトの初期化
-        servo = MultiServo(pi, PINS, debug=DEBUG_FLAG)  # 複数サーボ
-        worker = ThreadWorker(servo, debug=DEBUG_FLAG)  # ワーカースレッド
-        parser = StrCmdToJson(  # 文字列コマンドをJSONコマンドに翻訳
-            angle_factor=[1, -1], debug=DEBUG_FLAG
-        )
+        servo = MultiServo(pi, PINS, debug=DEBUG_FLAG)
+        worker = ThreadWorker(servo, debug=DEBUG_FLAG)
+        parser = StrCmdToJson(angle_factor=[1, -1], debug=DEBUG_FLAG)
 
-        # **IMPORTANT**
-        # ワーカースレッドを裏で動かす
-        worker.start()
+        worker.start()  # ワーカースレッドを裏で動かす
 
         # コマンド呼び出し
-        # - ワーカースレッドで非同期実行されるので、
-        #   呼び出しはすぐに戻ってくる。
-        for _strcmd in STRCMDS:
-            # 文字列コマンドをJSONコマンドに翻訳
-            _jsoncmd = parser.cmdstr_to_json(_strcmd)
-            print(f"jsoncmd={_jsoncmd}")
-
-            # スレッドワーカーに送信し、返信をすぐに受け取る
+        for _strcmd in STR_CMDS:
+            _jsoncmd = parser.cmdstr_to_json(_strcmd)  # JSONに翻訳
             print(f">>> {_strcmd} = {_jsoncmd}")
             result = worker.send(_jsoncmd)
             print(f"  <<< {result}\n")
@@ -56,9 +46,10 @@ def main():
     finally:  # 必ず実行される: 異常終了時でも、適切に終了処理を行う
         if worker:
             worker.end()
+        if servo:
+            servo.off()
         if pi:
             pi.stop()
-
         print("END")
 
 

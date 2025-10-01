@@ -4,7 +4,6 @@
 """
 tests/test_07_threadworker.py
 """
-import json
 import time
 from unittest.mock import MagicMock, patch
 
@@ -120,10 +119,9 @@ class TestThreadWorker:
             "method": "invalid_method",
             "params": {}
         }
-        reply = thread_worker.send(cmd)
+        reply_json = thread_worker.send(cmd)
         time.sleep(0.5)  # コマンド処理を待つ
 
-        reply_json = json.loads(reply)
         assert reply_json["error"]["code"] == -32601
         assert "Invalid command" in reply_json["error"]["message"]
         assert thread_worker.qsize == 0

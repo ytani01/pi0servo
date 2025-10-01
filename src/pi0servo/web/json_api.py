@@ -2,7 +2,7 @@
 # (c) 2025 Yoichi Tanibayashi
 #
 """pi0servo JSON API Server."""
-
+import json
 import os
 from contextlib import asynccontextmanager
 from typing import Any, Dict, List, Union
@@ -39,11 +39,11 @@ class JsonApi:
         self.thr_worker.end()
         self.__log.info("done")
 
-    def send_cmdjson(self, cmdjson):
+    def send_cmdjson(self, cmdjson: dict) -> dict:
         """send JSON command to thread worker"""
         self.__log.debug("cmdjson=%s", cmdjson)
 
-        _res = self.thr_worker.send(cmdjson)
+        _res: dict = self.thr_worker.send(cmdjson)
 
         return _res
 
@@ -93,7 +93,7 @@ async def exec_cmd(
     """
     debug = request.app.state.debug
     _log = get_logger(__name__, debug)
-    _log.debug("cmd=%s, type=%s", cmd, type(cmd))
+    _log.debug("cmd=%s: %s", cmd, type(cmd).__name__)
 
     cmd_list: List[Dict[str, Any]]
     if isinstance(cmd, dict):
@@ -101,16 +101,14 @@ async def exec_cmd(
     else:
         cmd_list = cmd
 
-    _log.debug("cmd_list=%s", cmd_list)
-
     _json_app = request.app.state.json_app
     _res = []
     for c in cmd_list:
-        _res1 = _json_app.send_cmdjson(c)
-        _log.debug("c=%s, _res1=%s", c, _res1)
+        _res1: dict = _json_app.send_cmdjson(c)
+        _log.debug("c=%s, _res1=%s", json.dumps(c), json.dumps(_res1))
         _res.append(_res1)
 
+    _log.debug("_res=%s", json.dumps(_res))
     if len(_res) == 1:
-        _res = _res[0]
-    _log.debug("_res=%s", _res)
+        return _res[0]
     return _res

@@ -56,6 +56,7 @@ class CliBase:
         """Send.
 
         To be override.
+        エラー時には、""(空文字列)を返すようにすること。
         """
         self.__log.debug("line=%a", line)
 
@@ -104,9 +105,13 @@ class CliBase:
                     self.handle_special(_line)
                     continue
 
+                _parsed_line = self.parse_line(_line)
+                self.__log.debug("parsed_line=%a", _parsed_line)
+                if not _parsed_line:
+                    self.__log.error("parsing error")
+                    continue
+
                 try:
-                    _parsed_line = self.parse_line(_line)
-                    self.__log.debug("parsed_line=%a", _parsed_line)
                     self.send(_parsed_line)
 
                 except Exception as _e:

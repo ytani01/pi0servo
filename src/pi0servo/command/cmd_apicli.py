@@ -56,7 +56,7 @@ class CmdAppCliBase(CliBase):
             for _j in line_json:
                 print(f">>> {_j}", flush=True)
                 _res = self.thworker.send(_j)
-                print(f" <<< {json.loads(_res)}", flush=True)
+                print(f" <<< {_res}", flush=True)
 
         except Exception as _e:
             self.__log.error("%s: %s", type(_e).__name__, _e)

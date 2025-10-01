@@ -37,13 +37,18 @@ class CmdApiClientInteractive(CliBase):
         Return:
             リスト形式のコマンド列を文字列に変換
         """
+        self.__log.debug("line=%a", line)
+
         # {"method": "move"} を {'cmd': 'move'} のように誤入力した場合の対応
         parsed_line = line.replace("'", "\"")
-        parsed_line_json = json.loads(parsed_line)
 
-        # リスト形式にしてから、文字列に変換
-        if not isinstance(parsed_line_json, list):
-            parsed_line = json.dumps([parsed_line_json])
+        try:
+            # JSON形式の確認のため、デコードしてみる
+            _ = json.loads(parsed_line)
+
+        except Exception as _e:
+            self.__log.error("%s: %s", type(_e).__name__, _e)
+            return ""
 
         self.__log.debug("parsed_line=%a", parsed_line)
         return parsed_line
@@ -52,23 +57,24 @@ class CmdApiClientInteractive(CliBase):
         """Send line."""
         self.__log.debug("line=%a", line)
 
-        line_json = json.loads(line)
-
         try:
-            for _j in line_json:
-                print(f">>> {_j}", flush=True)
-                _res = self.api_client.post(json.dumps(_j))
-                self.print_response(_res)
+            line_json = json.loads(line)
         except Exception as _e:
             self.__log.error("%s: %s", type(_e).__name__, _e)
+            return
 
-    def print_response(self, _res):
-        """print response in json format"""
-        self.__log.debug("_res='%s': %s", _res, type(_res))
-        try:
-            print(f" <<< {self.url}> {_res.json()}")
-        except Exception:
-            print(f" <<< {_res}")
+        if not isinstance(line_json, list):
+            line_json = [line_json]
+
+        for _j in line_json:
+            try:
+                print(f">>> {json.dumps(_j)}", flush=True)
+
+                res = self.api_client.post(_j)
+
+                print(f" <<< {self.url}: {res}")
+            except Exception as _e:
+                self.__log.error("%s: %s", type(_e).__name__, _e)
 
 
 class CmdApiClient:
