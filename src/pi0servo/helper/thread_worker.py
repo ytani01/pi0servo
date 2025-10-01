@@ -34,6 +34,10 @@ class ThreadWorker(threading.Thread):
         "UNKOWN": -32000,
     }
 
+    CMD_CANCEL = "cancel"
+    CMD_QSIZE = "qsize"
+    CMD_WAIT = "wait"
+
     # コマンド一覧(例)
     # コマンドチェックにも使う
     CMD_SAMPLES_ALL: list[dict] = [
@@ -104,21 +108,24 @@ class ThreadWorker(threading.Thread):
             }
         },
         {
-            "method": "cancel",
+            "method": CMD_CANCEL,
             "params": {
                 "comment": "special command"
             }
         },
         {
-            "method": "qsize",
+            "method": CMD_QSIZE,
+            "params": {
+                "comment": "special command"
+            }
+        },
+        {
+            "method": CMD_WAIT,
             "params": {
                 "comment": "special command"
             }
         },
     ]
-
-    CMD_CANCEL = "cancel"
-    CMD_QSIZE = "qsize"
 
     DEF_RECV_TIMEOUT = 0.2  # sec
     DEF_INTERVAL_SEC = 0.0  # sec
@@ -158,6 +165,7 @@ class ThreadWorker(threading.Thread):
 
         self._cmdq: queue.Queue = queue.Queue()
         self._active = False
+        self._busy_flag = False
 
         self._cmd_list = []
         for _c in self.CMD_SAMPLES_ALL:
@@ -206,13 +214,8 @@ class ThreadWorker(threading.Thread):
         self.__log.debug("count=%s", _count)
         return _count
 
-    def cancel_cmds(self):
-        """Alias of clear_cmdq()."""
-        self.__log.debug("")
-        return self.clear_cmdq()
-
     def mk_reply_result(
-        self, result: int | str | dict, req: str | dict
+        self, result: int | str | dict | None, req: str | dict
     ) -> str:
         """Make reply JSON string."""
         self.__log.debug("result=%s", result)
@@ -220,6 +223,8 @@ class ThreadWorker(threading.Thread):
         reply = {
             "result": {
                 "value": result,
+                "qsize": self.qsize,
+                "busy_flag": self._busy_flag,
                 "request": req
             }
         }
@@ -277,15 +282,22 @@ class ThreadWorker(threading.Thread):
                 return _ret
 
             if cmd_name == self.CMD_CANCEL:
-                _count = self.clear_cmdq()  # キューをクリアする。 
+                _count = self.clear_cmdq()
                 _ret = self.mk_reply_result(_count, cmd_data)
                 self.__log.debug("_ret=%s", _ret)
                 return _ret
 
             if cmd_name == self.CMD_QSIZE:
-                _qsize = self.qsize
-                _ret = self.mk_reply_result(_qsize, cmd_data)
+                _ret = self.mk_reply_result(self.qsize, cmd_data)
                 self.__log.debug("_ret=%s", _ret)
+                return _ret
+
+            if cmd_name == self.CMD_WAIT:
+                while self._busy_flag:
+                    self.__log.debug("waiting..")
+                    time.sleep(0.5)
+                _ret = self.mk_reply_result(self.qsize, cmd_data)
+                self.__log.debug("done")
                 return _ret
 
             # 通常のコマンドは、コマンドキューに入れる。
@@ -298,11 +310,11 @@ class ThreadWorker(threading.Thread):
         except Exception as _e:
             self.__log.error("%s: %s", type(_e).__name__, _e)
 
-        _ret = self.mk_reply_result("OK", cmd_data)
+        _ret = self.mk_reply_result(None, cmd_data)
         return _ret
 
     def recv(self, timeout=DEF_RECV_TIMEOUT):
-        """recv"""
+        """Receive command form queue."""
         try:
             _cmd_data = self._cmdq.get(timeout=timeout)
         except queue.Empty:
@@ -590,9 +602,11 @@ class ThreadWorker(threading.Thread):
         self._active = True
 
         while self._active:
+            self._busy_flag = False
             _cmd_data = self.recv()
             if not _cmd_data:
                 continue
+            self._busy_flag = True
 
             self.__log.debug("qsize=%s", self._cmdq.qsize())
             try:

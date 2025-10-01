@@ -61,7 +61,7 @@ class TestCmdApiCli:
             ),
             (
                 '{"method": "move", "params": {"angles": [30, 30]}}\n',
-                "OK",
+                "'value': None",
                 f"{CMDNAME}"
             ),
             (
@@ -69,8 +69,8 @@ class TestCmdApiCli:
                 '{"method": "move", "params": {"angles": [30, 30]}},'
                 '{"method": "move", "params": {"angles": [0, 0]}}'
                 ']\n',
-                "OK",
-                f"{CMDNAME}>"
+                "[30, 30]",
+                "[0, 0]"
             ),
             (
                 '{"method": "cancel"}\n',

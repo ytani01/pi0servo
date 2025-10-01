@@ -32,6 +32,9 @@ class StrCmdToJson:
         # qsize
         "qs": "qsize",
         "qq": "qsize",
+        # wait
+        "wa": "wait",
+        "ww": "wait",
     }
 
     # 'mv'コマンドの角度パラメータのエイリアスマッピング
@@ -232,7 +235,7 @@ class StrCmdToJson:
                 _cmd_data["params"]["servo"] = servo
                 _cmd_data["params"]["target"] = target
 
-            elif cmd_key in ["ca", "zz", "qs", "qq"]:
+            elif cmd_key in ["ca", "zz", "qs", "qq", "wa", "ww"]:
                 pass
 
         except (ValueError, TypeError) as _e:

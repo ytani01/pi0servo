@@ -28,7 +28,7 @@ def mocker_multiservo():
 def thread_worker(mocker_multiservo):
     """ThreadWorkerのテスト用インスタンスを生成するフィクスチャ"""
     mservo = mocker_multiservo()
-    worker = ThreadWorker(mservo, debug=True)
+    worker = ThreadWorker(mservo, debug=False)
     worker.start()  # スレッドを開始
     yield worker
     worker.end()  # テスト終了時にスレッドを終了
@@ -136,14 +136,4 @@ class TestThreadWorker:
         thread_worker.send(cmd2)
 
         thread_worker.clear_cmdq()
-        assert thread_worker.qsize == 0
-
-    def test_cancel_cmds(self, thread_worker):
-        """cancel_cmdsのテスト"""
-        cmd1 = {"method": "move", "params": {"angles": [0]}}
-        cmd2 = {"method": "sleep", "params": {"sec": 0.1}}
-        thread_worker.send(cmd1)
-        thread_worker.send(cmd2)
-
-        thread_worker.cancel_cmds()
         assert thread_worker.qsize == 0

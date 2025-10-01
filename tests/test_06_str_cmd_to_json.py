@@ -65,6 +65,9 @@ class TestStrCmdToJson:
                 )
             ),
             ("ca", '[{"method": "cancel"}]'),
+            ("zz", '[{"method": "cancel"}]'),
+            ("wa", '[{"method": "wait"}]'),
+            ("ww", '[{"method": "wait"}]'),
             (
                 "mv:.",
                 '[{'

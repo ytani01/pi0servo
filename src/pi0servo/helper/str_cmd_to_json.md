@@ -33,6 +33,10 @@ def str_to_json(cmdstr: str): -> str
   - 'sx': {"method": "set"}  # set max
   - 'ca': {"method": "cancel"}
   - 'zz': {"method": "cancel"}
+  - 'qs': {"method": "qsize"}
+  - 'qq': {"method": "qsize"}
+  - 'wa': {"method": "wait"}
+  - 'ww': {"method": "wait"}
 
 ## 補足ルール
 
@@ -92,3 +96,15 @@ def str_to_json(cmdstr: str): -> str
 
 入力: 'zz'
 出力: '{"method": "cancel"}
+
+入力: 'qs'
+出力: '{"method": "qsize"}
+
+入力: 'qq'
+出力: '{"method": "qsize"}
+
+入力: 'wa'
+出力: '{"method": "wait"}
+
+入力: 'ww'
+出力: '{"method": "wait"}

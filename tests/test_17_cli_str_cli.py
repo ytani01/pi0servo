@@ -79,8 +79,13 @@ class TestCmdStrCli:
                 "'value': 0"
             ),
             (
+                'ms:0.5 mv:0,0 ww\n',
+                "'qsize': 1",
+                "'qsize': 0"
+            ),
+            (
                 "mv:0\n",
-                "OK",
+                "{'angles': [0]}",
                 "ERROR",
             ),
             (

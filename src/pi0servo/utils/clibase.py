@@ -15,7 +15,7 @@ class CliBase:
     COMMENT_STR = "#"
     SPECIAL_COMMAND_PREFIX = "/"
 
-    HIST_LEN = 1000
+    HIST_LEN = 500
 
     def __init__(
         self, prompt_prefix, history_file, debug=False
@@ -83,7 +83,7 @@ class CliBase:
                     _line = input(self.prompt_prefix + self.PROMPT_STR)
                     _line = _line.strip()
                     self.__log.debug("line=%a", _line)
-                    readline.write_history_file(self.history_file)
+                    # readline.write_history_file(self.history_file)
 
                 except (KeyboardInterrupt, EOFError) as _e:
                     self.__log.debug("%s: %s", type(_e).__name__, _e)
