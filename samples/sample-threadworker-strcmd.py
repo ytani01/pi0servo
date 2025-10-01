@@ -1,5 +1,3 @@
-import time
-
 import pigpio
 
 from pi0servo import MultiServo, StrCmdToJson, ThreadWorker
@@ -23,6 +21,8 @@ STRCMDS = [
     "mv:0,0",
     "mv:-45,-45",
     "mv:0,0",
+
+    "wa",
 ]
 
 
@@ -55,19 +55,13 @@ def main():
         #   呼び出しはすぐに戻ってくる。
         for _strcmd in STRCMDS:
             # 文字列コマンドをJSONコマンドに翻訳
-            _jsoncmd = parser.cmdstr_to_jsonliststr(_strcmd)
+            _jsoncmd = parser.cmdstr_to_json(_strcmd)
+            print(f"jsoncmd={_jsoncmd}")
 
             # スレッドワーカーに送信し、返信をすぐに受け取る
             result = worker.send(_jsoncmd)
             print(f">>> {_strcmd} = {_jsoncmd}")
             print(f"    <<< {result}\n")
-
-        # **IMPORTANT**
-        # スレッドの処理がすべて完了するのを待つ
-        while worker.qsize > 0:
-            print(f"qsize = {worker.qsize}")
-            time.sleep(1)
-        print(f"qsize = {worker.qsize}")
 
     finally:  # 必ず実行される: 異常終了時でも、適切に終了処理を行う
         if worker:

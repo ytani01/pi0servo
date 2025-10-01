@@ -293,7 +293,7 @@ class ThreadWorker(threading.Thread):
                 return _ret
 
             if cmd_name == self.CMD_WAIT:
-                while self._busy_flag:
+                while self._busy_flag or self.qsize > 0:
                     self.__log.debug("waiting..")
                     time.sleep(0.5)
                 _ret = self.mk_reply_result(self.qsize, cmd_data)
@@ -602,7 +602,8 @@ class ThreadWorker(threading.Thread):
         self._active = True
 
         while self._active:
-            self._busy_flag = False
+            if self.qsize == 0:
+                self._busy_flag = False
             _cmd_data = self.recv()
             if not _cmd_data:
                 continue

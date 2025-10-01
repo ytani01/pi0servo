@@ -1,5 +1,3 @@
-import time
-
 import pigpio
 
 from pi0servo import MultiServo, ThreadWorker
@@ -18,6 +16,7 @@ CMD_JSONS = [
     {"method": "move", "params": {"angles": [-50, -50]}},
     {"method": "move_sec", "params": {"sec": MultiServo.DEF_MOVE_SEC}},
     {"method": "move", "params": {"angles": [0, 0]}},
+    {"method": "wait"},  # すべての動作が完了するまで待つ
 ]
 
 
@@ -44,13 +43,6 @@ def main():
             print(f">>> {cmd}")
             result = worker.send(cmd)
             print(f"    <<<{result}")
-
-        # **Important**
-        # スレッドの処理がすべて完了するのを待つ
-        while worker.qsize > 0:
-            print(f"qsize = {worker.qsize}")
-            time.sleep(1)
-        print(f"qsize = {worker.qsize}")
 
     finally:
         if worker:

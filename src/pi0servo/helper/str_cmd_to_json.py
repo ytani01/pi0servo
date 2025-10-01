@@ -137,7 +137,7 @@ class StrCmdToJson:
         self.__log.debug("angles=%s", angles)
         return angles
 
-    def _cmdstr_to_json(self, cmd_str: str) -> dict:
+    def cmdstr_to_json(self, cmd_str: str) -> dict:
         """Command string to command data(dict).
 
         Args:
@@ -245,13 +245,13 @@ class StrCmdToJson:
         self.__log.debug("_cmd_data=%s", _cmd_data)
         return _cmd_data
 
-    def _cmdstr_to_jsonlist(self, cmd_line: str) -> list[dict]:
+    def cmdstr_to_jsonlist(self, cmd_line: str) -> list[dict]:
         """Command line to command string list."""
 
         _cmd_data_list = []
 
         for cmd_str in cmd_line.split():
-            _cmd_data = self._cmdstr_to_json(cmd_str)
+            _cmd_data = self.cmdstr_to_json(cmd_str)
             self.__log.debug("cmd_data=%s", _cmd_data)
 
             _cmd_data_list.append(_cmd_data)
@@ -265,11 +265,7 @@ class StrCmdToJson:
         """Dict形式をJSON文字列に変換."""
         self.__log.debug("cmd_line=%s", cmd_line)
 
-        _json_data: List[dict] | dict = self._cmdstr_to_jsonlist(cmd_line)
-
-        # もし、配列要素が一つだけなら、その要素だけを取り出す。
-        # if len(_json_data) == 1:
-        #     _json_data = _json_data[0]
+        _json_data: List[dict] | dict = self.cmdstr_to_jsonlist(cmd_line)
 
         self.__log.debug('_json_data="%s"', _json_data)
         return json.dumps(_json_data)

@@ -83,6 +83,16 @@ class TestCmdApiCli:
                 f"{CMDNAME}>"
             ),
             (
+                '['
+                '{"method":"move_sec","params": {"sec": 1}},'
+                '{"method":"move","params":{"angles":[20,-20]}}, '
+                '{"method":"move","params":{"angles":[0,0]}},'
+                '{"method":"wait"}'
+                ']\n',
+                "'qsize': 1",
+                "'qsize': 0"
+            ),
+            (
                 "a\n",
                 "JSONDecodeError",
                 f"{CMDNAME}>"
