@@ -4,10 +4,10 @@
 """cmd_apicli.py"""
 import json
 
+from pyclibase import CliBase
+
 from pi0servo import MultiServo, get_logger
 from pi0servo.helper.thread_worker import ThreadWorker
-
-from ..utils.clibase import CliBase
 
 
 class CmdAppCliBase(CliBase):
@@ -45,22 +45,28 @@ class CmdAppCliBase(CliBase):
         self.__log.debug("parsed_line=%a", parsed_line)
         return parsed_line
 
-    def send(self, line):
-        """Send"""
+    def exec(self, line: str) -> str:
+        """Execute line."""
         self.__log.debug("line=%a", line)
 
         line_json = json.loads(line)
+        if not isinstance(line_json, list):
+            line_json = [line_json]
         self.__log.debug("line_json=%s", line_json)
 
+        result_json = []
         try:
             for _j in line_json:
                 print(f">>> {_j}", flush=True)
                 _res = self.thworker.send(_j)
                 print(f" <<< {_res}", flush=True)
+                result_json.append(_res)
 
         except Exception as _e:
             self.__log.error("%s: %s", type(_e).__name__, _e)
+            return ""
 
+        return json.dumps(result_json)
 
 class CmdApiCli:
     """CmdApiCli."""
