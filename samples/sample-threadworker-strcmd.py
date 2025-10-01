@@ -7,21 +7,11 @@ DEBUG_FLAG = False
 
 STRCMDS = [
     "ms:0.5",
-
-    "mv:45,45",
-    "mv:0,0",
-
+    "mv:45,45", "mv:0,0",
     "sl:2.0",
-
-    "mv:45,-45",
-    "mv:0,0",
-
+    "mv:45,-45", "mv:0,0",
     "ms:0.2",
-    "mv:-45,45",
-    "mv:0,0",
-    "mv:-45,-45",
-    "mv:0,0",
-
+    "mv:-45,45", "mv:0,0", "mv:-45,-45", "mv:0,0",
     "wa",
 ]
 
@@ -59,9 +49,9 @@ def main():
             print(f"jsoncmd={_jsoncmd}")
 
             # スレッドワーカーに送信し、返信をすぐに受け取る
-            result = worker.send(_jsoncmd)
             print(f">>> {_strcmd} = {_jsoncmd}")
-            print(f"    <<< {result}\n")
+            result = worker.send(_jsoncmd)
+            print(f"  <<< {result}\n")
 
     finally:  # 必ず実行される: 異常終了時でも、適切に終了処理を行う
         if worker:

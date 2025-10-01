@@ -172,9 +172,7 @@ class StrCmdToJson:
             cmd_param_str = cmd_parts[1]
         self.__log.debug(
             "cmd_key=%s, cmd_name=%s, cmd_param_str=%s",
-            cmd_key,
-            cmd_name,
-            cmd_param_str,
+            cmd_key, cmd_name, cmd_param_str,
         )
 
         # _cmd_dataの初期化
@@ -185,55 +183,41 @@ class StrCmdToJson:
             if cmd_key == "mv":
                 if not cmd_param_str:
                     return self._create_error_data("INVALID_PARAM", cmd_str)
-
                 angles = self._parse_angles(cmd_param_str)
                 if angles is None:
                     return self._create_error_data("INVALID_PARAM", cmd_str)
-
-                _cmd_data["params"] = {}
-                _cmd_data["params"]["angles"] = angles
+                _cmd_data["params"] = {"angles": angles}
 
             elif cmd_key in ["sl", "ms", "is"]:
                 sec = float(cmd_param_str)
                 if sec < 0:
                     return self._create_error_data("INVALID_PARAM", cmd_str)
-
-                _cmd_data["params"] = {}
-                _cmd_data["params"]["sec"] = sec
+                _cmd_data["params"] = {"sec": sec}
 
             elif cmd_key == "st":
                 _n = int(cmd_param_str)
                 if _n < 1:
                     return self._create_error_data("INVALID_PARAM", cmd_str)
-
-                _cmd_data["params"] = {}
-                _cmd_data["params"]["n"] = _n
+                _cmd_data["params"] = {"n": _n}
 
             elif cmd_key == "mp":
-                pulse_diffs = [
+                _pulse_diffs = [
                     int(_s) * self.angle_factor[i]
                     for i, _s in enumerate(cmd_param_str.split(","))
                 ]
-                self.__log.debug("pulse_diffs=%s", pulse_diffs)
-
-                _cmd_data["params"] = {}
-                _cmd_data["params"]["pulse_diffs"] = pulse_diffs
+                self.__log.debug("pulse_diffs=%s", _pulse_diffs)
+                _cmd_data["params"] = {"pulse_diffs": _pulse_diffs}
 
             elif cmd_key in ("sc", "sn", "sx"):
                 servo = int(cmd_param_str)
                 target = self.SET_TARGET[cmd_key]
-
                 if self.angle_factor[servo] < 0:
                     if target == "min":
                         target = "max"
                     elif target == "max":
                         target = "min"
-
                 self.__log.debug("servo=%s, target=%s", servo, target)
-
-                _cmd_data["params"] = {}
-                _cmd_data["params"]["servo"] = servo
-                _cmd_data["params"]["target"] = target
+                _cmd_data["params"] = {"servo": servo, "target": target}
 
             elif cmd_key in ["ca", "zz", "qs", "qq", "wa", "ww"]:
                 pass
