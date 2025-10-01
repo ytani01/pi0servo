@@ -46,85 +46,37 @@ class ThreadWorker(threading.Thread):
             "params": {
                 "angles": [30, None, "center"],
                 "move_sec": 0.2,
-                "step_n": 40
-            }
+                "step_n": 40,
+            },
         },
         {
             "method": "move",
             "params": {
                 "angles": [30, None, "center"],
                 "move_sec": 0.2,
-                "step_n": 40
-            }
+                "step_n": 40,
+            },
         },
         {
             "method": "move_all_angles",
-            "params": {
-                "angles": [30, None, "center"]
-            }
+            "params": {"angles": [30, None, "center"]},
         },
         {
             "method": "move_all_pulses",
-            "params": {
-                "pulses": [1000, 2000, None, 0]
-            }
+            "params": {"pulses": [1000, 2000, None, 0]},
         },
-        {
-            "method": "move_sec",
-            "params": {
-                "sec": 1.5
-            }
-        },
-        {
-            "method": "step_n",
-            "params": {
-                "n": 40
-            }
-        },
-        {
-            "method": "interval",
-            "params": {
-                "sec": 0.5
-            }
-        },
-        {
-            "method": "sleep",
-            "params": {
-                "sec": 1.0
-            }
-        },
+        {"method": "move_sec", "params": {"sec": 1.5}},
+        {"method": "step_n", "params": {"n": 40}},
+        {"method": "interval", "params": {"sec": 0.5}},
+        {"method": "sleep", "params": {"sec": 1.0}},
         {
             "method": "move_pulse_relative",
-            "params": {
-                "servo": 2,
-                "pulse_diff": -20
-            }
+            "params": {"servo": 2, "pulse_diff": -20},
         },
-        {
-            "method": "set",
-            "params": {
-                "servo": 1,
-                "target": "center"
-            }
-        },
-        {
-            "method": CMD_CANCEL,
-            "params": {
-                "comment": "special command"
-            }
-        },
-        {
-            "method": CMD_QSIZE,
-            "params": {
-                "comment": "special command"
-            }
-        },
-        {
-            "method": CMD_WAIT,
-            "params": {
-                "comment": "special command"
-            }
-        },
+        {"method": "set", "params": {"servo": 1, "target": "center"}},
+        {"method": CMD_CANCEL, "params": {"comment": "special command"}},
+        {"method": CMD_QSIZE, "params": {"comment": "special command"}},
+        {"method": CMD_WAIT, "params": {"comment": "special command"}},
     ]
 
     DEF_RECV_TIMEOUT = 0.2  # sec
@@ -160,7 +112,9 @@ class ThreadWorker(threading.Thread):
 
         self.__log.debug(
             "move_sec=%s, step_n=%s, interval_sec=%s",
-            move_sec, step_n, interval_sec
+            move_sec,
+            step_n,
+            interval_sec,
         )
 
         self._cmdq: queue.Queue = queue.Queue()
@@ -225,7 +179,7 @@ class ThreadWorker(threading.Thread):
                 "value": result,
                 "qsize": self.qsize,
                 "busy_flag": self._busy_flag,
-                "request": req
+                "request": req,
             }
         }
         self.__log.debug("reply=%s", reply)

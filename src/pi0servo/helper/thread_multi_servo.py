@@ -148,8 +148,8 @@ class ThreadMultiServo:
             "params": {
                 "angles": angles,
                 "move_sec": move_sec,
-                "step_n": step_n
-            }
+                "step_n": step_n,
+            },
         }
         self.send_cmd(cmd)
 
@@ -182,8 +182,8 @@ class ThreadMultiServo:
             "params": {
                 "angle_diffs": angle_diffs,
                 "move_sec": move_sec,
-                "step_n": step_n
-            }
+                "step_n": step_n,
+            },
         }
         self.send_cmd(cmd)
 

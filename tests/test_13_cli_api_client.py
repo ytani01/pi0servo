@@ -11,11 +11,11 @@ class TestBasic:
     @pytest.mark.parametrize(
         "instr, expect1, expect2",
         [
-            ('{"method": "cancel"}\n', "ConnectionError", "api-client"),
+            ('{"method": "cancel"}\n', "result=", "api-client"),
             ("a\n", "JSONDecodeError", "api-client>"),
         ],
     )
-    def test_servo(self, cli_runner, instr, expect1, expect2):
+    def test_api_client(self, cli_runner, instr, expect1, expect2):
         """servo command"""
         cmdline = f"{CMD}"
         print(f"* cmdline='{cmdline}'")

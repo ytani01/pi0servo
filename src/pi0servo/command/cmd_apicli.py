@@ -2,6 +2,7 @@
 # (c) 2025 Yoichi Tanibayashi
 #
 """cmd_apicli.py"""
+
 import json
 
 from pyclibase import CliBase
@@ -28,16 +29,13 @@ class CmdAppCliBase(CliBase):
 
         # {"method": "move", ..} を {'method': 'move', ..}
         # のように誤入力した場合の対応
-        parsed_line = line.replace("'", "\"")
+        parsed_line = line.replace("'", '"')
 
         try:
             parsed_line_json = json.loads(parsed_line)
         except json.JSONDecodeError as _e:
             self.__log.warning("%s: %s", type(_e).__name__, _e)
-            parsed_line_json = {
-                "error": "INVALID_JSON",
-                "data": line
-            }
+            parsed_line_json = {"error": "INVALID_JSON", "data": line}
 
         if not isinstance(parsed_line_json, list):
             parsed_line = json.dumps([parsed_line_json])
@@ -68,19 +66,20 @@ class CmdAppCliBase(CliBase):
 
         return json.dumps(result_json)
 
+
 class CmdApiCli:
     """CmdApiCli."""
 
-    def __init__(
-            self, cmd_name, pi, pins, history_file, debug=False
-    ) -> None:
+    def __init__(self, cmd_name, pi, pins, history_file, debug=False) -> None:
         """constractor."""
 
         self.__debug = debug
         self.__log = get_logger(self.__class__.__name__, self.__debug)
         self.__log.debug(
             "cmd_name=%s, pins=%s, history_file=%s",
-            cmd_name, pins, history_file
+            cmd_name,
+            pins,
+            history_file,
         )
 
         self.pi = pi
@@ -95,8 +94,10 @@ class CmdApiCli:
             self.__log.error("%s: %s", type(_e).__name__, _e)
 
         self.cli = CmdAppCliBase(
-            self.cmd_name, self.history_file, self.thworker,
-            debug=self.__debug
+            self.cmd_name,
+            self.history_file,
+            self.thworker,
+            debug=self.__debug,
         )
 
     def main(self):

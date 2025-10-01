@@ -2,6 +2,7 @@
 # (c) 2025 Yoichi Tanibayashi
 #
 """API Client."""
+
 import json
 
 import requests
@@ -30,7 +31,7 @@ class ApiClient:
         self,
         status: str,
         cmddata: str | dict | list[dict],
-        retval: str | dict | None = None
+        retval: str | dict | None = None,
     ) -> dict:
         """Make result data (JSON, dict)"""
 

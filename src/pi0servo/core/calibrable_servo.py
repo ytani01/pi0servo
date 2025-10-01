@@ -254,7 +254,10 @@ class CalibrableServo(PiServo):
 
         self.__log.debug(
             "Loaded: pin=%s, min=%s, center=%s, max=%s",
-            self.pin, self.pulse_min, self.pulse_center, self.pulse_max
+            self.pin,
+            self.pulse_min,
+            self.pulse_center,
+            self.pulse_max,
         )
 
     def save_conf(self):

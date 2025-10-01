@@ -2,6 +2,7 @@
 # (c) 2025 Yoichi Tanibayashi
 #
 """__main__.py"""
+
 import os
 
 import click
@@ -59,13 +60,16 @@ def cli(ctx, debug):
 @click.argument("pin", type=int, nargs=1)
 @click.argument("pulse", type=str, nargs=1)
 @click.option(
-    "--wait-sec", "-s", "-w", type=float, default=0.8, show_default=True,
-    help="wait sec"
+    "--wait-sec",
+    "-s",
+    "-w",
+    type=float,
+    default=0.8,
+    show_default=True,
+    help="wait sec",
 )
 @click_common_opts(click, __version__)
-def servo(
-    ctx, pin: int, pulse: int, wait_sec: float, debug: bool
-) -> None:
+def servo(ctx, pin: int, pulse: int, wait_sec: float, debug: bool) -> None:
     """servo command."""
     cmd_name = ctx.command.name
     __log = get_logger(__name__, debug)
@@ -92,18 +96,22 @@ def servo(
 @cli.command()
 @click.argument("pin", type=int, nargs=1)
 @click.option(
-    "--conf_file", "-c", "-f", type=str,
-    default=CalibrableServo.DEF_CONF_FILE, show_default=True,
-    help="Config file"
+    "--conf_file",
+    "-c",
+    "-f",
+    type=str,
+    default=CalibrableServo.DEF_CONF_FILE,
+    show_default=True,
+    help="Config file",
 )
 @click_common_opts(click, __version__)
 def calib(ctx, pin, conf_file, debug):
     """calibration tool
 
-* configuration search path:
+    * configuration search path:
 
-    Current dir --> Home dir --> /etc
-"""
+        Current dir --> Home dir --> /etc
+    """
     cmd_name = ctx.command.name
     __log = get_logger(__name__, debug)
     __log.debug("cmd_name=%s", cmd_name)
@@ -136,9 +144,11 @@ def calib(ctx, pin, conf_file, debug):
 @cli.command()
 @click.argument("pins", type=int, nargs=-1)
 @click.option(
-    "--history_file", type=str,
-    default="~/.pi0servo_apiclient_history", show_default=True,
-    help="History file"
+    "--history_file",
+    type=str,
+    default="~/.pi0servo_apiclient_history",
+    show_default=True,
+    help="History file",
 )
 @click_common_opts(click, __version__)
 def api_cli(ctx, pins, history_file, debug):
@@ -169,13 +179,19 @@ def api_cli(ctx, pins, history_file, debug):
 @cli.command()
 @click.argument("pins", type=int, nargs=-1)
 @click.option(
-    "--history_file", type=str,
-    default="~/.pi0servo_strclient_history", show_default=True,
-    help="History file"
+    "--history_file",
+    type=str,
+    default="~/.pi0servo_strclient_history",
+    show_default=True,
+    help="History file",
 )
 @click.option(
-    "--angle_factor", "-a", type=str, default="1,1,1,1", show_default=True,
-    help="Angle Factor"
+    "--angle_factor",
+    "-a",
+    type=str,
+    default="1,1,1,1",
+    show_default=True,
+    help="Angle Factor",
 )
 @click_common_opts(click, __version__)
 def str_cli(ctx, pins, history_file, angle_factor, debug):
@@ -185,14 +201,16 @@ def str_cli(ctx, pins, history_file, angle_factor, debug):
     __log.debug("cmd_name=%s", cmd_name)
     __log.debug(
         "pins=%s, history_file=%s, angle_factor=%s",
-        pins, history_file, angle_factor
+        pins,
+        history_file,
+        angle_factor,
     )
 
     if not pins:
         print_pins_error(ctx)
         return
 
-    af_list = [int(i) for i in angle_factor.split(',')]
+    af_list = [int(i) for i in angle_factor.split(",")]
     __log.debug("af_list=%s", af_list)
 
     app = None
@@ -214,12 +232,20 @@ def str_cli(ctx, pins, history_file, angle_factor, debug):
 @cli.command()
 @click.argument("pins", type=int, nargs=-1)
 @click.option(
-    "--server_host", "-s", type=str, default="0.0.0.0", show_default=True,
-    help="server hostname or IP address"
+    "--server_host",
+    "-s",
+    type=str,
+    default="0.0.0.0",
+    show_default=True,
+    help="server hostname or IP address",
 )
 @click.option(
-    "--port", "-p", type=int, default=8000, show_default=True,
-    help="port number"
+    "--port",
+    "-p",
+    type=int,
+    default=8000,
+    show_default=True,
+    help="port number",
 )
 @click_common_opts(click, __version__)
 def api_server(ctx, pins, server_host, port, debug):
@@ -247,14 +273,19 @@ def api_server(ctx, pins, server_host, port, debug):
 @cli.command()
 @click.argument("cmdline", type=str, nargs=-1)
 @click.option(
-    "--url", "-u", type=str,
-    default="http://localhost:8000/cmd", show_default=True,
-    help="API URL"
+    "--url",
+    "-u",
+    type=str,
+    default="http://localhost:8000/cmd",
+    show_default=True,
+    help="API URL",
 )
 @click.option(
-    "--history_file", type=str,
-    default="~/.pi0servo_apiclient_history", show_default=True,
-    help="History file"
+    "--history_file",
+    type=str,
+    default="~/.pi0servo_apiclient_history",
+    show_default=True,
+    help="History file",
 )
 @click_common_opts(click, __version__)
 def api_client(ctx, cmdline, url, history_file, debug):
@@ -262,8 +293,7 @@ def api_client(ctx, cmdline, url, history_file, debug):
     cmd_name = ctx.command.name
     __log = get_logger(__name__, debug)
     __log.debug(
-        "cmd_name=%s, url=%s, history_file=%s",
-        cmd_name, url, history_file
+        "cmd_name=%s, url=%s, history_file=%s", cmd_name, url, history_file
     )
 
     __log.debug("cmdline=%a", cmdline)
@@ -284,18 +314,27 @@ def api_client(ctx, cmdline, url, history_file, debug):
 @cli.command()
 @click.argument("cmdline", type=str, nargs=-1)
 @click.option(
-    "--url", "-u", type=str,
-    default="http://localhost:8000/cmd", show_default=True,
-    help="API URL"
+    "--url",
+    "-u",
+    type=str,
+    default="http://localhost:8000/cmd",
+    show_default=True,
+    help="API URL",
 )
 @click.option(
-    "--history_file", type=str,
-    default="~/.pi0servo_strclient_history", show_default=True,
-    help="History file"
+    "--history_file",
+    type=str,
+    default="~/.pi0servo_strclient_history",
+    show_default=True,
+    help="History file",
 )
 @click.option(
-    "--angle_factor", "-a", type=str, default="1,1,1,1", show_default=True,
-    help="Angle Factor"
+    "--angle_factor",
+    "-a",
+    type=str,
+    default="1,1,1,1",
+    show_default=True,
+    help="Angle Factor",
 )
 @click_common_opts(click, __version__)
 def str_client(ctx, cmdline, url, history_file, angle_factor, debug):
@@ -304,11 +343,14 @@ def str_client(ctx, cmdline, url, history_file, angle_factor, debug):
     __log = get_logger(__name__, debug)
     __log.debug(
         "cmd_name=%s, url=%s, history_file=%s, angle_factor=%s",
-        cmd_name, url, history_file, angle_factor
+        cmd_name,
+        url,
+        history_file,
+        angle_factor,
     )
     __log.debug("cmdline=%s", cmdline)
 
-    af_list = [int(i) for i in angle_factor.split(',')]
+    af_list = [int(i) for i in angle_factor.split(",")]
     __log.debug("af_list=%s", af_list)
 
     app = None
@@ -329,12 +371,20 @@ def str_client(ctx, cmdline, url, history_file, angle_factor, debug):
 @cli.command()
 @click.argument("pins", type=int, nargs=-1)
 @click.option(
-    "--server_host", "-s", type=str, default="0.0.0.0", show_default=True,
-    help="server hostname or IP address"
+    "--server_host",
+    "-s",
+    type=str,
+    default="0.0.0.0",
+    show_default=True,
+    help="server hostname or IP address",
 )
 @click.option(
-    "--port", "-p", type=int, default=8000, show_default=True,
-    help="port number"
+    "--port",
+    "-p",
+    type=int,
+    default=8000,
+    show_default=True,
+    help="port number",
 )
 @click_common_opts(click, __version__)
 def jsonrpc_server(ctx, pins, server_host, port, debug):

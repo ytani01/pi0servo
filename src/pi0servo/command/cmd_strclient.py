@@ -11,9 +11,7 @@ from .cmd_apiclient import CmdApiClient, CmdApiClientInteractive
 class CmdStrClientInteractive(CmdApiClientInteractive):
     """CmdStrClient Interactive base."""
 
-    def __init__(
-            self, prefix, hist, cmdline, url, angle_factor, debug=False
-    ):
+    def __init__(self, prefix, hist, cmdline, url, angle_factor, debug=False):
         super().__init__(prefix, hist, cmdline, url)
 
         self.__debug = debug
@@ -57,6 +55,10 @@ class CmdStrClient(CmdApiClient):
         self.angle_factor = angle_factor
 
         self.cli = CmdStrClientInteractive(
-            self.cmd_name, self.history_file, self.cmdline, self.url,
-            self.angle_factor, debug=self.__debug
+            self.cmd_name,
+            self.history_file,
+            self.cmdline,
+            self.url,
+            self.angle_factor,
+            debug=self.__debug,
         )

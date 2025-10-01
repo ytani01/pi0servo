@@ -2,6 +2,7 @@
 # (c) 2025 Yoichi Tanibayashi
 #
 """cmd_strclient.py."""
+
 from pi0servo import StrCmdToJson, get_logger
 
 from .cmd_apicli import CmdApiCli, CmdAppCliBase
@@ -45,13 +46,18 @@ class CmdStrCli(CmdApiCli):
         self.__log = get_logger(self.__class__.__name__, self.__debug)
         self.__log.debug(
             "cmd_name=%s, pins=%s, history_file=%s, angle_factor=%s",
-            cmd_name, pins, history_file, angle_factor
+            cmd_name,
+            pins,
+            history_file,
+            angle_factor,
         )
 
         self.angle_factor = angle_factor
 
         self.cli = CmdStrCliBase(
-            self.cmd_name, self.history_file,
-            self.thworker, self.angle_factor,
-            debug=self.__debug
+            self.cmd_name,
+            self.history_file,
+            self.thworker,
+            self.angle_factor,
+            debug=self.__debug,
         )

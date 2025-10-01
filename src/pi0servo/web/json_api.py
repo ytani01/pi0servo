@@ -2,6 +2,7 @@
 # (c) 2025 Yoichi Tanibayashi
 #
 """pi0servo JSON API Server."""
+
 import json
 import os
 from contextlib import asynccontextmanager

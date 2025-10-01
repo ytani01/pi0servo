@@ -71,10 +71,7 @@ class StrCmdToJson:
 
     def _create_error_data(self, code_key: str, strcmd: str) -> dict:
         """Create error data."""
-        return {
-            "error": code_key,
-            "data": strcmd
-        }
+        return {"error": code_key, "data": strcmd}
 
     def _parse_angles(
         self, param_str: str
@@ -172,7 +169,9 @@ class StrCmdToJson:
             cmd_param_str = cmd_parts[1]
         self.__log.debug(
             "cmd_key=%s, cmd_name=%s, cmd_param_str=%s",
-            cmd_key, cmd_name, cmd_param_str,
+            cmd_key,
+            cmd_name,
+            cmd_param_str,
         )
 
         # _cmd_dataの初期化

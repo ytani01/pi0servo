@@ -2,11 +2,12 @@
 # (c) 2025 Yoichi Tanibayashi
 #
 """cmd_apiclient.py"""
+
 import json
 
-from pi0servo import ApiClient, get_logger
+from pyclibase import CliBase
 
-from ..utils.clibase import CliBase
+from pi0servo import ApiClient, get_logger
 
 
 class CmdApiClientInteractive(CliBase):
@@ -40,7 +41,7 @@ class CmdApiClientInteractive(CliBase):
         self.__log.debug("line=%a", line)
 
         # {"method": "move"} を {'cmd': 'move'} のように誤入力した場合の対応
-        parsed_line = line.replace("'", "\"")
+        parsed_line = line.replace("'", '"')
 
         try:
             # JSON形式の確認のため、デコードしてみる
@@ -81,7 +82,7 @@ class CmdApiClient:
     """CmdApiClient."""
 
     def __init__(
-            self, cmd_name, url, cmdline: tuple, history_file, debug=False
+        self, cmd_name, url, cmdline: tuple, history_file, debug=False
     ) -> None:
         """constractor."""
         self.__debug = debug
@@ -96,8 +97,11 @@ class CmdApiClient:
         self.history_file = history_file
 
         self.cli = CmdApiClientInteractive(
-            self.cmd_name, self.history_file, self.cmdline, self.url,
-            debug=self.__debug
+            self.cmd_name,
+            self.history_file,
+            self.cmdline,
+            self.url,
+            debug=self.__debug,
         )
 
     def main(self):

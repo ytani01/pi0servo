@@ -13,7 +13,7 @@ class TestBasic:
         [
             ("\n",  "str-client>"),
             ("a\n", "str-client>"),
-            ("a\n", "Error"),
+            ("a\n", "error"),
         ],
     )
     def test_servo(self, cli_runner, instr, expect):

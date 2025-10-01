@@ -2,6 +2,7 @@
 # (c) 2025 Yoichi Tanibayashi
 #
 """cmd_apiserver.py"""
+
 import os
 
 import uvicorn
@@ -35,9 +36,11 @@ class CmdApiServer:
         os.environ[self.ENV_DEBUG] = "1" if self.__debug else "0"
 
         uvicorn.run(
-            self.MODULE_API, host=self.hostname, port=self.port,
+            self.MODULE_API,
+            host=self.hostname,
+            port=self.port,
             reload=True,
-            log_level="debug" if self.__debug else "warning"
+            log_level="debug" if self.__debug else "warning",
         )
 
     def end(self):
