@@ -277,7 +277,6 @@ def api_server(ctx, pins, server_host, port, debug):
 
 
 @cli.command()
-@click.argument("cmdline", type=str, nargs=-1)
 @click.option(
     "--url",
     "-u",
@@ -293,32 +292,29 @@ def api_server(ctx, pins, server_host, port, debug):
     show_default=True,
     help="History file",
 )
+@click.option("--script-file", "-f", type=str, default="", help="script file")
 @click_common_opts(click, __version__)
-def api_client(ctx, cmdline, url, history_file, debug):
+def api_client(ctx, url, history_file, script_file, debug):
     """String API Client."""
     cmd_name = ctx.command.name
     __log = get_logger(__name__, debug)
     __log.debug(
-        "cmd_name=%s, url=%s, history_file=%s", cmd_name, url, history_file
+        "cmd_name=%s, url=%s, history_file=%s, script_file=%s",
+        cmd_name,
+        url,
+        history_file,
+        script_file,
     )
-
-    __log.debug("cmdline=%a", cmdline)
 
     app = None
     try:
-        app = CmdApiClient(cmd_name, url, cmdline, history_file, debug)
+        app = CmdApiClient(cmd_name, url, history_file, script_file, debug)
         app.main()
-
-    except (KeyboardInterrupt, EOFError):
-        pass
-
-    finally:
-        if app:
-            app.end()
+    except Exception as _e:
+        __log.error("%s: $%s", type(_e).__name__, _e)
 
 
 @cli.command()
-@click.argument("cmdline", type=str, nargs=-1)
 @click.option(
     "--url",
     "-u",
@@ -334,6 +330,7 @@ def api_client(ctx, cmdline, url, history_file, debug):
     show_default=True,
     help="History file",
 )
+@click.option("--script-file", "-f", type=str, default="", help="script file")
 @click.option(
     "--angle_factor",
     "-a",
@@ -343,18 +340,17 @@ def api_client(ctx, cmdline, url, history_file, debug):
     help="Angle Factor",
 )
 @click_common_opts(click, __version__)
-def str_client(ctx, cmdline, url, history_file, angle_factor, debug):
+def str_client(ctx, url, history_file, script_file, angle_factor, debug):
     """String Command API Client."""
     cmd_name = ctx.command.name
     __log = get_logger(__name__, debug)
     __log.debug(
-        "cmd_name=%s, url=%s, history_file=%s, angle_factor=%s",
+        "cmd_name=%s, url=%s, history_file=%s, script_file=%s",
         cmd_name,
         url,
         history_file,
-        angle_factor,
+        script_file,
     )
-    __log.debug("cmdline=%s", cmdline)
 
     af_list = [int(i) for i in angle_factor.split(",")]
     __log.debug("af_list=%s", af_list)
@@ -362,16 +358,11 @@ def str_client(ctx, cmdline, url, history_file, angle_factor, debug):
     app = None
     try:
         app = CmdStrClient(
-            cmd_name, url, cmdline, history_file, af_list, debug
+            cmd_name, url, history_file, script_file, af_list, debug=debug
         )
         app.main()
-
-    except (KeyboardInterrupt, EOFError):
-        pass
-
-    finally:
-        if app:
-            app.end()
+    except Exception as _e:
+        __log.error("%s: $%s", type(_e).__name__, _e)
 
 
 @cli.command()

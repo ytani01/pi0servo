@@ -50,8 +50,7 @@ class CmdApiCli(CliBase):
     def parse_line(self, line: str) -> str:
         """parse command line string to json string"""
 
-        # {"method": "move", ..} を {'method': 'move', ..}
-        # のように誤入力した場合の対応
+        # {"method": "move"} を {'cmd': 'move'} のように誤入力した場合の対応
         parsed_line = line.replace("'", '"')
 
         try:
@@ -59,6 +58,7 @@ class CmdApiCli(CliBase):
         except json.JSONDecodeError as _e:
             self.__log.warning("%s: %s", type(_e).__name__, _e)
             parsed_line_json = {"error": "INVALID_JSON", "data": line}
+            return ""
 
         if not isinstance(parsed_line_json, list):
             parsed_line = json.dumps([parsed_line_json])
@@ -70,7 +70,13 @@ class CmdApiCli(CliBase):
         """Execute line."""
         self.__log.debug("line=%a", line)
 
-        line_json = json.loads(line)
+        try:
+            line_json = json.loads(line)
+        except Exception as _e:
+            msg = f"{type(_e).__name__}: {_e}"
+            self.__log.error(msg)
+            return msg
+
         if not isinstance(line_json, list):
             line_json = [line_json]
         self.__log.debug("line_json=%s", line_json)
@@ -82,9 +88,7 @@ class CmdApiCli(CliBase):
                 _res = self.thworker.send(_j)
                 print(f" <<< {_res}", flush=True)
                 result_json.append(_res)
-
         except Exception as _e:
             self.__log.error("%s: %s", type(_e).__name__, _e)
             return ""
-
         return json.dumps(result_json)
