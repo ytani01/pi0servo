@@ -1,3 +1,4 @@
 [tasks]
+upgrade = "pwd && (export LANG=C sudo apt update && sudo apt upgrade && sudo apt autoremove -y && mise self-update && mise up && uv tool upgrade --all && uv add -U --editable --group dev .)"
 lint = "pwd && uv run isort src && uv run ruff format src && uv run pyright src && uv run flake8 src && uv run mypy src"
 test = "uv run pytest -v tests"

@@ -63,6 +63,7 @@ dev = [
     "pylint>=3.3.7",
     "pyright>=1.1.403",
     "hatch",
+    "pi0servo",
 ]
 samples = [
 ]
@@ -74,5 +75,13 @@ ignore_missing_imports = true
 [tool.uv.sources]
 pyclickutils = { path = "../pyclickutils", editable = true }
 pyclibase = { path = "../pyclibase", editable = true }
+pi0servo = { workspace = true, editable = true }
+
+[tool.uv.workspace]
+members = [
+    ".",
+    ".",
+    ".",
+]
 
 [tool.hatch.publish.pypi]
