@@ -4,6 +4,7 @@
 """
 pytest conftest
 """
+
 import os
 import pty
 import select
@@ -108,6 +109,7 @@ class CLITestBase:
 
     コマンドの実行、出力のアサーションなど、CLIテストで頻繁に使用する機能を提供します。
     """
+
     DEFAULT_TIMEOUT = 10
     DEFAULT_ENCODING = "utf-8"
 

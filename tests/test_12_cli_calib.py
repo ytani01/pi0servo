@@ -7,19 +7,20 @@ import pytest
 CMD = "uv run pi0servo calib"
 PIN = 15
 
-KEY_TAB = '\x09'
-KEY_C_C = '\x03'  # Ctrl-C
+KEY_TAB = "\x09"
+KEY_C_C = "\x03"  # Ctrl-C
 
 
 class TestBasic:
     """Basic tests."""
+
     @pytest.mark.parametrize(
         "arg, opt, inkey1, expect1, inkey2, expect2",
         [
-            (PIN, "", KEY_TAB, "GPIO",        KEY_TAB, "GPIO"),
-            (PIN, "", "h",     "Select",      "h",     "Misc"),
-            (PIN, "", "q",     "== Quit ==",  "",      ""),
-            (PIN, "", KEY_C_C, "conf_file",   "",      ""),
+            (PIN, "", KEY_TAB, "GPIO", KEY_TAB, "GPIO"),
+            (PIN, "", "h", "Select", "h", "Misc"),
+            (PIN, "", "q", "== Quit ==", "", ""),
+            (PIN, "", KEY_C_C, "conf_file", "", ""),
         ],
     )
     def test_cli_calib(
@@ -27,20 +28,20 @@ class TestBasic:
     ):
         """servo command"""
         cmdline = f"{CMD} {arg} {opt}"
-        print(f'''
-* cmdline='{cmdline}''')
+        print(f"""
+* cmdline='{cmdline}""")
 
         session = cli_runner.run_interactive_command(cmdline.split())
         time.sleep(1)
 
         if inkey1:
-            print(f'''* inkey1='{inkey1}''')
+            print(f"""* inkey1='{inkey1}""")
             session.send_key(inkey1)
             assert session.expect(expect1)
             time.sleep(1)
 
         if inkey2:
-            print(f'''* inkey2='{inkey2}''')
+            print(f"""* inkey2='{inkey2}""")
             session.send_key(inkey2)
             assert session.expect(expect2)
             # time.sleep(1)
@@ -54,13 +55,11 @@ class TestBasic:
             (PIN, "", signal.SIGTERM),
         ],
     )
-    def test_cli_calib_signal(
-        self, cli_runner, arg, opt, sig
-    ):
+    def test_cli_calib_signal(self, cli_runner, arg, opt, sig):
         """servo command"""
         cmdline = f"{CMD} {arg} {opt}"
-        print(f'''
-* cmdline='{cmdline}', sig={sig}''')
+        print(f"""
+* cmdline='{cmdline}', sig={sig}""")
 
         session = cli_runner.run_interactive_command(cmdline.split())
         time.sleep(1)
@@ -71,7 +70,7 @@ class TestBasic:
         proc.wait(timeout=3)
 
         ret = proc.returncode
-        print(f'''ret={ret}''')
+        print(f"""ret={ret}""")
 
         if ret > 128:
             assert ret - 128 == int(sig)

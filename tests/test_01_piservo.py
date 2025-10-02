@@ -3,6 +3,7 @@
 """
 tests/test_01_piservo.py
 """
+
 import pytest
 
 from pi0servo.core.piservo import PiServo

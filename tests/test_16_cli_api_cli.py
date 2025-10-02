@@ -12,27 +12,11 @@ class TestCmdApiCli:
     @pytest.mark.parametrize(
         "args, stdout, stderr",
         [
-            (
-                "",
-                "Please specify GPIO pins",
-                ""
-            ),
-            (
-                "-d",
-                "Please specify GPIO pins",
-                "DEBUG"
-            ),
-            (
-                "-h",
-                "Usage: ",
-                ""
-            ),
-            (
-                "-V",
-                "pi0servo",
-                ""
-            ),
-        ]
+            ("", "Please specify GPIO pins", ""),
+            ("-d", "Please specify GPIO pins", "DEBUG"),
+            ("-h", "Usage: ", ""),
+            ("-V", "pi0servo", ""),
+        ],
     )
     def test_cli_err1(self, cli_runner, args, stdout, stderr):
         """servo command"""
@@ -46,57 +30,39 @@ class TestCmdApiCli:
         print(f"** expect='{stderr}'")
 
         cli_runner.assert_output_contains(
-            result,
-            stdout=stdout,
-            stderr=stderr
+            result, stdout=stdout, stderr=stderr
         )
 
     @pytest.mark.parametrize(
         "instr, expect1, expect2",
         [
-            (
-                '\n',
-                "",
-                f"{CMDNAME}>"
-            ),
+            ("\n", "", f"{CMDNAME}>"),
             (
                 '{"method": "move", "params": {"angles": [30, 30]}}\n',
                 "'value': None",
-                f"{CMDNAME}"
+                f"{CMDNAME}",
             ),
             (
-                '['
+                "["
                 '{"method": "move", "params": {"angles": [30, 30]}},'
                 '{"method": "move", "params": {"angles": [0, 0]}}'
-                ']\n',
+                "]\n",
                 "[30, 30]",
-                "[0, 0]"
+                "[0, 0]",
             ),
+            ('{"method": "cancel"}\n', "'value': 0", f"{CMDNAME}>"),
+            ('{"method": "qsize"}\n', "'value': ", f"{CMDNAME}>"),
             (
-                '{"method": "cancel"}\n',
-                "'value': 0",
-                f"{CMDNAME}>"
-            ),
-            (
-                '{"method": "qsize"}\n',
-                "'value': ",
-                f"{CMDNAME}>"
-            ),
-            (
-                '['
+                "["
                 '{"method":"move_sec","params": {"sec": 1}},'
                 '{"method":"move","params":{"angles":[20,-20]}}, '
                 '{"method":"move","params":{"angles":[0,0]}},'
                 '{"method":"wait"}'
-                ']\n',
+                "]\n",
                 "'qsize': 1",
-                "'qsize': 0"
+                "'qsize': 0",
             ),
-            (
-                "a\n",
-                "JSONDecodeError",
-                f"{CMDNAME}>"
-            ),
+            ("a\n", "JSONDecodeError", f"{CMDNAME}>"),
         ],
     )
     def test_cli(self, cli_runner, instr, expect1, expect2):

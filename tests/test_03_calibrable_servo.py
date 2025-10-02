@@ -4,6 +4,7 @@
 tests/test_03_calibrable_servo.py
 (リファクタリング修正版)
 """
+
 from unittest.mock import patch
 
 import pytest
@@ -19,7 +20,7 @@ CONF_FILE = "test_servo_conf.json"
 def mock_config_manager():
     """ServoConfigManagerのモックを返すフィクスチャ"""
     with patch(
-            "pi0servo.core.calibrable_servo.ServoConfigManager"
+        "pi0servo.core.calibrable_servo.ServoConfigManager"
     ) as mock_scm:
         instance = mock_scm.return_value
         instance.get_config.return_value = None
@@ -110,23 +111,29 @@ class TestCalibrableServoRefactored:
     #
     # Angle Conversion Tests
     #
-    @pytest.mark.parametrize("deg, expected_pulse_calc", [
-        (0.0, "self.PULSE_CENTER"),
-        (90.0, "self.PULSE_MAX"),
-        (-90.0, "self.PULSE_MIN"),
-        (45.0, "(self.PULSE_CENTER + self.PULSE_MAX) // 2"),
-    ])
+    @pytest.mark.parametrize(
+        "deg, expected_pulse_calc",
+        [
+            (0.0, "self.PULSE_CENTER"),
+            (90.0, "self.PULSE_MAX"),
+            (-90.0, "self.PULSE_MIN"),
+            (45.0, "(self.PULSE_CENTER + self.PULSE_MAX) // 2"),
+        ],
+    )
     def test_conversion_deg2pulse(self, servo, deg, expected_pulse_calc):
         """deg2pulseのパラメータ化テスト"""
         self._setup_servo_calibration(servo)
         expected_pulse = eval(expected_pulse_calc)
         assert servo.deg2pulse(deg) == expected_pulse
 
-    @pytest.mark.parametrize("pulse_calc, expected_deg", [
-        ("self.PULSE_CENTER", 0.0),
-        ("self.PULSE_MAX", 90.0),
-        ("self.PULSE_MIN", -90.0),
-    ])
+    @pytest.mark.parametrize(
+        "pulse_calc, expected_deg",
+        [
+            ("self.PULSE_CENTER", 0.0),
+            ("self.PULSE_MAX", 90.0),
+            ("self.PULSE_MIN", -90.0),
+        ],
+    )
     def test_conversion_pulse2deg(self, servo, pulse_calc, expected_deg):
         """pulse2degのパラメータ化テスト"""
         self._setup_servo_calibration(servo)
@@ -143,16 +150,19 @@ class TestCalibrableServoRefactored:
     #
     # Movement Tests
     #
-    @pytest.mark.parametrize("angle_in, expected_pulse_calc", [
-        (45, "(self.PULSE_CENTER + self.PULSE_MAX) // 2"),
-        ("min", "self.PULSE_MIN"),
-        ("center", "self.PULSE_CENTER"),
-        ("max", "self.PULSE_MAX"),
-        (100, "self.PULSE_MAX"),
-        (-100, "self.PULSE_MIN"),
-    ])
+    @pytest.mark.parametrize(
+        "angle_in, expected_pulse_calc",
+        [
+            (45, "(self.PULSE_CENTER + self.PULSE_MAX) // 2"),
+            ("min", "self.PULSE_MIN"),
+            ("center", "self.PULSE_CENTER"),
+            ("max", "self.PULSE_MAX"),
+            (100, "self.PULSE_MAX"),
+            (-100, "self.PULSE_MIN"),
+        ],
+    )
     def test_movement_move_angle_calibrated(
-            self, servo, angle_in, expected_pulse_calc
+        self, servo, angle_in, expected_pulse_calc
     ):
         """キャリブレーション値を考慮したmove_angleのテスト"""
         self._setup_servo_calibration(servo)

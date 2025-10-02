@@ -16,13 +16,13 @@ base_schema = {
             "properties": {
                 "code": {"type": "integer"},
                 "message": {"type": "string"},
-                "data": {}
+                "data": {},
             },
-            "required": ["code", "message"]
-        }
+            "required": ["code", "message"],
+        },
     },
     "required": ["jsonrpc"],
-    "additionalProperties": False
+    "additionalProperties": False,
 }
 
 
@@ -56,12 +56,12 @@ def validate_jsonrpc(message: str):
 msgs = [
     '{"jsonrpc": "2.0", "method": "subtract", "params": [42, 23], "id": 1}',
     (
-        '{'
+        "{"
         '"jsonrpc": "2.0", '
         '"method": "a", '
         '"params": {"a": [0,2,3], "ms":0.5 }, '
         '"id": 1'
-        '}'
+        "}"
     ),
     (
         '{"params": {"a": [0,2,3], "b":0.5, "c":2}, '

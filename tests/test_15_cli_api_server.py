@@ -7,6 +7,7 @@ PIN = 25
 
 class TestBasic:
     """Basic tests."""
+
     def test_start(self, cli_runner):
         """server start"""
 
@@ -21,7 +22,7 @@ class TestBasic:
         time.sleep(3)
 
     def test_start_err(self, cli_runner):
-        """server start error """
+        """server start error"""
 
         cmdline = CMD
         print(f"* cmdline='{cmdline}'")

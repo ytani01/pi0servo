@@ -4,6 +4,7 @@
 """
 tests/test_07_threadworker.py
 """
+
 import time
 from unittest.mock import MagicMock, patch
 
@@ -16,8 +17,9 @@ from pi0servo.helper.thread_worker import ThreadWorker
 @pytest.fixture
 def mocker_multiservo():
     """MultiServoをモックするためのフィクスチャ"""
-    with patch("pi0servo.core.multi_servo.MultiServo") \
-            as mock_mservo_constructor:
+    with patch(
+        "pi0servo.core.multi_servo.MultiServo"
+    ) as mock_mservo_constructor:
         mock_mservo_instance = MagicMock(spec=MultiServo)
         mock_mservo_constructor.return_value = mock_mservo_instance
         yield mock_mservo_constructor
@@ -42,8 +44,9 @@ class TestThreadWorker:
         assert thread_worker.mservo == mservo
         assert thread_worker.qsize == 0
 
-    def test_send_move_all_angles_sync(self, thread_worker,
-                                       mocker_multiservo):
+    def test_send_move_all_angles_sync(
+        self, thread_worker, mocker_multiservo
+    ):
         """move_all_angles_syncコマンドのテスト"""
         mservo = mocker_multiservo()
         cmd = {
@@ -51,8 +54,8 @@ class TestThreadWorker:
             "params": {
                 "angles": [30, None, "center"],
                 "move_sec": 0.2,
-                "step_n": 40
-            }
+                "step_n": 40,
+            },
         }
         thread_worker.send(cmd)
         time.sleep(0.5)  # コマンド処理を待つ
@@ -67,16 +70,12 @@ class TestThreadWorker:
         mservo = mocker_multiservo()
         cmd = {
             "method": "move_all_pulses",
-            "params": {
-                "pulses": [1000, 2000, None, 0]
-            }
+            "params": {"pulses": [1000, 2000, None, 0]},
         }
         thread_worker.send(cmd)
         time.sleep(0.5)  # コマンド処理を待つ
 
-        mservo.move_all_pulses.assert_called_once_with(
-            [1000, 2000, None, 0]
-        )
+        mservo.move_all_pulses.assert_called_once_with([1000, 2000, None, 0])
         assert thread_worker.qsize == 0
 
     def test_send_move_pulse_relative(self, thread_worker, mocker_multiservo):
@@ -84,10 +83,7 @@ class TestThreadWorker:
         mservo = mocker_multiservo()
         cmd = {
             "method": "move_pulse_relative",
-            "params": {
-                "servo": 2,
-                "pulse_diff": -20
-            }
+            "params": {"servo": 2, "pulse_diff": -20},
         }
         thread_worker.send(cmd)
         time.sleep(0.5)  # コマンド処理を待つ
@@ -100,13 +96,7 @@ class TestThreadWorker:
     def test_send_set_command(self, thread_worker, mocker_multiservo):
         """setコマンドのテスト"""
         mservo = mocker_multiservo()
-        cmd = {
-            "method": "set",
-            "params": {
-                "servo": 1,
-                "target": "center"
-            }
-        }
+        cmd = {"method": "set", "params": {"servo": 1, "target": "center"}}
         thread_worker.send(cmd)
         time.sleep(0.5)  # コマンド処理を待つ
 
@@ -115,10 +105,7 @@ class TestThreadWorker:
 
     def test_send_invalid_command(self, thread_worker):
         """無効なコマンドのテスト"""
-        cmd = {
-            "method": "invalid_method",
-            "params": {}
-        }
+        cmd = {"method": "invalid_method", "params": {}}
         reply_json = thread_worker.send(cmd)
         time.sleep(0.5)  # コマンド処理を待つ
 

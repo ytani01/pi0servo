@@ -3,6 +3,7 @@
 """
 tests/test_04_multi_servo.py
 """
+
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -18,7 +19,7 @@ CONF_FILE = "test_multi_servo_conf.json"
 def mock_calibrable_servo():
     """CalibrableServoのモックを返すフィクスチャ"""
     with patch(
-            "pi0servo.core.multi_servo.CalibrableServo", autospec=True
+        "pi0servo.core.multi_servo.CalibrableServo", autospec=True
     ) as mock_cs:
         # autospec=Trueで、CalibrableServoのインターフェースを持つモックを作成
         # 各インスタンスが異なる振る舞いをするように、
@@ -147,9 +148,7 @@ class TestMultiServo:
         mock_sleep.assert_called_with(move_sec / steps)
 
     @patch("time.sleep")
-    def test_move_all_angles_sync_str_none(
-        self, mock_sleep, multi_servo
-    ):
+    def test_move_all_angles_sync_str_none(self, mock_sleep, multi_servo):
         """move_all_angles_syncのテスト（文字列とNoneを含む）"""
         print(f"mock_sleep={mock_sleep}")
         ms, mock_instances = multi_servo

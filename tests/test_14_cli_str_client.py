@@ -8,10 +8,11 @@ CMD = "uv run pi0servo str-client --history_file /tmp/testhist"
 
 class TestBasic:
     """Basic tests."""
+
     @pytest.mark.parametrize(
         "instr, expect",
         [
-            ("\n",  "str-client>"),
+            ("\n", "str-client>"),
             ("a\n", "str-client>"),
             ("a\n", "error"),
         ],
@@ -19,8 +20,8 @@ class TestBasic:
     def test_servo(self, cli_runner, instr, expect):
         """servo command"""
         cmdline = f"{CMD}"
-        print(f'''
-* cmdline='{cmdline}''')
+        print(f"""
+* cmdline='{cmdline}""")
 
         session = cli_runner.run_interactive_command(cmdline.split())
 

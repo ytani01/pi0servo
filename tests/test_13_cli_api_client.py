@@ -8,6 +8,7 @@ CMD = "uv run pi0servo api-client --history_file /tmp/testhist"
 
 class TestBasic:
     """Basic tests."""
+
     @pytest.mark.parametrize(
         "instr, expect1, expect2",
         [

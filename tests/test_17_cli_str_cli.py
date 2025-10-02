@@ -8,30 +8,15 @@ PINS = "25 27"
 
 class TestCmdStrCli:
     """Test CmdStrCli."""
+
     @pytest.mark.parametrize(
         "args, stdout, stderr",
         [
-            (
-                "",
-                "Please specify GPIO pins",
-                ""
-            ),
-            (
-                "-d",
-                "Please specify GPIO pins",
-                "DEBUG"
-            ),
-            (
-                "-h",
-                "Usage: ",
-                ""
-            ),
-            (
-                "-V",
-                "pi0servo",
-                ""
-            ),
-        ]
+            ("", "Please specify GPIO pins", ""),
+            ("-d", "Please specify GPIO pins", "DEBUG"),
+            ("-h", "Usage: ", ""),
+            ("-V", "pi0servo", ""),
+        ],
     )
     def test_cli_err1(self, cli_runner, args, stdout, stderr):
         """servo command"""
@@ -45,44 +30,22 @@ class TestCmdStrCli:
         print(f"** expect='{stderr}'")
 
         cli_runner.assert_output_contains(
-            result,
-            stdout=stdout,
-            stderr=stderr
+            result, stdout=stdout, stderr=stderr
         )
 
     @pytest.mark.parametrize(
         "instr, expect1, expect2",
         [
+            ("\n", "", f"{CMDNAME}>"),
             (
-                '\n',
-                "",
-                f"{CMDNAME}>"
-            ),
-            (
-                'mv:-30,-30\n',
+                "mv:-30,-30\n",
                 "method",
                 "[-30, -30]",
             ),
-            (
-                'mv:30,30 mv:0,0\n',
-                "[30, 30]",
-                "[0, 0]"
-            ),
-            (
-                'zz\n',
-                "cancel",
-                "'value': 0"
-            ),
-            (
-                'qq\n',
-                "result",
-                "'value': 0"
-            ),
-            (
-                'ms:0.5 mv:0,0 ww\n',
-                "'qsize': 1",
-                "'qsize': 0"
-            ),
+            ("mv:30,30 mv:0,0\n", "[30, 30]", "[0, 0]"),
+            ("zz\n", "cancel", "'value': 0"),
+            ("qq\n", "result", "'value': 0"),
+            ("ms:0.5 mv:0,0 ww\n", "'qsize': 1", "'qsize': 0"),
             (
                 "mv:0\n",
                 "{'angles': [0]}",

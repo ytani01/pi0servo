@@ -1,4 +1,49 @@
-[tasks]
-upgrade = "pwd && (export LANG=C sudo apt update && sudo apt upgrade && sudo apt autoremove -y && mise self-update && mise up && uv tool upgrade --all && uv add -U --editable --group dev .)"
-lint = "pwd && uv run isort src && uv run ruff format src && uv run pyright src && uv run flake8 src && uv run mypy src"
-test = "uv run pytest -v tests"
+[tasks.upgradesys]
+description = "upgrade global tools"
+run = '''
+# upgrade global
+echo "# apt"
+LANG=C sudo apt update
+LANG=C sudo apt upgrade
+LANG=C sudo apt autoremove -y
+echo "# mise"
+mise self-update
+mise up
+echo "# uv"
+uv tool upgrade --all
+'''
+alias = "upsys"
+
+[tasks.upgradelocal]
+description = "upgrade in this project"
+run = '''
+# upgrade this project
+echo "# pip"
+uv pip install -U --group dev -e .
+echo "# pyclickutils"
+uv add -U ../pyclickutils
+echo "# pyclibase"
+uv add -U ../pyclibase
+'''
+alias = "uplocal"
+depends = ["upgradesys"]
+
+[tasks.lint]
+description = "linting"
+run = '''
+# linting
+echo "# isort"
+uv run isort src
+echo "# ruff"
+uv run ruff format src
+echo "# pyright"
+uv run pyright src
+echo "# flake8"
+uv run flake8 src
+echo "# mypy"
+uv run mypy src
+'''
+
+[tasks.test]
+description = "test"
+run = "uv run pytest -v tests"
