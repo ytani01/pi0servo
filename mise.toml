@@ -1,0 +1,3 @@
+[tasks]
+lint = "pwd && uv run isort src && uv run ruff format src && uv run pyright src && uv run flake8 src && uv run mypy src"
+test = "uv run pytest -v tests"
