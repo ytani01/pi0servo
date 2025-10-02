@@ -11,18 +11,41 @@ from pi0servo import MultiServo, get_logger
 from pi0servo.helper.thread_worker import ThreadWorker
 
 
-class CmdAppCliBase(CliBase):
-    """CLI base"""
+class CmdApiCli(CliBase):
+    """CmdApiCli."""
 
-    def __init__(self, prefix, hist, thworker, debug=False):
-        """constractor"""
-
-        super().__init__(prefix, hist, debug=debug)
-
+    def __init__(
+        self, cmd_name, pi, pins, history_file, script_file, debug=False
+    ) -> None:
+        """Constractor."""
+        super().__init__(cmd_name, history_file, script_file, debug=debug)
         self.__debug = debug
-        self.__log = get_logger(__class__.__name__, self.__debug)
+        self.__log = get_logger(self.__class__.__name__, self.__debug)
+        self.__log.debug("cmd_name=%s, pins=%s", cmd_name, pins)
 
-        self.thworker = thworker
+        self.pi = pi
+        self.pins = pins
+
+        try:
+            self.mservo = MultiServo(self.pi, self.pins, debug=False)
+            self.thworker = ThreadWorker(self.mservo, debug=self.__debug)
+        except Exception as _e:
+            self.__log.error("%s: %s", type(_e).__name__, _e)
+
+    def main(self):
+        """main loop"""
+        self.__log.debug("")
+        self.thworker.start()
+        super().main()
+
+    def end(self):
+        """end"""
+        self.__log.debug("")
+        super().end()
+
+        if self.thworker:
+            self.thworker.end()
+        print("\n* Bye\n")
 
     def parse_line(self, line: str) -> str:
         """parse command line string to json string"""
@@ -65,50 +88,3 @@ class CmdAppCliBase(CliBase):
             return ""
 
         return json.dumps(result_json)
-
-
-class CmdApiCli:
-    """CmdApiCli."""
-
-    def __init__(self, cmd_name, pi, pins, history_file, debug=False) -> None:
-        """constractor."""
-
-        self.__debug = debug
-        self.__log = get_logger(self.__class__.__name__, self.__debug)
-        self.__log.debug(
-            "cmd_name=%s, pins=%s, history_file=%s",
-            cmd_name,
-            pins,
-            history_file,
-        )
-
-        self.pi = pi
-        self.cmd_name = cmd_name
-        self.pins = pins
-        self.history_file = history_file
-
-        try:
-            self.mservo = MultiServo(self.pi, self.pins, debug=False)
-            self.thworker = ThreadWorker(self.mservo, debug=self.__debug)
-        except Exception as _e:
-            self.__log.error("%s: %s", type(_e).__name__, _e)
-
-        self.cli = CmdAppCliBase(
-            self.cmd_name,
-            self.history_file,
-            self.thworker,
-            debug=self.__debug,
-        )
-
-    def main(self):
-        """main loop"""
-        self.thworker.start()
-        self.cli.loop()
-
-    def end(self):
-        """end"""
-        self.__log.debug("")
-
-        if self.thworker:
-            self.thworker.end()
-        print("\n* Bye\n")

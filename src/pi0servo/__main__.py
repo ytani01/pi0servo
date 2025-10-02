@@ -150,30 +150,33 @@ def calib(ctx, pin, conf_file, debug):
     show_default=True,
     help="History file",
 )
+@click.option("--script-file", "-f", type=str, default="", help="script file")
 @click_common_opts(click, __version__)
-def api_cli(ctx, pins, history_file, debug):
+def api_cli(ctx, pins, history_file, script_file, debug):
     """API CLI"""
     cmd_name = ctx.command.name
     __log = get_logger(__name__, debug)
     __log.debug("cmd_name=%s", cmd_name)
-    __log.debug("pins=%s, history_file=%s", pins, history_file)
+    __log.debug(
+        "pins=%s, history_file=%s, script_file=%s",
+        pins,
+        history_file,
+        script_file,
+    )
 
     if not pins:
         print_pins_error(ctx)
         return
 
-    app = None
     try:
         pi = get_pi(debug)
-        app = CmdApiCli(cmd_name, pi, pins, history_file, debug=debug)
+        app = CmdApiCli(
+            cmd_name, pi, pins, history_file, script_file, debug=debug
+        )
         app.main()
 
     except Exception as _e:
         __log.error("%s: $%s", type(_e).__name__, _e)
-
-    finally:
-        if app:
-            app.end()
 
 
 @cli.command()
@@ -185,6 +188,7 @@ def api_cli(ctx, pins, history_file, debug):
     show_default=True,
     help="History file",
 )
+@click.option("--script-file", "-f", type=str, default="", help="script file")
 @click.option(
     "--angle_factor",
     "-a",
@@ -194,15 +198,16 @@ def api_cli(ctx, pins, history_file, debug):
     help="Angle Factor",
 )
 @click_common_opts(click, __version__)
-def str_cli(ctx, pins, history_file, angle_factor, debug):
+def str_cli(ctx, pins, history_file, script_file, angle_factor, debug):
     """String command CLI"""
     cmd_name = ctx.command.name
     __log = get_logger(__name__, debug)
     __log.debug("cmd_name=%s", cmd_name)
     __log.debug(
-        "pins=%s, history_file=%s, angle_factor=%s",
+        "pins=%s, history_file=%s, script_file=%s, angle_factor=%s",
         pins,
         history_file,
+        script_file,
         angle_factor,
     )
 
@@ -213,20 +218,21 @@ def str_cli(ctx, pins, history_file, angle_factor, debug):
     af_list = [int(i) for i in angle_factor.split(",")]
     __log.debug("af_list=%s", af_list)
 
-    app = None
     try:
         pi = get_pi(debug)
         app = CmdStrCli(
-            cmd_name, pi, pins, history_file, af_list, debug=debug
+            cmd_name,
+            pi,
+            pins,
+            history_file,
+            script_file,
+            af_list,
+            debug=debug,
         )
         app.main()
 
     except Exception as _e:
         __log.error("%s: $%s", type(_e).__name__, _e)
-
-    finally:
-        if app:
-            app.end()
 
 
 @cli.command()

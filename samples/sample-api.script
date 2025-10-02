@@ -1,0 +1,5 @@
+{"method": "move_sec", "params": {"sec": 2}}
+{"method": "move", "params": {"angles": [30, 30]}}
+{"method": "move", "params": {"angles": [-30, null]}}
+{"method": "move", "params": {"angles": ["center", "center"]}}
+{"method": "wait"}

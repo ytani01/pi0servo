@@ -73,6 +73,6 @@ ignore_missing_imports = true
 
 [tool.uv.sources]
 pyclickutils = { path = "../pyclickutils", editable = true }
-pyclibase = { path = "../pyclibase" }
+pyclibase = { path = "../pyclibase", editable = true }
 
 [tool.hatch.publish.pypi]
