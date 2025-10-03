@@ -86,10 +86,22 @@ Read the initial instructions of serena MCP.
 
 - `Tasks.md` のすべてのタスクが完了した場合:- 
   1. ユーザーに完了を報告し、ユーザーが `ToDo.md`を更新するよう促す。
-  2. `archivefile Tasks.md`コマンドを実行
-     - このコマンドは、`Tasks.md` を
-       -  `yyyymmdd-HHMMSS-Tasks-done.md` にリネームし
-       - `archives/`へ移動する。
+  2. `archivefile Tasks.md`コマンドを実行してアーカイブする。
+```
+ Usage: archivefile [OPTIONS] [SRC_FILES]...
+
+  指定されたファイルをアーカイブディレクトリに移動し、リネーム。
+
+Options:
+  -s, --stat TEXT    status  [default: done]
+  -v, --verbose      verbose flag
+  -d, --dstdir TEXT  destination directory  [default: ./archives]
+  -V, --version      Show the version and exit.
+  --debug            debug flag
+  -h, --help         Show this message and exit.
+
+```
+
 
 ### === `Tasks.md` がない場合
 
