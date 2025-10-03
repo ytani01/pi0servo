@@ -6,8 +6,9 @@
 import json
 
 from pyclibase import CliBase
+from pyclickutils import get_logger
 
-from pi0servo import ApiClient, get_logger
+from pi0servo import ApiClient
 
 
 class CmdApiClient(CliBase):

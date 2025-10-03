@@ -3,7 +3,9 @@
 #
 """cmd_strclient.py."""
 
-from pi0servo import StrCmdToJson, get_logger
+from pyclickutils import get_logger
+
+from pi0servo import StrCmdToJson
 
 from .cmd_apiclient import CmdApiClient
 

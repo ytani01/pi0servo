@@ -33,15 +33,15 @@ description = "linting"
 run = '''
 # linting
 echo "# isort"
-uv run isort src
+uv run isort src samples tests
 echo "# ruff"
-uv run ruff format src
+uv run ruff format src samples tests
 echo "# pyright"
-uv run pyright src
+uv run pyright src samples tests
 echo "# flake8"
-uv run flake8 src
+uv run flake8 src samples tests
 echo "# mypy"
-uv run mypy src
+uv run mypy src samples tests
 '''
 
 [tasks.test]

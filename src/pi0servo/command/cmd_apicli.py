@@ -6,8 +6,9 @@
 import json
 
 from pyclibase import CliBase
+from pyclickutils import get_logger
 
-from pi0servo import MultiServo, get_logger
+from pi0servo import MultiServo
 from pi0servo.helper.thread_worker import ThreadWorker
 
 

@@ -65,6 +65,8 @@ dev = [
     "hatch",
 ]
 samples = [
+    "jsonschema>=4.25.1",
+    "types-jsonschema>=4.25.1.20250822",
 ]
 
 [[tool.mypy.overrides]]

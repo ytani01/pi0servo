@@ -3,7 +3,9 @@
 #
 import time
 
-from pi0servo import PiServo, get_logger
+from pyclickutils import get_logger
+
+from pi0servo import PiServo
 
 
 class CmdServo:

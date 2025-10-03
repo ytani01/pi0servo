@@ -6,9 +6,10 @@
 #
 from typing import Optional
 
+from pyclickutils import get_logger
+
 from ..core.calibrable_servo import CalibrableServo
 from ..core.multi_servo import MultiServo
-from ..utils.my_logger import get_logger
 from .thread_worker import ThreadWorker
 
 

@@ -6,8 +6,7 @@
 import json
 
 import requests
-
-from pi0servo import get_logger
+from pyclickutils import get_logger
 
 
 class ApiClient:

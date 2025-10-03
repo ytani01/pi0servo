@@ -7,9 +7,9 @@ import os
 
 import click
 import pigpio
-from pyclickutils import click_common_opts
+from pyclickutils import click_common_opts, get_logger
 
-from . import __version__, get_logger
+from . import __version__
 from .command.cmd_apicli import CmdApiCli
 from .command.cmd_apiclient import CmdApiClient
 from .command.cmd_apiserver import CmdApiServer
@@ -42,7 +42,7 @@ def print_pins_error(ctx):
 
 
 @click.group()
-@click_common_opts(click, __version__)
+@click_common_opts(__version__)
 def cli(ctx, debug):
     """pi0servo CLI top."""
     cmd_name = ctx.info_name
@@ -68,7 +68,7 @@ def cli(ctx, debug):
     show_default=True,
     help="wait sec",
 )
-@click_common_opts(click, __version__)
+@click_common_opts(__version__)
 def servo(ctx, pin: int, pulse: int, wait_sec: float, debug: bool) -> None:
     """servo command."""
     cmd_name = ctx.command.name
@@ -104,7 +104,7 @@ def servo(ctx, pin: int, pulse: int, wait_sec: float, debug: bool) -> None:
     show_default=True,
     help="Config file",
 )
-@click_common_opts(click, __version__)
+@click_common_opts(__version__)
 def calib(ctx, pin, conf_file, debug):
     """calibration tool
 
@@ -151,7 +151,7 @@ def calib(ctx, pin, conf_file, debug):
     help="History file",
 )
 @click.option("--script-file", "-f", type=str, default="", help="script file")
-@click_common_opts(click, __version__)
+@click_common_opts(__version__)
 def api_cli(ctx, pins, history_file, script_file, debug):
     """API CLI"""
     cmd_name = ctx.command.name
@@ -197,7 +197,7 @@ def api_cli(ctx, pins, history_file, script_file, debug):
     show_default=True,
     help="Angle Factor",
 )
-@click_common_opts(click, __version__)
+@click_common_opts(__version__)
 def str_cli(ctx, pins, history_file, script_file, angle_factor, debug):
     """String command CLI"""
     cmd_name = ctx.command.name
@@ -253,7 +253,7 @@ def str_cli(ctx, pins, history_file, script_file, angle_factor, debug):
     show_default=True,
     help="port number",
 )
-@click_common_opts(click, __version__)
+@click_common_opts(__version__)
 def api_server(ctx, pins, server_host, port, debug):
     """API (JSON) Server ."""
     cmd_name = ctx.command.name
@@ -293,7 +293,7 @@ def api_server(ctx, pins, server_host, port, debug):
     help="History file",
 )
 @click.option("--script-file", "-f", type=str, default="", help="script file")
-@click_common_opts(click, __version__)
+@click_common_opts(__version__)
 def api_client(ctx, url, history_file, script_file, debug):
     """String API Client."""
     cmd_name = ctx.command.name
@@ -339,7 +339,7 @@ def api_client(ctx, url, history_file, script_file, debug):
     show_default=True,
     help="Angle Factor",
 )
-@click_common_opts(click, __version__)
+@click_common_opts(__version__)
 def str_client(ctx, url, history_file, script_file, angle_factor, debug):
     """String Command API Client."""
     cmd_name = ctx.command.name
@@ -383,7 +383,7 @@ def str_client(ctx, url, history_file, script_file, angle_factor, debug):
     show_default=True,
     help="port number",
 )
-@click_common_opts(click, __version__)
+@click_common_opts(__version__)
 def jsonrpc_server(ctx, pins, server_host, port, debug):
     """JSON-RPC Server ."""
     cmd_name = ctx.command.name

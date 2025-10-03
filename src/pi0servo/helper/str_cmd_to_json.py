@@ -6,7 +6,7 @@
 import json
 from typing import Any, Dict, List, Optional, Union
 
-from pi0servo.utils.my_logger import get_logger
+from pyclickutils import get_logger
 
 
 class StrCmdToJson:
