@@ -12,67 +12,75 @@ class TestCmdStrCli:
     @pytest.mark.parametrize(
         "args, stdout, stderr",
         [
-            ("", "Please specify GPIO pins", ""),
-            ("-d", "Please specify GPIO pins", "DEBUG"),
-            ("-h", "Usage: ", ""),
-            ("-V", "pi0servo", ""),
+            (
+                "",
+                "Please specify GPIO pins", ""
+            ),
+            (
+                "-d",
+                "Please specify GPIO pins", "DEBUG"
+            ),
+            (
+                "-h",
+                "Usage: ", ""
+            ),
+            (
+                "-V",
+                "pi0servo", ""
+            ),
         ],
     )
-    def test_cli_err1(self, cli_runner, args, stdout, stderr):
+    def test_cli_cmdline(self, cli_runner, args, stdout, stderr):
         """servo command"""
-        cmdline = f"{CMD} {args}"
-        print(f"\n* cmdline='{cmdline}'")
-
-        result = cli_runner.run_command(cmdline.split())
-        print(f"* stdout='''{result.stdout}'''")
-        print(f"** expect='{stdout}'")
-        print(f"* stderr='''{result.stderr}'''")
-        print(f"** expect='{stderr}'")
-
-        cli_runner.assert_output_contains(
-            result, stdout=stdout, stderr=stderr
-        )
+        cli_runner.test_command(CMD, args, e_stdout=stdout, e_stderr=stderr)
 
     @pytest.mark.parametrize(
-        "instr, expect1, expect2",
+        "inout",
         [
-            ("\n", "", f"{CMDNAME}>"),
-            (
-                "mv:-30,-30\n",
-                "method",
-                "[-30, -30]",
-            ),
-            ("mv:30,30 mv:0,0\n", "[30, 30]", "[0, 0]"),
-            ("zz\n", "cancel", "'value': 0"),
-            ("qq\n", "result", "'value': 0"),
-            ("ms:0.5 mv:0,0 ww\n", "'qsize': 1", "'qsize': 0"),
-            (
-                "mv:0\n",
-                "{'angles': [0]}",
-                "ERROR",
-            ),
-            (
-                "a\n",
-                "err",
-                "METHOD_NOT_FOUND",
-            ),
+            [
+                {
+                    "in": "\n",
+                    "out": ["", f"{CMDNAME}>"]
+                },
+                {
+                    "in": "mv:-30,-30\n",
+                    "out": ["method", "[-30, -30]"]
+                },
+                {
+                    "in": "mv:30,30 mv:0,0\n",
+                    "out": ["[30, 30]", "[0, 0]"]
+                },
+                {
+                    "in": "zz\n",
+                    "out": ["cancel", "'value': ", "'qsize': 0"]
+                },
+                {
+                    "in": "qq\n",
+                    "out": ["qsize", "result", "'value': 0"]
+                },
+            ],
+            [
+                {
+                    "in": "ms:0.5 mv:0,0 ww\n",
+                    "out": ["'qsize': 1", "'qsize': 0"]
+                },
+            ],
+            [
+                {
+                    "in": "mv:0\n",
+                    "out": ["{'angles': [0]}", "ERROR"]
+                },
+                {
+                    "in": "a\n",
+                    "out": ["err", "METHOD_NOT_FOUND"]
+                },
+            ],
         ],
     )
-    def test_cli(self, cli_runner, instr, expect1, expect2):
+    def test_cli_inout(self, cli_runner, inout):
         """servo command"""
         cmdline = f"{CMD} {PINS}"
-        print(f"* cmdline='{cmdline}'")
 
-        session = cli_runner.run_interactive_command(cmdline.split())
-
-        print(f"* instr={instr!r}")
-        session.send_key(instr)
-        if expect1:
-            print(f"* expect1={expect1}")
-            assert session.expect(expect1)
-        if expect2:
-            print(f"* expect2={expect2}")
-            assert session.expect(expect2)
-
-        session.close()
-        # time.sleep(3)
+        cli_runner.test_interactive(
+            cmdline, in_out=inout
+        )

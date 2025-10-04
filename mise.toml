@@ -18,13 +18,25 @@ alias = "upsys"
 description = "upgrade in this project"
 run = '''
 # upgrade this project
+
+echo "# rm uv.lock"
+rm uv.lock
+
+echo "# uv sync"
+uv sync
+
 echo "# pyclickutils"
 uv add -U ../pyclickutils
+
 echo "# pyclibase"
 uv add -U ../pyclibase
+
 echo "# pip"
 uv pip install -U --group dev -e .
 uv pip install -U --group samples -e .
+
+echo "# uv run pi0servo -V"
+uv run pi0servo -V
 '''
 alias = "uplocal"
 depends = ["upgradesys"]
@@ -39,12 +51,12 @@ echo "# ruff"
 uv run ruff format src samples tests
 echo "# pyright"
 uv run pyright src samples tests
-echo "# flake8"
-uv run flake8 src samples tests
 echo "# mypy"
 uv run mypy src samples tests
 '''
+depends = ["upgradelocal"]
 
 [tasks.test]
 description = "test"
 run = "uv run pytest -v tests"
+depends = ["lint"]
