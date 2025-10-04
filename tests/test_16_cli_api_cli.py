@@ -18,11 +18,9 @@ class TestCmdApiCli:
             ("-V", "pi0servo", ""),
         ],
     )
-    def test_cli_err1(self, cli_runner, args, stdout, stderr):
+    def test_cli_cmdline_err(self, cli_runner, args, stdout, stderr):
         """servo command"""
         cmdline = f"{CMD} {args}"
-        print(f"\n* cmdline='{cmdline}'")
-
         result = cli_runner.run_command(cmdline.split())
         print(f"* stdout='''{result.stdout}'''")
         print(f"** expect='{stdout}'")
@@ -34,51 +32,52 @@ class TestCmdApiCli:
         )
 
     @pytest.mark.parametrize(
-        "instr, expect1, expect2",
+        "inout",
         [
-            ("\n", "", f"{CMDNAME}>"),
-            (
-                '{"method": "move", "params": {"angles": [30, 30]}}\n',
-                "'value': None",
-                f"{CMDNAME}",
-            ),
-            (
-                "["
-                '{"method": "move", "params": {"angles": [30, 30]}},'
-                '{"method": "move", "params": {"angles": [0, 0]}}'
-                "]\n",
-                "[30, 30]",
-                "[0, 0]",
-            ),
-            ('{"method": "cancel"}\n', "'value': 0", f"{CMDNAME}>"),
-            ('{"method": "qsize"}\n', "'value': ", f"{CMDNAME}>"),
-            (
-                "["
-                '{"method":"move_sec","params": {"sec": 1}},'
-                '{"method":"move","params":{"angles":[20,-20]}}, '
-                '{"method":"move","params":{"angles":[0,0]}},'
-                '{"method":"wait"}'
-                "]\n",
-                "'qsize': 1",
-                "'qsize': 0",
-            ),
-            ("a\n", "JSONDecodeError", f"{CMDNAME}>"),
+            [
+                {"in": "\n", "out": ["", f"{CMDNAME}>"]},
+                {
+                    "in": (
+                        '{"method": "move", "params": {"angles": [30, 30]}}\n'
+                    ),
+                    "out": ["'value': None", f"{CMDNAME}"],
+                },
+            ],
+            [
+                {
+                    "in": (
+                        '{"method": "move", "params": {"angles": [30, 30]}}, '
+                        '{"method": "move", "params": {"angles": [0, 0]}}'
+                        "\n"
+                    ),
+                    "out": ["[30, 30]", "[0, 0]"],
+                },
+                {
+                    "in": '{"method": "cancel"}\n',
+                    "out": ["'value': 0", f"{CMDNAME}>"],
+                },
+                {
+                    "in": '{"method": "qsize"}\n',
+                    "out": ["'value': ", f"{CMDNAME}>"],
+                },
+            ],
+            [
+                {
+                    "in": (
+                        "["
+                        '{"method":"move_sec","params": {"sec": 1}}, '
+                        '{"method":"move","params":{"angles":[20,-20]}}, '
+                        '{"method":"move","params":{"angles":[0,0]}}, '
+                        '{"method":"wait"}'
+                        "]\n"
+                    ),
+                    "out": ["'qsize': 1", "'qsize': 0"],
+                },
+                {"in": "a\n", "out": ["JSONDecodeError", f"{CMDNAME}>"]},
+            ],
         ],
     )
-    def test_cli(self, cli_runner, instr, expect1, expect2):
+    def test_cli_interactive(self, cli_runner, inout):
         """servo command"""
         cmdline = f"{CMD} {PINS}"
-        print(f"* cmdline='{cmdline}'")
-
-        session = cli_runner.run_interactive_command(cmdline.split())
-
-        session.send_key(instr)
-        if expect1:
-            print(f"expect1={expect1}")
-            assert session.expect(expect1)
-        if expect2:
-            print(f"expect2={expect2}")
-            assert session.expect(expect2)
-
-        session.close()
-        # time.sleep(3)
+        cli_runner.test_interactive(cmdline, in_out=inout)

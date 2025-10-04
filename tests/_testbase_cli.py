@@ -43,11 +43,12 @@ class InteractiveSession:
                         if p in self.output:
                             matched_pattern.append(p)
                             true_count += 1
-                    print(f" {true_count}/{len(pattern)} >>> {data!r}")
+                    print(f" {true_count}/{len(pattern)} >>> {data}")
                     if true_count == len(pattern):
                         return True
                 except OSError:
                     break
+            time.sleep(0.05)
         return False
 
     def assert_out(
@@ -67,7 +68,7 @@ class InteractiveSession:
         self.send_key(in_data)
         time.sleep(0.1)
 
-        print(f"### expected={out_data}")
+        # print(f"### expected={out_data}")
         assert self.expect(out_data)
         time.sleep(0.1)
 
@@ -222,7 +223,7 @@ class CLITestBase:
                 command_list += opts
 
         command_str = " ".join(command_list)
-        print(f"\n\n# command line:  {command_str!r}")
+        print(f"\n# command line:  {command_str!r}")
 
         master_fd, slave_fd = pty.openpty()
         process = subprocess.Popen(
@@ -257,9 +258,6 @@ class CLITestBase:
                 cmdline_list += opts.split()
             else:
                 cmdline_list += opts
-
-        cmdline_str = " ".join(cmdline_list)
-        print(f"\n\n# cmdline = {cmdline_str}")
 
         session = self.run_interactive_command(cmdline_list)
         session.assert_out(e_stdout, e_stderr)  # 起動直後

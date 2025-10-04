@@ -10,22 +10,26 @@ class TestBasic:
     """Basic tests."""
 
     @pytest.mark.parametrize(
-        "instr, expect1, expect2",
+        "inout",
         [
-            ('{"method": "cancel"}\n', "result=", "api-client"),
-            ("a\n", "JSONDecodeError", "api-client>"),
+            [
+                {
+                    "in": '{"method": "cancel"}\n',
+                    "out": ["NewConnectionError", "result=", "api-client>"],
+                },
+                {"in": "a\n", "out": ["JSONDecodeError", "api-client>"]},
+            ],
         ],
     )
-    def test_api_client(self, cli_runner, instr, expect1, expect2):
+    def test_api_client(self, cli_runner, inout):
         """servo command"""
-        cmdline = f"{CMD}"
-        print(f"* cmdline='{cmdline}'")
+        cli_runner.test_interactive(CMD, in_out=inout)
 
-        session = cli_runner.run_interactive_command(cmdline.split())
+        # session = cli_runner.run_interactive_command(cmdline)
 
-        session.send_key(instr)
-        assert session.expect(expect1)
-        assert session.expect(expect2)
+        # session.send_key(instr)
+        # assert session.expect(expect1)
+        # assert session.expect(expect2)
 
-        session.close()
-        time.sleep(3)
+        # session.close()
+        # time.sleep(3)
