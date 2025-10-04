@@ -18,13 +18,13 @@ alias = "upsys"
 description = "upgrade in this project"
 run = '''
 # upgrade this project
-echo "# pip"
-uv pip install -U --group dev -e .
-uv pip install -U --group samples -e .
 echo "# pyclickutils"
 uv add -U ../pyclickutils
 echo "# pyclibase"
 uv add -U ../pyclibase
+echo "# pip"
+uv pip install -U --group dev -e .
+uv pip install -U --group samples -e .
 '''
 alias = "uplocal"
 depends = ["upgradesys"]
