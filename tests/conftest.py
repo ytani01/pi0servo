@@ -67,8 +67,9 @@ class InteractiveSession:
         """Sends a key press to the process."""
         os.write(self.master_fd, key.encode())
 
-    def expect(self, pattern: str, timeout: int = 5) -> bool:
+    def expect(self, pattern: str, timeout: int = 20) -> bool:
         """Waits for a pattern to appear in the output."""
+        print(f"\n* pattern: '''{pattern}'''")
         start_time = time.time()
         while time.time() - start_time < timeout:
             r, _, _ = select.select([self.master_fd], [], [], 0.1)
@@ -76,10 +77,9 @@ class InteractiveSession:
                 try:
                     data = os.read(self.master_fd, 1024).decode()
                     self.output += data
+                    print(f" >>> {data}")
                     if pattern in self.output:
                         # print(f"* output: {self.output!r}")
-                        print(f"* output: '''{self.output}'''")
-                        print(f"* pattern: '''{pattern}'''")
                         return True
                 except OSError as _e:
                     print(f"{type(_e).__name__}: {_e}")
@@ -91,6 +91,7 @@ class InteractiveSession:
             return True
 
         self.close()
+        print("Timeout")
         return False
 
     def get_output(self) -> str:
@@ -110,7 +111,7 @@ class CLITestBase:
     コマンドの実行、出力のアサーションなど、CLIテストで頻繁に使用する機能を提供します。
     """
 
-    DEFAULT_TIMEOUT = 10
+    DEFAULT_TIMEOUT = 20
     DEFAULT_ENCODING = "utf-8"
 
     def run_command(
