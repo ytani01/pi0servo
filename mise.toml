@@ -45,12 +45,16 @@ depends = ["upgradesys"]
 description = "linting"
 run = '''
 # linting
+
 echo "# isort"
 uv run isort src samples tests
+
 echo "# ruff"
 uv run ruff format src samples tests
+
 echo "# pyright"
 uv run pyright src samples tests
+
 echo "# mypy"
 uv run mypy src samples tests
 '''

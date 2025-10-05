@@ -19,14 +19,17 @@ class InteractiveSession:
 
     def send_key(self, key: str):
         """Sends a key press to the process."""
-        print(f"## key: {key!r}")
+        print(f"## key-input: {key!r}")
         os.write(self.master_fd, key.encode())
 
     def expect(self, pattern: str | list[str], timeout: float = 5.0) -> bool:
         """Waits for a pattern to appear in the output."""
+        if not pattern:
+            return True
+
         if isinstance(pattern, str):
             pattern = [pattern]
-        print(f"## expect: {pattern}")
+        print(f"### excpect: {pattern!r}")
 
         start_time = time.time()
         self.output = ""
@@ -43,7 +46,9 @@ class InteractiveSession:
                         if p in self.output:
                             matched_pattern.append(p)
                             true_count += 1
-                    print(f" {true_count}/{len(pattern)} >>> {data}")
+                    print(
+                        f">>> {data!r}\n#### match: {true_count}/{len(pattern)}"
+                    )
                     if true_count == len(pattern):
                         return True
                 except OSError:
@@ -56,25 +61,30 @@ class InteractiveSession:
     ):
         """Assert output."""
         if e_stdout:
-            print(f"## expected={e_stdout}")
+            print("## <stdout>")
             assert self.expect(e_stdout)
         if e_stderr:
-            print(f"## expected={e_stderr}")
+            print("## <stderr>")
             assert self.expect(e_stderr)
 
     def assert_in_out(self, in_data: str, out_data: str | list[str]):
         """Assert interactive in and out."""
-        print(f"\n## in={in_data!r}")
+        # print(f"in_data={in_data!r}")
         self.send_key(in_data)
         time.sleep(0.1)
 
-        # print(f"### expected={out_data}")
+        # print(f"out_data={out_data}")
         assert self.expect(out_data)
         time.sleep(0.1)
 
     def assert_in_out_list(self, inout: list[dict]):
         """Assert interactive in and out."""
+        # print(f"inout={inout}")
+        if isinstance(inout, dict):
+            inout = [inout]
+
         for _inout in inout:
+            # print(f"_inout={_inout}")
             self.assert_in_out(_inout["in"], _inout["out"])
 
     def close(self, terminate_flag=True, timeout_sec=3.0):
@@ -82,11 +92,11 @@ class InteractiveSession:
         ret = None
 
         if terminate_flag:
-            print("* terminate")
+            print("* terminate process")
             self.process.terminate()
         try:
             ret = self.process.wait(timeout=timeout_sec)
-            print(f"ret={ret}")
+            print(f"* ret={ret}")
         except subprocess.TimeoutExpired as _e:
             print(f"{type(_e).__name__}: {_e}")
             print("* kill process")
@@ -104,16 +114,35 @@ class CLITestBase:
     DEFAULT_TIMEOUT = 10
     DEFAULT_ENCODING = "utf-8"
 
+    def _cmdline(
+        self, command: str | list[str], args: str | list[str] | None = None
+    ) -> tuple[str, list]:
+        """make command line list and string."""
+        if isinstance(command, str):
+            cmdline_list = command.split()
+        else:
+            cmdline_list = command
+
+        if args:
+            if isinstance(args, str):
+                cmdline_list += args.split()
+            else:
+                cmdline_list += args
+
+        cmdline_str = " ".join(cmdline_list)
+
+        return (cmdline_str, cmdline_list)
+
     def run_command(
         self,
         command: str | list[str],
-        opts: str | list[str] | None = None,
+        args: str | list[str] | None = None,
         input_data: Optional[str] = None,
         timeout: int = DEFAULT_TIMEOUT,
         cwd: Optional[str] = None,
         env: Optional[dict[str, str]] = None,
     ) -> subprocess.CompletedProcess:
-        """コマンドを実行し、結果を返します。
+        """コマンドを実行し、結果を返す。
 
         Args:
             command: 実行するコマンドのリスト。
@@ -123,30 +152,20 @@ class CLITestBase:
             env: コマンドの環境変数。
 
         Returns:
-            コマンドの実行結果。
+            result: コマンドの実行結果。
 
         Raises:
             pytest.fail: コマンドの実行に失敗した場合。
             pytest.skip: コマンドが見つからない場合。
         """
-        if isinstance(command, str):
-            command_list = command.split()
-        else:
-            command_list = command
-
-        if opts:
-            if isinstance(opts, str):
-                command_list += opts.split()
-            else:
-                command_list += opts
-        command_str = " ".join(command_list)
+        cmdline_str, cmdline_list = self._cmdline(command, args)
+        print(f"\n# cmdline = {cmdline_str!r}")
 
         try:
-            print(f"\n\n# cmdline = {command_str!r}")
             if input_data:
                 print(f"## input: {input_data!r}")
             result = subprocess.run(
-                command_list,
+                cmdline_list,
                 capture_output=True,
                 text=True,
                 encoding=self.DEFAULT_ENCODING,
@@ -157,8 +176,8 @@ class CLITestBase:
             )
             return result
         except subprocess.TimeoutExpired as _e:
-            command_str = " ".join(command)
-            pytest.fail(f"{type(_e).__name__}: {timeout}s: {command_str}")
+            cmdline_str = " ".join(command)
+            pytest.fail(f"{type(_e).__name__}: {timeout}s: {cmdline_str}")
         except FileNotFoundError:
             pytest.skip(f"Command not found: {command[0]}")
 
@@ -198,36 +217,35 @@ class CLITestBase:
     def test_command(
         self,
         command: str | list[str],
-        opts: str | list[str] = "",
+        args: str | list[str] = "",
         input_data: Optional[str] = None,
+        timeout: int = DEFAULT_TIMEOUT,
+        cwd: Optional[str] = None,
+        env: Optional[dict[str, str]] = None,
         e_stdout: str | list[str] = "",
         e_stderr: str | list[str] = "",
         e_ret: int | None = None,
     ) -> None:
         """Test command."""
-        result = self.run_command(command, opts, input_data)
+        result = self.run_command(
+            command,
+            args=args,
+            input_data=input_data,
+            timeout=timeout,
+            cwd=cwd,
+            env=env,
+        )
         self.assert_result(result, e_stdout, e_stderr, e_ret)
 
     def run_interactive_command(
-        self, command: str | list[str], opts: str | list[str] = ""
+        self, command: str | list[str], args: str | list[str] = ""
     ) -> "InteractiveSession":
-        if isinstance(command, str):
-            command_list = command.split()
-        else:
-            command_list = command
-
-        if opts:
-            if isinstance(opts, str):
-                command_list += opts.split()
-            else:
-                command_list += opts
-
-        command_str = " ".join(command_list)
-        print(f"\n# command line:  {command_str!r}")
+        cmdline_str, cmdline_list = self._cmdline(command, args)
+        print(f"\n# command line:  {cmdline_str!r}")
 
         master_fd, slave_fd = pty.openpty()
         process = subprocess.Popen(
-            command_list,
+            cmdline_list,
             stdin=slave_fd,
             stdout=slave_fd,
             stderr=slave_fd,
@@ -240,7 +258,7 @@ class CLITestBase:
     def test_interactive(
         self,
         cmdline: str | list[str],
-        opts: str | list[str] = "",
+        args: str | list[str] = "",
         e_stdout: str | list[str] = "",
         e_stderr: str | list[str] = "",
         in_out: list[dict] = [],
@@ -248,18 +266,7 @@ class CLITestBase:
         e_ret: int | None = None,
     ) -> None:
         """Test interactive session."""
-        if isinstance(cmdline, str):
-            cmdline_list = cmdline.split()
-        else:
-            cmdline_list = cmdline
-
-        if opts:
-            if isinstance(opts, str):
-                cmdline_list += opts.split()
-            else:
-                cmdline_list += opts
-
-        session = self.run_interactive_command(cmdline_list)
+        session = self.run_interactive_command(cmdline, args)
         session.assert_out(e_stdout, e_stderr)  # 起動直後
         session.assert_in_out_list(in_out)  # 入出力
         ret = session.close(terminate_flag)  # 終了
