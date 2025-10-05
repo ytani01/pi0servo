@@ -74,7 +74,7 @@ class StrCmdToJson:
         return {"error": code_key, "data": strcmd}
 
     def _parse_angles(
-        self, param_str: str
+        self, angle_str: str
     ) -> Optional[List[Union[int, str, None]]]:
         """Parse angle parameters.
         'mv'コマンドのパラメータ文字列をパースして角度のリストを返す.
@@ -86,14 +86,14 @@ class StrCmdToJson:
             "x,n,c"         --> ["max","min","center"]
             "x,.,center,20" --> ["max",null,"center",20]
         """
-        parts = param_str.split(",")
-        self.__log.debug("parts=%s", parts)
+        angle_parts = angle_str.split(",")
+        # self.__log.debug("angle_parts=%s", angle_parts)
 
         angles: List[Union[int, str, None]] = []
 
-        for part in parts:
-            _p = part.strip().lower()
-            self.__log.debug("_p=%s", _p)
+        for angle_part in angle_parts:
+            _p = angle_part.strip().lower()
+            # self.__log.debug("_p=%s", _p)
             if not _p:  # 空の要素は不正
                 return None
 
@@ -115,7 +115,7 @@ class StrCmdToJson:
                 except ValueError:
                     return None  # 数値に変換できない
 
-        self.__log.debug("angles=%s", angles)
+        # self.__log.debug("angles=%s", angles)
 
         # angle_factor に応じて符号反転
         for _i in range(len(angles)):
@@ -235,7 +235,7 @@ class StrCmdToJson:
 
         for cmd_str in cmd_line.split():
             _cmd_data = self.cmdstr_to_json(cmd_str)
-            self.__log.debug("cmd_data=%s", _cmd_data)
+            # self.__log.debug("cmd_data=%s", _cmd_data)
 
             _cmd_data_list.append(_cmd_data)
 
@@ -246,7 +246,7 @@ class StrCmdToJson:
 
     def cmdstr_to_jsonliststr(self, cmd_line: str) -> str:
         """Dict形式をJSON文字列に変換."""
-        self.__log.debug("cmd_line=%s", cmd_line)
+        # self.__log.debug("cmd_line=%s", cmd_line)
 
         _json_data: List[dict] | dict = self.cmdstr_to_jsonlist(cmd_line)
 

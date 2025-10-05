@@ -6,7 +6,6 @@ Test for ServoConfigManager
 """
 
 import json
-import os
 from pathlib import Path
 
 import pytest
@@ -31,12 +30,16 @@ def setup_test_env(tmp_path, monkeypatch):
     test_cwd.mkdir()
     test_home.mkdir()
 
-    # Path.home() と os.getcwd() をモンキーパッチで差し替え
+    # Path.home()をモンキーパッチで差し替え
     monkeypatch.setattr(Path, "home", lambda: test_home)
-    monkeypatch.setattr(os, "getcwd", lambda: str(test_cwd))
+
+    # monkeypatch.setattr(os, "getcwd", lambda: str(test_cwd))
+    #   上記の行は、getcwdを書き換えてしまうので、
+    #   後続のテストで問題が起こる！
 
     # テスト中は作成したカレントディレクトリに移動
     monkeypatch.chdir(test_cwd)
+    print(f"\ntest_cwd={test_cwd}\n")
 
     # 各ディレクトリのパスをyieldで返す
     yield {

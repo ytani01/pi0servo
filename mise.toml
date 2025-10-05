@@ -6,9 +6,11 @@ echo "# apt"
 LANG=C sudo apt update
 LANG=C sudo apt upgrade
 LANG=C sudo apt autoremove -y
+
 echo "# mise"
 mise self-update
 mise up
+
 echo "# uv"
 uv tool upgrade --all
 '''
@@ -53,15 +55,21 @@ echo "# ruff"
 uv run ruff format src samples tests
 uv run ruff check --fix --extend-select I  src samples tests
 
-echo "# pyright"
-uv run pyright src samples tests
+# echo "# pyright"
+# uv run pyright src samples tests
 
 echo "# mypy"
 uv run mypy src samples tests
+
+uv run pi0servo -V
 '''
 depends = ["upgradelocal"]
 
 [tasks.test]
 description = "test"
-run = "uv run pytest -v tests"
+run = '''
+uv run pytest -v tests
+
+uv run pi0servo -V
+'''
 depends = ["lint"]

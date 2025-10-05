@@ -168,6 +168,8 @@ def api_cli(ctx, pins, history_file, script_file, debug):
         print_pins_error(ctx)
         return
 
+    pi = None
+    app = None
     try:
         pi = get_pi(debug)
         app = CmdApiCli(
@@ -177,6 +179,12 @@ def api_cli(ctx, pins, history_file, script_file, debug):
 
     except Exception as _e:
         __log.error("%s: $%s", type(_e).__name__, _e)
+
+    finally:
+        # if app:
+        #     app.end()
+        if pi:
+            pi.stop()
 
 
 @cli.command()
@@ -218,6 +226,8 @@ def str_cli(ctx, pins, history_file, script_file, angle_factor, debug):
     af_list = [int(i) for i in angle_factor.split(",")]
     __log.debug("af_list=%s", af_list)
 
+    app = None
+    pi = None
     try:
         pi = get_pi(debug)
         app = CmdStrCli(
@@ -233,6 +243,12 @@ def str_cli(ctx, pins, history_file, script_file, angle_factor, debug):
 
     except Exception as _e:
         __log.error("%s: $%s", type(_e).__name__, _e)
+
+    finally:
+        # if app:
+        #     app.end()
+        if pi:
+            pi.stop()
 
 
 @cli.command()

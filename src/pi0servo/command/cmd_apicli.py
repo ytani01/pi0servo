@@ -46,7 +46,7 @@ class CmdApiCli(CliBase):
 
         if self.thworker:
             self.thworker.end()
-        print("\n* Bye\n")
+        print("\n* Bye!\n")
 
     def parse_line(self, line: str) -> str:
         """parse command line string to json string"""

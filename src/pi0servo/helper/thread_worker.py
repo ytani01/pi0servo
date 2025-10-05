@@ -140,6 +140,27 @@ class ThreadWorker(threading.Thread):
             "set": self._handle_set,
         }
 
+    def __enter__(self):
+        """Enter for 'with'."""
+        self.__log.debug("")
+
+        self.start()
+
+        return self
+
+    def __exit__(self, ex_type, ex_value, trace):
+        """Exit for 'with'."""
+        self.__log.debug(
+            "ex_type=%s, ex_value=%s, trace=%s", ex_type, ex_value, trace
+        )
+
+        if ex_type:
+            self.__log.error("%s: %s", ex_type.__name__, ex_value)
+            return True
+
+        self.end()
+        return False
+
     @property
     def qsize(self) -> int:
         """Size of command queue."""
