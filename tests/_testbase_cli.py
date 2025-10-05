@@ -48,18 +48,27 @@ class InteractiveSession:
                     data = os.read(self.master_fd, 1024).decode()
                     self.output += data
                     # print(f"### Current output: \n{self.output}")
-                    true_count = 0
                     matched_pattern = []
                     for p in pattern:
                         if p in self.output:
                             matched_pattern.append(p)
-                            true_count += 1
                     print(
-                        f">>> {data!r}\n#### match: {true_count}/{len(pattern)}"
+                        "#### data\n"
+                        f"{data!r}\n"
+                        "##### matched:"
+                        f"{len(matched_pattern)}/{len(pattern)}:"
+                        f" {matched_pattern}"
                     )
-                    if true_count == len(pattern):
+                    if len(matched_pattern) == len(pattern):
+                        # print(f"#### matched all: {pattern!r}")
                         return True
-                except OSError:
+
+                except UnicodeDecodeError as _e:
+                    print(f"{type(_e).__name__}, {_e}")
+                    continue
+
+                except OSError as _e:
+                    print(f"{type(_e).__name__}, {_e}")
                     break
             time.sleep(0.05)
         return False
@@ -80,14 +89,18 @@ class InteractiveSession:
 
     def assert_in_out(
         self,
-        in_data: str,
+        in_data: str | list[str],
         out_data: str | list[str],
         timeout: float = TIMEOUT_EXPECT,
     ):
         """Assert interactive in and out."""
         # print(f"in_data={in_data!r}")
-        self.send_key(in_data)
-        time.sleep(0.1)
+        if isinstance(in_data, str):
+            in_data = [in_data]
+
+        for _i in in_data:
+            self.send_key(_i)
+            time.sleep(0.1)
 
         # print(f"out_data={out_data}")
         assert self.expect(out_data, timeout=timeout)
@@ -178,6 +191,7 @@ class CLITestBase:
         """
         cmdline_str, cmdline_list = self._cmdline(command, args)
         print(f"\n# cmdline = {cmdline_str!r}")
+        print(f"# cmdline_list = {cmdline_list}")
 
         try:
             if input_data:
@@ -195,7 +209,7 @@ class CLITestBase:
             return result
         except subprocess.TimeoutExpired as _e:
             cmdline_str = " ".join(command)
-            pytest.fail(f"{type(_e).__name__}: {timeout}s: {cmdline_str}")
+            pytest.fail(f"{type(_e).__name__}: {timeout}s: {cmdline_str!r}")
         except FileNotFoundError:
             pytest.skip(f"Command not found: {command[0]}")
 

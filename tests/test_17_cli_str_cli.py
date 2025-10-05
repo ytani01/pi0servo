@@ -19,7 +19,7 @@ class TestCmdStrCli:
         ],
     )
     def test_cli_cmdline(self, cli_runner, args, stdout, stderr):
-        """servo command"""
+        """Cilent String CLI."""
         cli_runner.test_command(CMD, args, e_stdout=stdout, e_stderr=stderr)
 
     @pytest.mark.parametrize(
@@ -45,7 +45,5 @@ class TestCmdStrCli:
         ],
     )
     def test_cli_inout(self, cli_runner, inout):
-        """servo command"""
-        cmdline = f"{CMD} {PINS}"
-
-        cli_runner.test_interactive(cmdline, in_out=inout)
+        """Cilent String CLI."""
+        cli_runner.test_interactive(CMD, PINS, in_out=inout)

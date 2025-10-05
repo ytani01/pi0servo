@@ -44,13 +44,14 @@ depends = ["upgradesys"]
 [tasks.lint]
 description = "linting"
 run = '''
-# linting
+# format and linting
 
-echo "# isort"
-uv run isort src samples tests
+#  echo "# isort"
+# uv run isort --diff src samples tests
 
 echo "# ruff"
 uv run ruff format src samples tests
+uv run ruff check --fix --extend-select I  src samples tests
 
 echo "# pyright"
 uv run pyright src samples tests

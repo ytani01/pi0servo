@@ -14,7 +14,7 @@ class TestBasic:
         cmdline = f"{CMD} {PIN}"
         print(f"* cmdline='{cmdline}'")
 
-        session = cli_runner.run_interactive_command(cmdline.split())
+        session = cli_runner.run_interactive_command(cmdline)
 
         assert session.expect("Ready")
 
@@ -27,7 +27,7 @@ class TestBasic:
         cmdline = CMD
         print(f"* cmdline='{cmdline}'")
 
-        result = cli_runner.run_command(cmdline.split())
+        result = cli_runner.run_command(cmdline)
         print(f"stdout='{result.stdout}'")
         print(f"stderr='{result.stderr}'")
 

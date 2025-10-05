@@ -21,63 +21,43 @@ class TestCmdApiCli:
     def test_cli_cmdline_err(self, cli_runner, args, stdout, stderr):
         """servo command"""
         cmdline = f"{CMD} {args}"
-        result = cli_runner.run_command(cmdline.split())
-        print(f"* stdout='''{result.stdout}'''")
-        print(f"** expect='{stdout}'")
-        print(f"* stderr='''{result.stderr}'''")
-        print(f"** expect='{stderr}'")
-
-        cli_runner.assert_output_contains(
-            result, stdout=stdout, stderr=stderr
-        )
+        cli_runner.test_command(cmdline, e_stdout=stdout, e_stderr=stderr)
 
     @pytest.mark.parametrize(
-        "inout",
+        ["indata", "expected"],
         [
-            [
-                {"in": "\n", "out": ["", f"{CMDNAME}>"]},
-                {
-                    "in": (
-                        '{"method": "move", "params": {"angles": [30, 30]}}\n'
-                    ),
-                    "out": ["'value': None", f"{CMDNAME}"],
-                },
-            ],
-            [
-                {
-                    "in": (
-                        '{"method": "move", "params": {"angles": [30, 30]}}, '
-                        '{"method": "move", "params": {"angles": [0, 0]}}'
-                        "\n"
-                    ),
-                    "out": ["[30, 30]", "[0, 0]"],
-                },
-                {
-                    "in": '{"method": "cancel"}\n',
-                    "out": ["'value': 0", f"{CMDNAME}>"],
-                },
-                {
-                    "in": '{"method": "qsize"}\n',
-                    "out": ["'value': ", f"{CMDNAME}>"],
-                },
-            ],
-            [
-                {
-                    "in": (
-                        "["
-                        '{"method":"move_sec","params": {"sec": 1}}, '
-                        '{"method":"move","params":{"angles":[20,-20]}}, '
-                        '{"method":"move","params":{"angles":[0,0]}}, '
-                        '{"method":"wait"}'
-                        "]\n"
-                    ),
-                    "out": ["'qsize': 1", "'qsize': 0"],
-                },
-                {"in": "a\n", "out": ["JSONDecodeError", f"{CMDNAME}>"]},
-            ],
+            ("\n", [f"{CMDNAME}>"]),
+            (
+                '{"method": "move", "params": {"angles": [30, 30]}}\n',
+                ["'value': None", f"{CMDNAME}"],
+            ),
+            (
+                (
+                    '{"method": "move", "params": {"angles": [30, 30]}}, '
+                    '{"method": "move", "params": {"angles": [0, 0]}}'
+                    "\n"
+                ),
+                ["[30, 30]", "[0, 0]"],
+            ),
+            (
+                '{"method": "cancel"}\n',
+                ["'value': 0", f"{CMDNAME}>"],
+            ),
+            ('{"method": "qsize"}\n', ["'value': ", f"{CMDNAME}>"]),
+            (
+                "["
+                '{"method":"move_sec","params": {"sec": 1}}, '
+                '{"method":"move","params":{"angles":[20,-20]}}, '
+                '{"method":"move","params":{"angles":[0,0]}}, '
+                '{"method":"wait"}'
+                "]\n",
+                ["'qsize': 1", "'qsize': 0"],
+            ),
+            ("a\n", ["JSONDecodeError", f"{CMDNAME}>"]),
         ],
     )
-    def test_cli_interactive(self, cli_runner, inout):
+    def test_cli_interactive(self, cli_runner, indata, expected):
         """servo command"""
         cmdline = f"{CMD} {PINS}"
+        inout = {"in": indata, "out": expected}
         cli_runner.test_interactive(cmdline, in_out=inout)

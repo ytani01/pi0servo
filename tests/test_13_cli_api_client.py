@@ -1,6 +1,3 @@
-#
-import time
-
 import pytest
 
 CMD = "uv run pi0servo api-client --history_file /tmp/testhist"
@@ -10,26 +7,16 @@ class TestBasic:
     """Basic tests."""
 
     @pytest.mark.parametrize(
-        "inout",
+        ["in_data", "expect"],
         [
-            [
-                {
-                    "in": '{"method": "cancel"}\n',
-                    "out": ["NewConnectionError", "result=", "api-client>"],
-                },
-                {"in": "a\n", "out": ["JSONDecodeError", "api-client>"]},
-            ],
+            (
+                '{"method": "cancel"}\n',
+                ["NewConnectionError", "result=", "api-client>"],
+            ),
+            ("a\n", ["JSONDecodeError", "api-client>"]),
         ],
     )
-    def test_api_client(self, cli_runner, inout):
+    def test_api_client(self, cli_runner, in_data, expect):
         """servo command"""
-        cli_runner.test_interactive(CMD, in_out=inout)
-
-        # session = cli_runner.run_interactive_command(cmdline)
-
-        # session.send_key(instr)
-        # assert session.expect(expect1)
-        # assert session.expect(expect2)
-
-        # session.close()
-        # time.sleep(3)
+        inout = {"in": in_data, "out": expect}
+        cli_runner.test_interactive(CMD, in_out=inout, timeout=10.0)
