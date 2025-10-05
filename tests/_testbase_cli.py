@@ -7,6 +7,9 @@ from typing import Optional
 
 import pytest
 
+TIMEOUT_EXPECT = 5.0
+TIMEOUT_CLOSE = 3.0
+
 
 class InteractiveSession:
     """Interactive session."""
@@ -19,10 +22,15 @@ class InteractiveSession:
 
     def send_key(self, key: str):
         """Sends a key press to the process."""
+        if not key:
+            return
+
         print(f"## key-input: {key!r}")
         os.write(self.master_fd, key.encode())
 
-    def expect(self, pattern: str | list[str], timeout: float = 5.0) -> bool:
+    def expect(
+        self, pattern: str | list[str], timeout: float = TIMEOUT_EXPECT
+    ) -> bool:
         """Waits for a pattern to appear in the output."""
         if not pattern:
             return True
@@ -57,27 +65,37 @@ class InteractiveSession:
         return False
 
     def assert_out(
-        self, e_stdout: str | list[str], e_stderr: str | list[str]
+        self,
+        e_stdout: str | list[str] | None = None,
+        e_stderr: str | list[str] | None = None,
+        timeout: float = TIMEOUT_EXPECT,
     ):
         """Assert output."""
         if e_stdout:
             print("## <stdout>")
-            assert self.expect(e_stdout)
+            assert self.expect(e_stdout, timeout=timeout)
         if e_stderr:
             print("## <stderr>")
-            assert self.expect(e_stderr)
+            assert self.expect(e_stderr, timeout=timeout)
 
-    def assert_in_out(self, in_data: str, out_data: str | list[str]):
+    def assert_in_out(
+        self,
+        in_data: str,
+        out_data: str | list[str],
+        timeout: float = TIMEOUT_EXPECT,
+    ):
         """Assert interactive in and out."""
         # print(f"in_data={in_data!r}")
         self.send_key(in_data)
         time.sleep(0.1)
 
         # print(f"out_data={out_data}")
-        assert self.expect(out_data)
+        assert self.expect(out_data, timeout=timeout)
         time.sleep(0.1)
 
-    def assert_in_out_list(self, inout: list[dict]):
+    def assert_in_out_list(
+        self, inout: list[dict], timeout: float = TIMEOUT_EXPECT
+    ):
         """Assert interactive in and out."""
         # print(f"inout={inout}")
         if isinstance(inout, dict):
@@ -85,9 +103,9 @@ class InteractiveSession:
 
         for _inout in inout:
             # print(f"_inout={_inout}")
-            self.assert_in_out(_inout["in"], _inout["out"])
+            self.assert_in_out(_inout["in"], _inout["out"], timeout=timeout)
 
-    def close(self, terminate_flag=True, timeout_sec=3.0):
+    def close(self, terminate_flag=True, timeout_sec=TIMEOUT_CLOSE):
         """Terminates the process and closes the file descriptor."""
         ret = None
 
@@ -264,11 +282,12 @@ class CLITestBase:
         in_out: list[dict] = [],
         terminate_flag=True,
         e_ret: int | None = None,
+        timeout: float = TIMEOUT_EXPECT,
     ) -> None:
         """Test interactive session."""
         session = self.run_interactive_command(cmdline, args)
-        session.assert_out(e_stdout, e_stderr)  # 起動直後
-        session.assert_in_out_list(in_out)  # 入出力
+        session.assert_out(e_stdout, e_stderr, timeout=timeout)  # 起動直後
+        session.assert_in_out_list(in_out, timeout=timeout)  # 入出力
         ret = session.close(terminate_flag)  # 終了
         if isinstance(e_ret, int):
             assert ret == e_ret

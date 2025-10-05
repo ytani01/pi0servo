@@ -28,26 +28,13 @@ class TestBasic:
     ):
         """servo command"""
         cmdline = f"{CMD} {arg} {opt}"
-        print(f"""
-* cmdline='{cmdline}""")
 
-        session = cli_runner.run_interactive_command(cmdline.split())
-        time.sleep(1)
+        in_out = [
+            {"in": inkey1, "out": expect1},
+            {"in": inkey2, "out": expect2},
+        ]
 
-        if inkey1:
-            print(f"""* inkey1='{inkey1}""")
-            session.send_key(inkey1)
-            assert session.expect(expect1)
-            time.sleep(1)
-
-        if inkey2:
-            print(f"""* inkey2='{inkey2}""")
-            session.send_key(inkey2)
-            assert session.expect(expect2)
-            # time.sleep(1)
-
-        session.close()
-        time.sleep(1)
+        cli_runner.test_interactive(cmdline, in_out=in_out, timeout=10.0)
 
     @pytest.mark.parametrize(
         "arg, opt, sig",
@@ -58,14 +45,12 @@ class TestBasic:
     def test_cli_calib_signal(self, cli_runner, arg, opt, sig):
         """servo command"""
         cmdline = f"{CMD} {arg} {opt}"
-        print(f"""
-* cmdline='{cmdline}', sig={sig}""")
-
-        session = cli_runner.run_interactive_command(cmdline.split())
+        session = cli_runner.run_interactive_command(cmdline)
         time.sleep(1)
 
         proc = session.process
 
+        print(f"* send_signal: {sig}")
         proc.send_signal(sig)
         proc.wait(timeout=3)
 
