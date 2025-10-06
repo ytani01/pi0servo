@@ -68,37 +68,37 @@ class MultiServo:
         if self.first_move:
             self.move_all_angles([0] * self.servo_n)
 
-    def __getattr__(self, name):
-        """
-        存在しない属性が呼び出された場合に、
-        各サーボの同名メソッドを呼び出す。
-        """
-        self.__log.debug("name=%s", name)
+    # def __getattr__(self, name):
+    #     """
+    #     存在しない属性が呼び出された場合に、
+    #     各サーボの同名メソッドを呼び出す。
+    #     """
+    #     self.__log.debug("name=%s", name)
 
-        # 各サーボインスタンスに同じ名前のメソッドが存在するか確認
-        if not all(
-            hasattr(s, name) and callable(getattr(s, name))
-            for s in self.servo
-        ):
-            msg = (
-                f"'{self.__class__.__name__}' object and its servos "
-                f"have no attribute '{name}'"
-            )
-            raise AttributeError(msg)
+    #     # 各サーボインスタンスに同じ名前のメソッドが存在するか確認
+    #     if not all(
+    #         hasattr(s, name) and callable(getattr(s, name))
+    #         for s in self.servo
+    #     ):
+    #         msg = (
+    #             f"'{self.__class__.__name__}' object and its servos "
+    #             f"have no attribute '{name}'"
+    #         )
+    #         raise AttributeError(msg)
 
-        def method(*args, **kwargs):
-            results = []
-            for s in self.servo:
-                # 各サーボのメソッドを呼び出す
-                result = getattr(s, name)(*args, **kwargs)
-                results.append(result)
+    #     def method(*args, **kwargs):
+    #         results = []
+    #         for s in self.servo:
+    #             # 各サーボのメソッドを呼び出す
+    #             result = getattr(s, name)(*args, **kwargs)
+    #             results.append(result)
 
-            # 結果がすべてNoneならNoneを、そうでなければ結果のリストを返す
-            if all(r is None for r in results):
-                return None
-            return results
+    #         # 結果がすべてNoneならNoneを、そうでなければ結果のリストを返す
+    #         if all(r is None for r in results):
+    #             return None
+    #         return results
 
-        return method
+    #     return method
 
     def get_pulse_center(self, index: int):
         """Get center(0 deg) pulse.
@@ -345,27 +345,42 @@ class MultiServo:
             # self.__log.debug("pin=%s, angle=%s", _s.pin, target_angles[_i])
             _s.move_angle(target_angles[_i])
 
-    def move_all_angles_relative(self, angle_diffs):
+    def move_all_angles_sync_relative(
+        self,
+        angle_diffs: list[float],
+        move_sec: float = DEF_MOVE_SEC,
+        step_n: int = DEF_STEP_N,
+    ):
         """Relative Move.
 
-        Args:
-            angle_diffs (List[float]):
+        Parameters
+        ----------
+        angle_diffs: list[float]
+            各サーボの相対角度のリスト。
+            None: 現在の角度(つまり、動かさない)
+        move_sec: float
+            動作にかかるおおよその時間（秒）。
+        step_n: int
+            動作を分割するステップ数。
+            1以下の場合は、move_angle() を呼び出して、ダイレクトに動かす
         """
         self.__log.debug("angle_diffs=%s", angle_diffs)
 
         _cur_angles = self.get_all_angles()
         self.__log.debug("cur_angles=%s", _cur_angles)
 
-        _new_angles = [
-            _cur_angles[i] + angle_diffs[i] for i in range(len(self.servo))
-        ]
+        _new_angles: list[float] = []
+        for i in range(len(self.servo)):
+            _new_angles.append(_cur_angles[i])
+            if angle_diffs[i]:
+                _new_angles[i] += angle_diffs[i]
         self.__log.debug("new_angles=%s", _new_angles)
 
-        self.move_angle(_new_angles)
+        self.move_all_angles_sync(_new_angles, move_sec, step_n)
 
     def move_all_angles_sync(
         self,
-        target_angles,
+        target_angles: list[float],
         move_sec: float = DEF_MOVE_SEC,
         step_n: int = DEF_STEP_N,
     ):
@@ -451,26 +466,26 @@ class MultiServo:
             # )
             time.sleep(_step_sec)
 
-    def move_angle_sync_relative(
-        self,
-        angle_diffs: list[float],
-        move_sec: float = DEF_MOVE_SEC,
-        step_n: int = DEF_STEP_N,
-    ):
-        """Relative Move."""
-        self.__log.debug(
-            "angle_diffs=%s, move_sec=%s, step_n=%s",
-            angle_diffs,
-            move_sec,
-            step_n,
-        )
+    # def move_angle_sync_relative(
+    #     self,
+    #     angle_diffs: list[float],
+    #     move_sec: float = DEF_MOVE_SEC,
+    #     step_n: int = DEF_STEP_N,
+    # ):
+    #     """Relative Move."""
+    #     self.__log.debug(
+    #         "angle_diffs=%s, move_sec=%s, step_n=%s",
+    #         angle_diffs,
+    #         move_sec,
+    #         step_n,
+    #     )
 
-        _cur_angles = self.get_all_angles()
-        self.__log.debug("cur_angles=%s", _cur_angles)
+    #     _cur_angles = self.get_all_angles()
+    #     self.__log.debug("cur_angles=%s", _cur_angles)
 
-        _new_angles = [
-            _cur_angles[i] + angle_diffs[i] for i in range(len(self.servo))
-        ]
-        self.__log.debug("new_angles=%s", _cur_angles)
+    #     _new_angles = [
+    #         _cur_angles[i] + angle_diffs[i] for i in range(len(self.servo))
+    #     ]
+    #     self.__log.debug("new_angles=%s", _cur_angles)
 
-        self.move_angle_sync(_new_angles, move_sec, step_n)
+    #     self.move_angle_sync(_new_angles, move_sec, step_n)

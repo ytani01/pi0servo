@@ -1,9 +1,3 @@
-# (c) 2025 Yoichi Tanibayashi
-#
-"""
-tests/test_04_multi_servo.py
-"""
-
 from unittest.mock import MagicMock, patch
 
 import pytest
