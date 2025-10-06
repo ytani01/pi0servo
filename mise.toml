@@ -41,7 +41,7 @@ echo "# uv run pi0servo -V"
 uv run pi0servo -V
 '''
 alias = "uplocal"
-depends = ["upgradesys"]
+# depends = ["upgradesys"]
 
 [tasks.lint]
 description = "linting"
