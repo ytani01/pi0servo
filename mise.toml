@@ -63,12 +63,12 @@ uv run mypy src samples tests
 
 uv run pi0servo -V
 '''
-depends = ["upgradelocal"]
+# depends = ["upgradelocal"]
 
 [tasks.test]
 description = "test"
 run = '''
-uv run pytest -v tests
+uv run pytest tests
 
 uv run pi0servo -V
 '''

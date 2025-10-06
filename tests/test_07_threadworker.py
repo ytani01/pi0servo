@@ -83,7 +83,7 @@ class TestThreadWorker:
         mservo = mocker_multiservo()
         cmd = {
             "method": "move_pulse_relative",
-            "params": {"servo": 2, "pulse_diff": -20},
+            "params": {"servo_idx": 2, "pulse_diff": -20},
         }
         thread_worker.send(cmd)
         time.sleep(0.5)  # コマンド処理を待つ

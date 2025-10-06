@@ -22,7 +22,7 @@ class StrCmdToJson:
         "st": "step_n",
         "is": "interval",
         # for calibration
-        "mp": "move_all_pulses_relative",
+        "mp": "move_pulse_relative",
         "sc": "set",  # set center
         "sn": "set",  # set min
         "sx": "set",  # set max
@@ -199,13 +199,24 @@ class StrCmdToJson:
                     return self._create_error_data("INVALID_PARAM", cmd_str)
                 _cmd_data["params"] = {"n": _n}
 
+            # elif cmd_key == "mp":
+            #     _pulse_diffs = [
+            #         int(_s) * self.angle_factor[i]
+            #         for i, _s in enumerate(cmd_param_str.split(","))
+            #     ]
+            #     self.__log.debug("pulse_diffs=%s", _pulse_diffs)
+            #     _cmd_data["params"] = {"pulse_diffs": _pulse_diffs}
+
             elif cmd_key == "mp":
-                _pulse_diffs = [
-                    int(_s) * self.angle_factor[i]
-                    for i, _s in enumerate(cmd_param_str.split(","))
-                ]
-                self.__log.debug("pulse_diffs=%s", _pulse_diffs)
-                _cmd_data["params"] = {"pulse_diffs": _pulse_diffs}
+                if not cmd_param_str:
+                    return self._create_error_data("INVALID_PARAM", cmd_str)
+                sv_idx_str, p_diff_str = cmd_param_str.split(",")
+                sv_idx = int(sv_idx_str)
+                p_diff = int(p_diff_str) * self.angle_factor[sv_idx]
+                _cmd_data["params"] = {
+                    "servo_idx": sv_idx,
+                    "pulse_diff": p_diff,
+                }
 
             elif cmd_key in ("sc", "sn", "sx"):
                 servo = int(cmd_param_str)

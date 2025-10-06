@@ -250,10 +250,10 @@ class MultiServo:
         for s in self.servo:
             s.off()
 
-    def get_pulse(self, idx: int) -> int:
-        """Get pulse of servo[idx]."""
-        _pulse = self.servo[idx].get_pulse()
-        self.__log.debug("idx=%s, pulse=%s", idx, _pulse)
+    def get_pulse(self, sv_idx: int) -> int:
+        """Get pulse of servo[sv_idx]."""
+        _pulse = self.servo[sv_idx].get_pulse()
+        self.__log.debug("sv_idx=%s, pulse=%s", sv_idx, _pulse)
         return _pulse
 
     def get_all_pulses(self):
@@ -268,9 +268,9 @@ class MultiServo:
         self.__log.debug("pulses=%s", pulses)
         return pulses
 
-    def move_pulse(self, idx, pulse, forced=False):
-        """Move one servo[idx]."""
-        self.servo[idx].move_pulse(pulse, forced)
+    def move_pulse(self, sv_idx, pulse, forced=False):
+        """Move one servo[sv_idx]."""
+        self.servo[sv_idx].move_pulse(pulse, forced)
 
     def move_all_pulses(self, pulses, forced=False):
         """Move all servos to `pulse`.
@@ -286,15 +286,15 @@ class MultiServo:
         for i in range(len(self.servo)):
             self.move_pulse(i, pulses[i], forced)
 
-    def move_pulse_relative(self, idx: int, pulse_diff: int, forced=False):
-        """Relative move one servo[idx]."""
+    def move_pulse_relative(self, sv_idx: int, pulse_diff: int, forced=False):
+        """Relative move one servo[sv_idx]."""
         self.__log.debug(
-            "idx=%s, pulse_diff=%s, forced=%s", idx, pulse_diff, forced
+            "sv_idx=%s, pulse_diff=%s, forced=%s", sv_idx, pulse_diff, forced
         )
-        _new_pulse = self.get_pulse(idx) + pulse_diff
+        _new_pulse = self.get_pulse(sv_idx) + pulse_diff
         self.__log.debug("new_pulse=%s", _new_pulse)
 
-        self.move_pulse(idx, _new_pulse, forced)
+        self.move_pulse(sv_idx, _new_pulse, forced)
 
     def move_all_pulses_relative(self, pulse_diffs, forced=False):
         """Relative move all servos.

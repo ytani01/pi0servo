@@ -27,10 +27,18 @@ class TestCmdStrCli:
         [
             [
                 {"in": "\n", "out": ["", f"{CMDNAME}>"]},
-                {"in": "mv:-30,-30\n", "out": ["method", "[-30, -30]"]},
-                {"in": "mv:30,30 mv:0,0\n", "out": ["[30, 30]", "[0, 0]"]},
+                {"in": "mv:-10,-10\n", "out": ["method", "[-10, -10]"]},
+                {"in": "mv:10,10 mv:0,0\n", "out": ["[10, 10]", "[0, 0]"]},
                 {"in": "zz\n", "out": ["cancel", "'value': ", "'qsize': 0"]},
                 {"in": "qq\n", "out": ["qsize", "result", "'value': 0"]},
+                {"in": "ww\n", "out": ["'qsize': 0", "flag': False"]},
+            ],
+            [
+                {"in": "sl:.5 ww\n", "out": ["'qsize': 0", "flag': False"]},
+                {"in": "mp:0,-50\n", "out": ["50}}}}", f"{CMDNAME}>"]},
+                {"in": "sl:.5 ww\n", "out": ["'qsize': 0", "flag': False"]},
+                {"in": "mp:0,50\n", "out": ["50}}}}", f"{CMDNAME}>"]},
+                {"in": "sl:.5 ww\n", "out": ["'qsize': 0", "flag': False"]},
             ],
             [
                 {

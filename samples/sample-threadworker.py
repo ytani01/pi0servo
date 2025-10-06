@@ -8,12 +8,12 @@ DEBUG_FLAG = False
 JSON_CMDS = [
     {"method": "step_n", "params": {"n": 20}},
     {"method": "move_sec", "params": {"sec": 1.0}},
-    {"method": "move", "params": {"angles": [50, 50]}},
-    {"method": "move", "params": {"angles": [-50, 50]}},
+    {"method": "move", "params": {"angles": [10, 10]}},
+    {"method": "move", "params": {"angles": [-10, 10]}},
     {"method": "move_sec", "params": {"sec": 0.1}},
     {"method": "sleep", "params": {"sec": 1}},
-    {"method": "move", "params": {"angles": [50, -50]}},
-    {"method": "move", "params": {"angles": [-50, -50]}},
+    {"method": "move", "params": {"angles": [10, -10]}},
+    {"method": "move", "params": {"angles": [-10, -10]}},
     {"method": "move_sec", "params": {"sec": MultiServo.DEF_MOVE_SEC}},
     {"method": "move", "params": {"angles": [0, 0]}},
     {"method": "wait"},  # workerスレッドのすべての動作が完了するまで待つ

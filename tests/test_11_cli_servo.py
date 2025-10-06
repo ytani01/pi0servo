@@ -10,9 +10,9 @@ class TestBasic:
     @pytest.mark.parametrize(
         "args, stdout, stderr",
         [
-            ("25 1000 -w .5", "pin=25, pulse=1000", ""),
-            ("25 2000 -w .5 -d", "pin=25, pulse=2000", "wait_sec=0.5"),
-            ("25 2000 -w .5 -h", "Options", ""),
+            ("25 1400 -w .5", ["pin=25", "pulse=1400"], ""),
+            ("25 1600 -w .5 -d", "pin=25, pulse=1600", "wait_sec=0.5"),
+            ("25 1600 -w .5 -h", "Options", ""),
         ],
     )
     def test_servo(self, cli_runner, args, stdout, stderr):
@@ -26,7 +26,7 @@ class TestBasic:
             ("25 3000", "done", ["ERROR", "invalid value"]),
             ("", "", ["Usage: ", "Error: Missing argument", "PIN"]),
             ("25", "", ["Usage:", "Error: Missing argument", "PULSE"]),
-            ("25 2000 -x", "", ["Usage:", "Error: No such option"]),
+            ("25 1300 -x", "", ["Usage:", "Error: No such option"]),
         ],
     )
     def test_servo_err(self, cli_runner, args, stdout, stderr):

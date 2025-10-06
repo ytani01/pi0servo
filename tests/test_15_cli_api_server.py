@@ -2,7 +2,7 @@
 import time
 
 CMD = "uv run pi0servo api-server"
-PIN = 25
+PIN = 5
 
 
 class TestBasic:

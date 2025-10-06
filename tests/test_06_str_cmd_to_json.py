@@ -47,11 +47,11 @@ class TestStrCmdToJson:
             ),
             ("sl:0.5", '[{"method": "sleep", "params": {"sec": 0.5}}]'),
             (
-                "mp:100,-50",
+                "mp:0,-50",
                 (
                     "[{"
-                    '"method": "move_all_pulses_relative", '
-                    '"params": {"pulse_diffs": [100, -50]}'
+                    '"method": "move_pulse_relative", '
+                    '"params": {"servo_idx": 0, "pulse_diff": -50}'
                     "}]"
                 ),
             ),

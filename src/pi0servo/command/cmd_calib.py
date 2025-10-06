@@ -104,12 +104,10 @@ class CalibApp:
                 try:
                     self.__log.debug("waiting")
                     inkey = self.term.inkey()
-                    print("AAA")
                 except Exception as _e:
                     self.__log.warning("%s: %s", type(_e).__name__, _e)
                     self.quit()
 
-                print("BBB")
                 self.__log.debug("inkey=%a", inkey)
                 if not inkey:
                     continue

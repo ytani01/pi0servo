@@ -4,8 +4,8 @@ import time
 
 import pytest
 
-CMD = "uv run pi0servo calib"
-PIN = 15
+CMD = "uv run pi0servo calib -f /tmp/test.json"
+PIN = 2
 
 KEY_TAB = "\x09"
 KEY_C_C = "\x03"  # Ctrl-C

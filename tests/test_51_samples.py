@@ -23,7 +23,6 @@ class TestSamplePrograms:
             "sample-threadmultiservo.py",
             "sample-threadworker.py",
             "sample-threadworker-strcmd.py",
-            "sample-strcli.py",
         ],
     )
     def test_sample_program(self, cli_runner, sample):

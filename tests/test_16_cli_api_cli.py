@@ -28,26 +28,39 @@ class TestCmdApiCli:
         [
             ("\n", [f"{CMDNAME}>"]),
             (
-                '{"method": "move", "params": {"angles": [30, 30]}}\n',
+                '{"method": "move", "params": {"angles": [10, 10]}}\n',
                 ["'value': None", f"{CMDNAME}"],
             ),
             (
                 (
-                    '{"method": "move", "params": {"angles": [30, 30]}}, '
+                    '{"method": "move", "params": {"angles": [10, 10]}}, '
                     '{"method": "move", "params": {"angles": [0, 0]}}'
                     "\n"
                 ),
-                ["[30, 30]", "[0, 0]"],
+                ["[10, 10]", "[0, 0]"],
             ),
             (
-                '{"method": "cancel"}\n',
-                ["'value': 0", f"{CMDNAME}>"],
+                (
+                    '{"method": "move_pulse_relative", '
+                    '"params": {"servo": 0, "pulse_diff": 50}}'
+                    "\n"
+                ),
+                ["result", "move_pulse_relative", "50}}}"],
             ),
+            (
+                (
+                    '{"method": "move_pulse_relative", '
+                    '"params": {"servo": 0, "pulse_diff": -50}}'
+                    "\n"
+                ),
+                ["result", "move_pulse_relative", "-50}}}"],
+            ),
+            ('{"method": "cancel"}\n', ["'value': 0", f"{CMDNAME}>"]),
             ('{"method": "qsize"}\n', ["'value': ", f"{CMDNAME}>"]),
             (
                 "["
                 '{"method":"move_sec","params": {"sec": 1}}, '
-                '{"method":"move","params":{"angles":[20,-20]}}, '
+                '{"method":"move","params":{"angles":[10,-10]}}, '
                 '{"method":"move","params":{"angles":[0,0]}}, '
                 '{"method":"wait"}'
                 "]\n",
@@ -59,5 +72,6 @@ class TestCmdApiCli:
     def test_cli_interactive(self, cli_runner, indata, expected):
         """servo command"""
         cmdline = f"{CMD} {PINS}"
+        print()
         inout = {"in": indata, "out": expected}
         cli_runner.test_interactive(cmdline, in_out=inout)
