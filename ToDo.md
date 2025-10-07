@@ -1,0 +1,4 @@
+  - [ ] 'mp:-10,0,0,10'
+    - [ ] src/helper/str_cmd_to_json.py
+    - [ ] samples/sample-threadworker-strcmd.py
+    - [ ] tests/test_06_str_cmd_to_json.py
