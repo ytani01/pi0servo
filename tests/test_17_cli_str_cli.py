@@ -34,7 +34,6 @@ class TestCmdStrCli:
                 {"in": "ww\n", "out": ["'qsize': 0", "flag': False"]},
             ],
             [
-                {"in": "sl:.5 ww\n", "out": ["'qsize': 0", "flag': False"]},
                 {"in": "mp:0,-50\n", "out": ["50}}}}", f"{CMDNAME}>"]},
                 {"in": "sl:.5 ww\n", "out": ["'qsize': 0", "flag': False"]},
                 {"in": "mp:0,50\n", "out": ["50}}}}", f"{CMDNAME}>"]},

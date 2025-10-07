@@ -6,7 +6,7 @@ PINS = [25, 27]
 ANGLE_FACTOR = [1, -1]
 
 STR_CMDS = [
-    "is:0.5",
+    "is:0.3",
     "mv:10,10",
     "mr:10,-10",
     "mv:0,0",
