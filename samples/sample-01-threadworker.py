@@ -11,7 +11,7 @@ JSON_CMDS = [
     {"method": "move", "params": {"angles": [10, 10]}},
     {"method": "move", "params": {"angles": [-10, 10]}},
     {"method": "move_sec", "params": {"sec": 0.1}},
-    {"method": "sleep", "params": {"sec": .5}},
+    {"method": "sleep", "params": {"sec": 0.5}},
     {"method": "move", "params": {"angles": [10, -10]}},
     {"method": "move", "params": {"angles": [-10, -10]}},
     {"method": "move_sec", "params": {"sec": MultiServo.DEF_MOVE_SEC}},
