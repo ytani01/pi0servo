@@ -358,7 +358,7 @@ class ThreadWorker(threading.Thread):
         try:
             _params = cmd["params"]
             _angle_diffs = _params["angle_diffs"]
-            _move_sec = _params["move_sec"]
+            _move_sec = _params.get("move_sec")
             if _move_sec is None:
                 _move_sec = self.move_sec
             _step_n = _params.get("step_n")

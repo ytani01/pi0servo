@@ -23,7 +23,7 @@ def str_to_json(cmdstr: str): -> str
 
 - コマンドの種類は以下の通り
   - 'mv': {"method": "move_all_angles_sync"}
-  - 'mr': {"method": "move_all_angles_sync"}
+  - 'mr': {"method": "move_all_angles_sync_relative"}
   - 'sl': {"method": "sleep"}
   - 'ms': {"method": "move_sec"}
   - 'st': {"method": "step_n"}

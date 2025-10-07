@@ -52,7 +52,7 @@ run = '''
 # uv run isort --diff src samples tests
 
 echo "# ruff"
-uv run ruff format src samples tests
+uv run ruff format --line-length 78 src samples tests
 uv run ruff check --fix --extend-select I  src samples tests
 
 # echo "# pyright"
@@ -73,3 +73,11 @@ uv run pytest tests
 uv run pi0servo -V
 '''
 depends = ["lint"]
+
+[tasks.build]
+description = "build"
+run = '''
+rm -rf dist
+uv build
+'''
+depends = ["test"]

@@ -14,8 +14,9 @@ class StrCmdToJson:
 
     # コマンド文字列とJSONコマンド名のマッピング
     COMMAND_MAP: Dict[str, str] = {
-        # main move command
+        # move command
         "mv": "move_all_angles_sync",
+        "mr": "move_all_angles_sync_relative",
         # move paramters
         "sl": "sleep",
         "ms": "move_sec",
@@ -119,13 +120,13 @@ class StrCmdToJson:
 
         # angle_factor に応じて符号反転
         for _i in range(len(angles)):
-            if _i >= len(self._angle_factor):
+            if _i >= len(self.angle_factor):
                 break
 
             if isinstance(angles[_i], int):
-                angles[_i] *= self._angle_factor[_i]
+                angles[_i] *= self.angle_factor[_i]
 
-            elif self._angle_factor[_i] == -1:
+            elif self.angle_factor[_i] == -1:
                 if angles[_i] == "min":
                     angles[_i] = "max"
                 elif angles[_i] == "max":
@@ -182,10 +183,31 @@ class StrCmdToJson:
             if cmd_key == "mv":
                 if not cmd_param_str:
                     return self._create_error_data("INVALID_PARAM", cmd_str)
+
                 angles = self._parse_angles(cmd_param_str)
+                self.__log.debug("angles=%s", angles)
                 if angles is None:
-                    return self._create_error_data("INVALID_PARAM", cmd_str)
+                    return self._create_error_data(
+                        "INVALID_PARAM", cmd_param_str
+                    )
+
                 _cmd_data["params"] = {"angles": angles}
+
+            elif cmd_key == "mr":
+                if not cmd_param_str:
+                    return self._create_error_data("INVALID_PARAM", cmd_str)
+
+                angle_diffs = [
+                    int(a) * self.angle_factor[i]
+                    for i, a in enumerate(cmd_param_str.split(","))
+                ]
+
+                if angle_diffs is None:
+                    return self._create_error_data(
+                        "INVALID_PARAM", cmd_param_str
+                    )
+
+                _cmd_data["params"] = {"angle_diffs": angle_diffs}
 
             elif cmd_key in ["sl", "ms", "is"]:
                 sec = float(cmd_param_str)
@@ -199,20 +221,14 @@ class StrCmdToJson:
                     return self._create_error_data("INVALID_PARAM", cmd_str)
                 _cmd_data["params"] = {"n": _n}
 
-            # elif cmd_key == "mp":
-            #     _pulse_diffs = [
-            #         int(_s) * self.angle_factor[i]
-            #         for i, _s in enumerate(cmd_param_str.split(","))
-            #     ]
-            #     self.__log.debug("pulse_diffs=%s", _pulse_diffs)
-            #     _cmd_data["params"] = {"pulse_diffs": _pulse_diffs}
-
             elif cmd_key == "mp":
                 if not cmd_param_str:
                     return self._create_error_data("INVALID_PARAM", cmd_str)
+
                 sv_idx_str, p_diff_str = cmd_param_str.split(",")
                 sv_idx = int(sv_idx_str)
                 p_diff = int(p_diff_str) * self.angle_factor[sv_idx]
+
                 _cmd_data["params"] = {
                     "servo_idx": sv_idx,
                     "pulse_diff": p_diff,

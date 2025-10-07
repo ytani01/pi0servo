@@ -158,6 +158,15 @@ class TestStrCmdToJson:
                     }
                 ],
             ),
+            (
+                "mr:10,20,-30,-40",
+                [
+                    {
+                        "method": "move_all_angles_sync_relative",
+                        "params": {"angle_diffs": [10, 20, -30, -40]},
+                    }
+                ],
+            ),
             ("sl:0.5", [{"method": "sleep", "params": {"sec": 0.5}}]),
             (
                 "mp:0,-50",
@@ -199,8 +208,8 @@ class TestStrCmdToJson:
                     }
                 ],
             ),
-            ("mv:100", [{"error": "INVALID_PARAM", "data": "mv:100"}]),
-            ("mv:abc", [{"error": "INVALID_PARAM", "data": "mv:abc"}]),
+            ("mv:100", [{"error": "INVALID_PARAM", "data": "100"}]),
+            ("mv:abc", [{"error": "INVALID_PARAM", "data": "abc"}]),
             (
                 "unknown:10",
                 [{"error": "METHOD_NOT_FOUND", "data": "unknown:10"}],
