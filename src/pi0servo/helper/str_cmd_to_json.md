@@ -23,6 +23,7 @@ def str_to_json(cmdstr: str): -> str
 
 - コマンドの種類は以下の通り
   - 'mv': {"method": "move_all_angles_sync"}
+  - 'mr': {"method": "move_all_angles_sync"}
   - 'sl': {"method": "sleep"}
   - 'ms': {"method": "move_sec"}
   - 'st': {"method": "step_n"}
@@ -61,6 +62,9 @@ def str_to_json(cmdstr: str): -> str
 入力: 'mv:x,.,center,20'
 出力: '{"method": "move_all_angles_sync", "params": {"angles": ["max",null,"center",20]}}'
 
+入力: 'mr:-10,0,0,10'
+出力: '{"method": "move_all_angles_sync_relative", "params": {"angle-diffs": [-10,0,0,10]}}'
+
 入力: 'sl:0.5'
 出力: '{"method": "sleep", "params": {"sec": 0.5}}'
 
@@ -80,7 +84,7 @@ def str_to_json(cmdstr: str): -> str
 出力: '{"method": "interval", "params": {"sec": 0.5}}'
 
 入力: 'mp:2,-20'
-出力: '{"method": "move_pulse_relative", "params": {"servo": 2, "pulse_diff": -20}}'
+出力: '{"method": "move_pulse_relative", "params": {"servo_idx": 2, "pulse_diff": -20}}'
 
 入力: 'sc:1'
 出力: '{"method": "set", "params": {"servo": 1, "target": "center"}}'

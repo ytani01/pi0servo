@@ -232,7 +232,7 @@ class StrCmdToJson:
             elif cmd_key in ["ca", "zz", "qs", "qq", "wa", "ww"]:
                 pass
 
-        except (ValueError, TypeError) as _e:
+        except (ValueError, TypeError, IndexError) as _e:
             self.__log.error("%s: %s", type(_e).__name__, _e)
             return self._create_error_data("INVALID_PARAM", cmd_str)
 

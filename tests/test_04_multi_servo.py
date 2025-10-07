@@ -110,9 +110,7 @@ class TestMultiServo:
         # first_move=TrueでMultiServoを初期化する。
         # これにより、内部でCalibrableServoのインスタンスが生成され、
         # 各サーボのmove_angle(0)が呼び出されるはず。
-        MultiServo(
-            pi, PINS, first_move=True, conf_file=CONF_FILE, debug=True
-        )
+        MultiServo(pi, PINS, first_move=True, conf_file=CONF_FILE, debug=True)
 
         # CalibrableServoがPINSの数だけ呼び出されたことを確認する。
         assert mock_class.call_count == len(PINS)
@@ -381,9 +379,9 @@ class TestMultiServo:
 
         # サーボ0の途中の角度が線形補間されていることを確認
         for i in range(steps):
-            expected_angle = start_angles[0] + (90.0 - start_angles[0]) * (
-                i + 1
-            ) / steps
+            expected_angle = (
+                start_angles[0] + (90.0 - start_angles[0]) * (i + 1) / steps
+            )
             mock_instances[0].move_angle.assert_any_call(expected_angle)
 
     @patch("time.sleep")

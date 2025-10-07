@@ -59,6 +59,10 @@ class ThreadWorker(threading.Thread):
             },
         },
         {
+            "method": "move_all_angles_sync_relative",
+            "params": {"angle_diffs": [-10, 0, 0, 10]}
+        },
+        {
             "method": "move_all_angles",
             "params": {"angles": [30, None, "center"]},
         },
@@ -78,6 +82,10 @@ class ThreadWorker(threading.Thread):
         {"method": CMD_CANCEL, "params": {"comment": "special command"}},
         {"method": CMD_QSIZE, "params": {"comment": "special command"}},
         {"method": CMD_WAIT, "params": {"comment": "special command"}},
+        {
+            "method": "move_all_pulses_relative",
+            "params": {"pulse_diffs": [200, -200, 0, 0]}
+        },
     ]
 
     DEF_RECV_TIMEOUT = 0.2  # sec
@@ -138,6 +146,8 @@ class ThreadWorker(threading.Thread):
             "sleep": self._handle_sleep,
             "move_pulse_relative": self._handle_move_pulse_relative,
             "set": self._handle_set,
+            "move_all_angles_sync_relative": self._handle_move_all_angles_sync_relative,
+            "move_all_pulses_relative": self._handle_move_all_pulses_relative,
         }
 
     def __enter__(self):
