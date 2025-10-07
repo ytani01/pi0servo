@@ -79,5 +79,6 @@ description = "build"
 run = '''
 rm -rf dist
 uv build
+uv run pi0servo -V
 '''
 depends = ["test"]
