@@ -45,6 +45,10 @@ def mock_calibrable_servo(mocker):
         s.conf_file = CONF_FILE
         # get_angle()メソッドが呼び出されたときに常に0.0を返すように設定。
         s.get_angle.return_value = 0.0
+        # move_angleなどのメソッドは、モックオブジェクトによって
+        # 自動的に呼び出しが記録される。特定の返り値を設定しない限り、
+        # デフォルトでNoneを返す。テストでは、これらのメソッドが
+        # 正しく呼び出されたか（assert_called_withなど）を検証する。
         # プロパティをモックするにはmocker.PropertyMockを使用する。
         # これにより、これらの属性がアクセスされたときに
         # 指定した値を返すようになる。
@@ -154,7 +158,9 @@ class TestMultiServo:
         assert mock_instances[0].pulse_max == 2400
 
     def test_move_all_angles(self, multi_servo):
-        """move_all_anglesのテスト"""
+        """
+        move_all_anglesのテスト。
+        """
         ms, mock_instances = multi_servo
         target_angles = [30, -45]
         ms.move_all_angles(target_angles)
@@ -162,7 +168,11 @@ class TestMultiServo:
         mock_instances[1].move_angle.assert_called_with(-45)
 
     def test_get_all_angles(self, multi_servo):
-        """get_all_anglesのテスト"""
+        """
+        get_all_anglesのテスト。
+        各CalibrableServoインスタンスのget_angle()が呼び出され、
+        その戻り値がリストとして正しく返されることを確認する。
+        """
         ms, mock_instances = multi_servo
         mock_instances[0].get_angle.return_value = 10.0
         mock_instances[1].get_angle.return_value = -20.0
@@ -170,7 +180,9 @@ class TestMultiServo:
         assert angles == [10.0, -20.0]
 
     def test_get_pulse(self, multi_servo):
-        """get_pulseのテスト"""
+        """
+        get_pulseのテスト。
+        """
         ms, mock_instances = multi_servo
         mock_instances[0].get_pulse.return_value = 1500
         pulse = ms.get_pulse(0)
@@ -178,7 +190,9 @@ class TestMultiServo:
         mock_instances[0].get_pulse.assert_called_once()
 
     def test_get_all_pulses(self, multi_servo):
-        """get_all_pulsesのテスト"""
+        """
+        get_all_pulsesのテスト。
+        """
         ms, mock_instances = multi_servo
         mock_instances[0].get_pulse.return_value = 1500
         mock_instances[1].get_pulse.return_value = 1600
@@ -188,13 +202,17 @@ class TestMultiServo:
         mock_instances[1].get_pulse.assert_called_once()
 
     def test_move_pulse(self, multi_servo):
-        """move_pulseのテスト"""
+        """
+        move_pulseのテスト。
+        """
         ms, mock_instances = multi_servo
         ms.move_pulse(0, 1500)
         mock_instances[0].move_pulse.assert_called_once_with(1500, False)
 
     def test_move_all_pulses(self, multi_servo):
-        """move_all_pulsesのテスト"""
+        """
+        move_all_pulsesのテスト。
+        """
         ms, mock_instances = multi_servo
         pulses = [1500, 1600]
         ms.move_all_pulses(pulses)
@@ -202,7 +220,9 @@ class TestMultiServo:
         mock_instances[1].move_pulse.assert_called_once_with(1600, False)
 
     def test_move_pulse_relative(self, multi_servo):
-        """move_pulse_relativeのテスト"""
+        """
+        move_pulse_relativeのテスト。
+        """
         ms, mock_instances = multi_servo
         mock_instances[0].get_pulse.return_value = 1500
         ms.move_pulse_relative(0, 100)
@@ -210,7 +230,9 @@ class TestMultiServo:
         mock_instances[0].move_pulse.assert_called_once_with(1600, False)
 
     def test_move_all_pulses_relative(self, multi_servo):
-        """move_all_pulses_relativeのテスト"""
+        """
+        move_all_pulses_relativeのテスト。
+        """
         ms, mock_instances = multi_servo
         mock_instances[0].get_pulse.return_value = 1500
         mock_instances[1].get_pulse.return_value = 1600
@@ -222,20 +244,27 @@ class TestMultiServo:
         mock_instances[1].move_pulse.assert_called_once_with(1500, False)
 
     def test_validate_angle_list_invalid_type(self, multi_servo):
-        """_validate_angle_listの不正な型に対するテスト"""
+        """
+        _validate_angle_listの不正な型に対するテスト。
+        """
         ms, _ = multi_servo
         assert ms._validate_angle_list("not a list") is False
         assert ms._validate_angle_list(123) is False
 
     def test_validate_angle_list_invalid_length(self, multi_servo):
-        """_validate_angle_listの不正な長さに対するテスト"""
+        """
+        _validate_angle_listの不正な長さに対するテスト。
+        """
         ms, _ = multi_servo
         assert ms._validate_angle_list([10]) is False  # 1要素
         assert ms._validate_angle_list([10, 20, 30]) is False  # 3要素
 
     @patch("time.sleep")
     def test_move_all_angles_sync_relative(self, mock_sleep, multi_servo):
-        """move_all_angles_sync_relativeのテスト"""
+        """
+        move_all_angles_sync_relativeのテスト。
+        複数のサーボが指定された角度まで同期して滑らかに動くことを確認する。
+        """
         ms, mock_instances = multi_servo
 
         start_angles = [0, 0]
@@ -329,7 +358,9 @@ class TestMultiServo:
 
     @patch("time.sleep")
     def test_move_all_angles_sync_str_none(self, mock_sleep, multi_servo):
-        """move_all_angles_syncのテスト（文字列とNoneを含む）"""
+        """
+        move_all_angles_syncのテスト（文字列とNoneを含む）。
+        """
         ms, mock_instances = multi_servo
         start_angles = [10, 20]
         target_angles = ["max", None]
@@ -357,7 +388,9 @@ class TestMultiServo:
 
     @patch("time.sleep")
     def test_move_all_angles_sync_invalid_str(self, mock_sleep, multi_servo):
-        """move_all_angles_syncの不正な文字列引数に対するテスト"""
+        """
+        move_all_angles_syncの不正な文字列引数に対するテスト。
+        """
         ms, mock_instances = multi_servo
         start_angles = [10, 20]
         target_angles = ["invalid", None]
@@ -377,7 +410,9 @@ class TestMultiServo:
         assert mock_instances[1].move_angle.call_count == steps
 
     def test_move_all_angles_sync_direct(self, multi_servo):
-        """move_all_angles_syncのテスト（step_n=1）"""
+        """
+        move_all_angles_syncのテスト（step_n=1）。
+        """
         ms, mock_instances = multi_servo
         target_angles = [30, -45]
         ms.move_all_angles_sync(target_angles, step_n=1)

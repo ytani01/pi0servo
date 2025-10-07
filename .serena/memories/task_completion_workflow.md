@@ -1,4 +1,11 @@
-1.  Check for `Tasks.md`.
-2.  If it exists, execute tasks and mark them as done.
-3.  If not, read `ToDo.md`, create `Tasks.md`, and ask for user confirmation.
-4.  After all tasks in `Tasks.md` are done, report to the user and run `archivefile Tasks.md`.
+## タスク完了ワークフロー
+
+- `ToDo.md`: ユーザーのみが、作成・編集・管理する。AIは参照のみ可能。
+- `Tasks.md`: AIが作成・編集・管理する。
+- `Tasks.md`作成後、ユーザーが "進めて" と言うまで、実行を開始しない。
+- `Tasks.md`のタスク項目が一つ完了したら、次の項目に進む前に完了した項目にマークすること。
+- `Tasks.md` のすべてのタスクが完了した場合:
+  1. ユーザーに完了を報告し、ユーザーが `ToDo.md`を更新するよう促す。
+  2. `archivefile Tasks.md`コマンドを実行してアーカイブする。
+
+**重要:** ユーザーが許可するまで、`Tasks.md`に書かれた内容を実行しない。
