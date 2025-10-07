@@ -60,7 +60,7 @@ class ThreadWorker(threading.Thread):
         },
         {
             "method": "move_all_angles_sync_relative",
-            "params": {"angle_diffs": [-10, 0, 0, 10]}
+            "params": {"angle_diffs": [-10, 0, 0, 10]},
         },
         {
             "method": "move_all_angles",
@@ -84,7 +84,7 @@ class ThreadWorker(threading.Thread):
         {"method": CMD_WAIT, "params": {"comment": "special command"}},
         {
             "method": "move_all_pulses_relative",
-            "params": {"pulse_diffs": [200, -200, 0, 0]}
+            "params": {"pulse_diffs": [200, -200, 0, 0]},
         },
     ]
 
@@ -138,16 +138,16 @@ class ThreadWorker(threading.Thread):
         self._command_handlers = {
             "move": self._handle_move_all_angles_sync,
             "move_all_angles_sync": self._handle_move_all_angles_sync,
+            "move_all_angles_sync_relative": self._handle_move_a_a_s_r,
             "move_all_angles": self._handle_move_all_angles,
             "move_all_pulses": self._handle_move_all_pulses,
+            "move_all_pulses_relative": self._handle_move_all_pulses_relative,
             "move_sec": self._handle_move_sec,
             "step_n": self._handle_step_n,
             "interval": self._handle_interval,
             "sleep": self._handle_sleep,
             "move_pulse_relative": self._handle_move_pulse_relative,
             "set": self._handle_set,
-            "move_all_angles_sync_relative": self._handle_move_all_angles_sync_relative,
-            "move_all_pulses_relative": self._handle_move_all_pulses_relative,
         }
 
     def __enter__(self):
@@ -337,6 +337,10 @@ class ThreadWorker(threading.Thread):
 
         self.mservo.move_all_angles_sync(_angles, _move_sec, _step_n)
         self._sleep_interval()
+
+    def _handle_move_a_a_s_r(self, cmd: dict):
+        """Alias of _handle_move_all_angles_sync_relative()."""
+        self._handle_move_all_angles_sync_relative(cmd)
 
     def _handle_move_all_angles_sync_relative(self, cmd: dict):
         """Handle move_all_angles_sync_relative().

@@ -5,8 +5,9 @@
 tests/test_06_str_cmd_to_json.py
 """
 
-import pytest
 import json
+
+import pytest
 
 from pi0servo.helper.str_cmd_to_json import StrCmdToJson
 
@@ -53,7 +54,11 @@ class TestStrCmdToJson:
         """_parse_anglesでangle_factorがanglesより短い場合のテスト"""
         instance = StrCmdToJson(angle_factor=[1, -1], debug=True)
         angle_str = "40,30,20"
-        expected_angles = [40, -30, 20] # 3番目の角度にはangle_factorが適用されない
+        expected_angles = [
+            40,
+            -30,
+            20,
+        ]  # 3番目の角度にはangle_factorが適用されない
         result = instance._parse_angles(angle_str)
         assert result == expected_angles
 
@@ -90,16 +95,20 @@ class TestStrCmdToJson:
 
     def test_cmdstr_to_json_mp_index_error(self):
         """cmdstr_to_jsonでmpコマンドのangle_factorインデックスエラーのテスト"""
-        instance = StrCmdToJson(angle_factor=[1], debug=True) # angle_factorが短い
-        cmd_str = "mp:1,-50" # servo_idx=1 はangle_factorの範囲外
+        instance = StrCmdToJson(
+            angle_factor=[1], debug=True
+        )  # angle_factorが短い
+        cmd_str = "mp:1,-50"  # servo_idx=1 はangle_factorの範囲外
         expected_json_obj = {"error": "INVALID_PARAM", "data": "mp:1,-50"}
         result = instance.cmdstr_to_json(cmd_str)
         assert result == expected_json_obj
 
     def test_cmdstr_to_json_set_index_error(self):
         """cmdstr_to_jsonでsetコマンドのangle_factorインデックスエラーのテスト"""
-        instance = StrCmdToJson(angle_factor=[1], debug=True) # angle_factorが短い
-        cmd_str = "sn:1" # servo_idx=1 はangle_factorの範囲外
+        instance = StrCmdToJson(
+            angle_factor=[1], debug=True
+        )  # angle_factorが短い
+        cmd_str = "sn:1"  # servo_idx=1 はangle_factorの範囲外
         expected_json_obj = {"error": "INVALID_PARAM", "data": "sn:1"}
         result = instance.cmdstr_to_json(cmd_str)
         assert result == expected_json_obj
@@ -204,7 +213,9 @@ class TestStrCmdToJson:
         self, str_cmd_to_json_instance, cmd_str, expected_json_obj
     ):
         """cmdstr_to_jsonliststrのテスト"""
-        result_json_str = str_cmd_to_json_instance.cmdstr_to_jsonliststr(cmd_str)
+        result_json_str = str_cmd_to_json_instance.cmdstr_to_jsonliststr(
+            cmd_str
+        )
         result_obj = json.loads(result_json_str)
         assert result_obj == expected_json_obj
 

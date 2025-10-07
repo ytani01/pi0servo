@@ -46,6 +46,9 @@ target-version = "py311"
 lint.select = ["E", "F", "I"]
 exclude = ["tests/data", "venv", ".git", "__pycache__"]
 
+[tool.ruff.format]
+docstring-code-line-length = 78
+
 [tool.ruff.lint.per-file-ignores]
 "conftest.py" = ["F401", "F811"]
 

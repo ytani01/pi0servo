@@ -5,8 +5,8 @@
 tests/test_07_threadworker.py
 """
 
-import time
 import threading
+import time
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -39,7 +39,9 @@ def thread_worker(mocker_multiservo):
 class TestThreadWorker:
     """ThreadWorkerクラスのテスト"""
 
-    def _wait_for_mock_call(self, mock_obj, timeout=1.0, interval=0.01, sleep_func=time.sleep):
+    def _wait_for_mock_call(
+        self, mock_obj, timeout=1.0, interval=0.01, sleep_func=time.sleep
+    ):
         """
         モックオブジェクトが呼び出されるまで待機するヘルパーメソッド。
         time.sleepの代わりにこれを使用することで、テストの信頼性と速度を向上させる。
@@ -49,7 +51,9 @@ class TestThreadWorker:
             if mock_obj.call_count > 0:
                 return
             sleep_func(interval)
-        raise TimeoutError(f"Mock object {mock_obj} was not called within {timeout} seconds")
+        raise TimeoutError(
+            f"Mock object {mock_obj} was not called within {timeout} seconds"
+        )
 
     def test_init(self, thread_worker):
         """初期化のテスト"""
@@ -86,7 +90,9 @@ class TestThreadWorker:
         thread_worker.send(cmd)
         self._wait_for_mock_call(mservo_instance.move_all_pulses)
 
-        mservo_instance.move_all_pulses.assert_called_once_with([1000, 2000, None, 0])
+        mservo_instance.move_all_pulses.assert_called_once_with(
+            [1000, 2000, None, 0]
+        )
         assert thread_worker.qsize == 0
 
     def test_send_move_pulse_relative(self, thread_worker):
@@ -127,12 +133,15 @@ class TestThreadWorker:
     def test_handle_sleep(self, mock_sleep, thread_worker, mocker):
         """_handle_sleepのテスト"""
         # _cmdq.getをモックして、コマンドが処理されるのを待つ
-        mock_cmdq_get = mocker.patch.object(thread_worker._cmdq, 'get')
+        mock_cmdq_get = mocker.patch.object(thread_worker._cmdq, "get")
 
         cmd = {"method": "sleep", "params": {"sec": 0.1}}
         thread_worker.send(cmd)
-        # _wait_for_mock_callがmock_sleepを呼ばないように、ダミーのsleep_funcを渡す
-        self._wait_for_mock_call(mock_cmdq_get, sleep_func=lambda x: None) # コマンドが処理されるのを待つ
+        # _wait_for_mock_callがmock_sleepを呼ばないように、
+        # ダミーのsleep_funcを渡す
+        self._wait_for_mock_call(
+            mock_cmdq_get, sleep_func=lambda x: None
+        )  # コマンドが処理されるのを待つ
 
         mock_sleep.assert_called_once_with(0.1)
         assert thread_worker.qsize == 0
@@ -175,22 +184,26 @@ class TestThreadWorker:
         """waitコマンドのテスト"""
         # _busy_flagとqsizeをモックして、waitコマンドの動作を制御する
         thread_worker._busy_flag = True
-        mock_cmdq_qsize = mocker.patch.object(thread_worker._cmdq, 'qsize', return_value=1)
+        mock_cmdq_qsize = mocker.patch.object(
+            thread_worker._cmdq, "qsize", return_value=1
+        )
 
         cmd_wait = {"method": thread_worker.CMD_WAIT}
 
         # 別スレッドでwaitコマンドを送信し、ブロックされることを確認
-        send_thread = threading.Thread(target=thread_worker.send, args=(cmd_wait,))
+        send_thread = threading.Thread(
+            target=thread_worker.send, args=(cmd_wait,)
+        )
         send_thread.start()
 
         # waitコマンドがブロックされている間に、_busy_flagとqsizeを変更
-        time.sleep(0.1) # waitコマンドが実行されるのを待つ
+        time.sleep(0.1)  # waitコマンドが実行されるのを待つ
         assert send_thread.is_alive()
 
         thread_worker._busy_flag = False
-        mock_cmdq_qsize.return_value = 0 # qsizeを0に変更
+        mock_cmdq_qsize.return_value = 0  # qsizeを0に変更
 
-        send_thread.join(timeout=1) # waitコマンドが終了するのを待つ
+        send_thread.join(timeout=1)  # waitコマンドが終了するのを待つ
         assert not send_thread.is_alive()
 
         # 最終的なqsizeが0であることを確認
@@ -201,7 +214,9 @@ class TestThreadWorker:
         cmd = {"error": "INVALID_JSON", "data": "some_data"}
         reply = thread_worker.send(cmd)
 
-        assert reply["error"]["code"] == thread_worker.ERROR_CODE["INVALID_JSON"]
+        assert (
+            reply["error"]["code"] == thread_worker.ERROR_CODE["INVALID_JSON"]
+        )
         assert reply["error"]["message"] == "INVALID_JSON"
         assert reply["error"]["data"] == "some_data"
         assert thread_worker.qsize == 0
@@ -209,15 +224,22 @@ class TestThreadWorker:
     def test_run_method_error_handling(self, thread_worker, mocker):
         """run()メソッドのエラーハンドリングのテスト"""
         # エラーを発生させるハンドラをモック
-        mocker.patch.object(thread_worker, '_handle_move_all_angles_sync', side_effect=ValueError("Test Error in Handler"))
-        mock_cmdq_get = mocker.patch.object(thread_worker._cmdq, 'get')
+        mocker.patch.object(
+            thread_worker,
+            "_handle_move_all_angles_sync",
+            side_effect=ValueError("Test Error in Handler"),
+        )
+        mock_cmdq_get = mocker.patch.object(thread_worker._cmdq, "get")
 
         cmd = {"method": "move_all_angles_sync", "params": {"angles": [0]}}
         thread_worker.send(cmd)
 
-        # エラーがログに記録されることを確認（直接アサートは難しいが、ログ出力を確認）
+        # エラーがログに記録されることを確認
+        # （直接アサートは難しいが、ログ出力を確認）
         # ここでは、コマンドが処理され、キューが空になることを確認する
-        self._wait_for_mock_call(mock_cmdq_get) # コマンドが処理されるのを待つ
+        self._wait_for_mock_call(
+            mock_cmdq_get
+        )  # コマンドが処理されるのを待つ
 
         assert thread_worker.qsize == 0
         # ログの確認はpytestのcaplogフィクスチャなどを使うが、ここでは省略
@@ -227,10 +249,16 @@ class TestThreadWorker:
         mservo_instance = thread_worker.mservo
         cmd = {
             "method": "move_all_angles_sync_relative",
-            "params": {"angle_diffs": [10, -10], "move_sec": 0.1, "step_n": 10},
+            "params": {
+                "angle_diffs": [10, -10],
+                "move_sec": 0.1,
+                "step_n": 10,
+            },
         }
         thread_worker.send(cmd)
-        self._wait_for_mock_call(mservo_instance.move_all_angles_sync_relative)
+        self._wait_for_mock_call(
+            mservo_instance.move_all_angles_sync_relative
+        )
 
         mservo_instance.move_all_angles_sync_relative.assert_called_once_with(
             [10, -10], 0.1, 10
@@ -249,7 +277,10 @@ class TestThreadWorker:
     def test_handle_move_all_pulses_relative(self, thread_worker):
         """_handle_move_all_pulses_relativeのテスト"""
         mservo_instance = thread_worker.mservo
-        cmd = {"method": "move_all_pulses_relative", "params": {"pulse_diffs": [100, -100]}}
+        cmd = {
+            "method": "move_all_pulses_relative",
+            "params": {"pulse_diffs": [100, -100]},
+        }
         thread_worker.send(cmd)
         self._wait_for_mock_call(mservo_instance.move_all_pulses_relative)
 
@@ -257,29 +288,35 @@ class TestThreadWorker:
 
     def test_handle_move_sec(self, thread_worker, mocker):
         """_handle_move_secのテスト"""
-        mock_cmdq_get = mocker.patch.object(thread_worker._cmdq, 'get')
+        mock_cmdq_get = mocker.patch.object(thread_worker._cmdq, "get")
         cmd = {"method": "move_sec", "params": {"sec": 0.3}}
         thread_worker.send(cmd)
-        self._wait_for_mock_call(mock_cmdq_get) # コマンドが処理されるのを待つ
+        self._wait_for_mock_call(
+            mock_cmdq_get
+        )  # コマンドが処理されるのを待つ
 
         assert thread_worker.qsize == 0
 
     def test_handle_step_n(self, thread_worker, mocker):
         """_handle_step_nのテスト"""
-        mock_cmdq_get = mocker.patch.object(thread_worker._cmdq, 'get')
+        mock_cmdq_get = mocker.patch.object(thread_worker._cmdq, "get")
         cmd = {"method": "step_n", "params": {"n": 50}}
         thread_worker.send(cmd)
-        self._wait_for_mock_call(mock_cmdq_get) # コマンドが処理されるのを待つ
+        self._wait_for_mock_call(
+            mock_cmdq_get
+        )  # コマンドが処理されるのを待つ
 
         assert thread_worker.step_n == 50
         assert thread_worker.qsize == 0
 
     def test_handle_interval(self, thread_worker, mocker):
         """_handle_intervalのテスト"""
-        mock_cmdq_get = mocker.patch.object(thread_worker._cmdq, 'get')
+        mock_cmdq_get = mocker.patch.object(thread_worker._cmdq, "get")
         cmd = {"method": "interval", "params": {"sec": 0.1}}
         thread_worker.send(cmd)
-        self._wait_for_mock_call(mock_cmdq_get) # コマンドが処理されるのを待つ
+        self._wait_for_mock_call(
+            mock_cmdq_get
+        )  # コマンドが処理されるのを待つ
 
         assert thread_worker.interval_sec == 0.1
         assert thread_worker.qsize == 0
