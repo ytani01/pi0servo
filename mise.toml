@@ -1,20 +1,31 @@
-[tasks.upgradesys]
-description = "upgrade global tools"
+[tasks.upgradeapt]
+description = "upgrade apt packages"
 run = '''
-# upgrade global
-echo "# apt"
+echo "# upgrade apt packages"
 LANG=C sudo apt update
 LANG=C sudo apt upgrade
 LANG=C sudo apt autoremove -y
+'''
+alias = "upapt"
 
-echo "# mise"
+[tasks.upgrademise]
+description = "upgrade mise"
+run = '''
+echo "# upgrade mise"
 mise self-update
 mise up
+'''
+alias = "upmise"
+depends = ["upgradeapt"]
 
-echo "# uv"
+[tasks.upgradeuv]
+description = "upgrade uv"
+run = '''
+echo "# upgrade uv"
 uv tool upgrade --all
 '''
-alias = "upsys"
+alias = "upuv"
+depends = ["upgrademise"]
 
 [tasks.upgradelocal]
 description = "upgrade in this project"
@@ -23,9 +34,12 @@ run = '''
 
 echo "# rm uv.lock"
 rm uv.lock
-
 echo "# uv sync"
 uv sync
+
+echo "# pip"
+uv pip install -U --group dev -e .
+uv pip install -U --group samples -e .
 
 echo "# pyclickutils"
 uv add -U ../pyclickutils
@@ -33,15 +47,13 @@ uv add -U ../pyclickutils
 echo "# pyclibase"
 uv add -U ../pyclibase
 
-echo "# pip"
-uv pip install -U --group dev -e .
-uv pip install -U --group samples -e .
+# uv pip install -e ../pyclibase
 
-echo "# uv run pi0servo -V"
-uv run pi0servo -V
+# echo "# uv run pi0servo -V"
+# uv run pi0servo -V
 '''
 alias = "uplocal"
-# depends = ["upgradesys"]
+depends = ["upgradeuv"]
 
 [tasks.lint]
 description = "linting"
@@ -63,7 +75,7 @@ uv run mypy src samples tests
 
 uv run pi0servo -V
 '''
-# depends = ["upgradelocal"]
+depends = ["upgradelocal"]
 
 [tasks.test]
 description = "test"
@@ -71,12 +83,14 @@ run = '''
 uv run pytest tests
 
 uv run pi0servo -V
+uv run pi0servo -V
 '''
 depends = ["lint"]
 
 [tasks.build]
 description = "build"
 run = '''
+echo "# build"
 rm -rf dist
 uv build
 uv run pi0servo -V
