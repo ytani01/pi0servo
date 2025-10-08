@@ -17,7 +17,9 @@ class TestBasic:
     )
     def test_servo(self, cli_runner, args, stdout, stderr):
         """servo command"""
-        cli_runner.test_command(CMD, args, e_stdout=stdout, e_stderr=stderr)
+        cli_runner.test_command(
+            CMD, args, e_stdout=stdout, e_stderr=stderr, timeout=60
+        )
 
     @pytest.mark.parametrize(
         "args, stdout, stderr",

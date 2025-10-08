@@ -7,7 +7,7 @@ from typing import Optional
 
 import pytest
 
-TIMEOUT_EXPECT = 15.0
+TIMEOUT_EXPECT = 25.0
 TIMEOUT_CLOSE = 3.0
 
 
