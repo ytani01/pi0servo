@@ -32,8 +32,8 @@ description = "upgrade in this project"
 run = '''
 # upgrade this project
 
-echo "# rm uv.lock"
-rm uv.lock
+echo "# rm -f uv.lock"
+rm -f uv.lock
 echo "# uv sync"
 uv sync
 
