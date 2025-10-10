@@ -68,38 +68,6 @@ class MultiServo:
         if self.first_move:
             self.move_all_angles([0] * self.servo_n)
 
-    # def __getattr__(self, name):
-    #     """
-    #     存在しない属性が呼び出された場合に、
-    #     各サーボの同名メソッドを呼び出す。
-    #     """
-    #     self.__log.debug("name=%s", name)
-
-    #     # 各サーボインスタンスに同じ名前のメソッドが存在するか確認
-    #     if not all(
-    #         hasattr(s, name) and callable(getattr(s, name))
-    #         for s in self.servo
-    #     ):
-    #         msg = (
-    #             f"'{self.__class__.__name__}' object and its servos "
-    #             f"have no attribute '{name}'"
-    #         )
-    #         raise AttributeError(msg)
-
-    #     def method(*args, **kwargs):
-    #         results = []
-    #         for s in self.servo:
-    #             # 各サーボのメソッドを呼び出す
-    #             result = getattr(s, name)(*args, **kwargs)
-    #             results.append(result)
-
-    #         # 結果がすべてNoneならNoneを、そうでなければ結果のリストを返す
-    #         if all(r is None for r in results):
-    #             return None
-    #         return results
-
-    #     return method
-
     def get_pulse_center(self, index: int):
         """Get center(0 deg) pulse.
 

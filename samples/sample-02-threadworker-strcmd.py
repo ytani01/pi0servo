@@ -1,6 +1,6 @@
 import pigpio
 
-from pi0servo import MultiServo, StrCmdToJson, ThreadWorker
+from pi0servo import StrCmdToJson, ThreadWorker
 
 PINS = [25, 27]
 ANGLE_FACTOR = [1, -1]
@@ -30,11 +30,10 @@ def main():
     worker = None
     try:
         pi = pigpio.pi()
-        servo = MultiServo(pi, PINS, debug=DEBUG_FLAG["servo"])
         parser = StrCmdToJson(
             angle_factor=ANGLE_FACTOR, debug=DEBUG_FLAG["parser"]
         )
-        with ThreadWorker(servo, debug=DEBUG_FLAG["worker"]) as worker:
+        with ThreadWorker(pi, PINS, debug=DEBUG_FLAG["worker"]) as worker:
             for _strcmd in STR_CMDS:
                 print(f">>> {_strcmd}")
 

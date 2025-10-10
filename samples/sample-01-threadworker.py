@@ -32,8 +32,7 @@ def main():
     worker = None
     try:
         # オブジェクトの初期化
-        servo = MultiServo(pi, PINS, debug=DEBUG_FLAG)
-        worker = ThreadWorker(servo, debug=DEBUG_FLAG)
+        worker = ThreadWorker(pi, PINS, debug=DEBUG_FLAG)
 
         worker.start()  # ワーカースレッドを裏で動かす
 

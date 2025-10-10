@@ -35,7 +35,7 @@ class OneKeyCli:
         self.__log.debug("angle_factor=%a", self.angle_factor)
 
         self.mservo = MultiServo(self.pi, self.pins, debug=self.__debug)
-        self.thr_worker = ThreadWorker(self.mservo, debug=self.__debug)
+        self.thr_worker = ThreadWorker(self.pi, self.pins, debug=self.__debug)
         self.parser = StrCmdToJson(self.angle_factor, debug=self.__debug)
 
         self.term = blessed.Terminal()

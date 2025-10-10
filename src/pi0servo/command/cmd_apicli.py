@@ -8,8 +8,7 @@ import json
 from pyclibase import CliBase
 from pyclickutils import get_logger
 
-from pi0servo import MultiServo
-from pi0servo.helper.thread_worker import ThreadWorker
+from ..helper.thread_worker import ThreadWorker
 
 
 class CmdApiCli(CliBase):
@@ -28,8 +27,9 @@ class CmdApiCli(CliBase):
         self.pins = pins
 
         try:
-            self.mservo = MultiServo(self.pi, self.pins, debug=False)
-            self.thworker = ThreadWorker(self.mservo, debug=self.__debug)
+            self.thworker = ThreadWorker(
+                self.pi, self.pins, debug=self.__debug
+            )
         except Exception as _e:
             self.__log.error("%s: %s", type(_e).__name__, _e)
 

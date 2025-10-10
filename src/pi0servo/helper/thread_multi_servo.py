@@ -64,7 +64,7 @@ class ThreadMultiServo:
         self.servo = self._mservo.servo  # list of CalibrableServo
 
         # 非同期処理を担当するThreadWorkerを起動し、mservoを渡す
-        self._worker = ThreadWorker(mservo=self._mservo, debug=self._debug)
+        self._worker = ThreadWorker(pi, pins, debug=self._debug)
         self._worker.start()
 
     @property

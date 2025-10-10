@@ -8,6 +8,7 @@ import time
 
 from pyclickutils import get_logger
 
+from ..core.calibrable_servo import CalibrableServo
 from ..core.multi_servo import MultiServo
 
 
@@ -16,11 +17,9 @@ class ThreadWorker(threading.Thread):
 
     すべてのコマンドは、JSON形式で、キューを介して受け渡される。
 
-    利用者は、コマンドを`send()`したら、ブロックせずに、
-    非同期に他の処理を行える。
+    コマンドを`send()`したら、ブロックせず、すぐに次の処理にうつる。
 
-    `Worker`は、コマンドキューから一つずつコマンドを取り出し、
-    順に実行する。
+    `Worker`は、コマンドキューから一つずつコマンドを取り出し、順に実行する。
 
     コマンドをキャンセルしたい場合は、`clear_cmdq()`で、
     キューに溜まっているコマンドをすべてキャンセルできる。
@@ -93,7 +92,10 @@ class ThreadWorker(threading.Thread):
 
     def __init__(
         self,
-        mservo: MultiServo,
+        pi,
+        pins: list[int],
+        first_move=True,
+        conf_file=CalibrableServo.DEF_CONF_FILE,
         move_sec: float | None = None,
         step_n: int | None = None,
         interval_sec: float = DEF_INTERVAL_SEC,
@@ -101,19 +103,19 @@ class ThreadWorker(threading.Thread):
     ):
         """Constructor."""
         super().__init__(daemon=True)
+        self.__debug = debug
+        self.__log = get_logger(self.__class__.__name__, self.__debug)
 
-        self._debug = debug
-        self.__log = get_logger(self.__class__.__name__, self._debug)
-
-        self.mservo = mservo
-
+        self.mservo = MultiServo(
+            pi, pins, first_move, conf_file, debug=self.__debug
+        )
         if move_sec is None:
-            self.move_sec = mservo.DEF_MOVE_SEC
+            self.move_sec = MultiServo.DEF_MOVE_SEC
         else:
             self.move_sec = move_sec
 
         if step_n is None:
-            self.step_n = mservo.DEF_STEP_N
+            self.step_n = MultiServo.DEF_STEP_N
         else:
             self.step_n = step_n
 
@@ -126,7 +128,7 @@ class ThreadWorker(threading.Thread):
             interval_sec,
         )
 
-        self._cmdq: queue.Queue = queue.Queue()
+        self._cmdq: queue.Queue[dict] = queue.Queue()
         self._active = False
         self._busy_flag = False
 
@@ -150,12 +152,28 @@ class ThreadWorker(threading.Thread):
             "set": self._handle_set,
         }
 
+    def end(self):
+        """end worker
+
+        スレッドを終了させ、
+        全モーターをオフにする。
+        """
+        self.__log.debug("")
+
+        # stop thread
+        self._active = False
+        self.clear_cmdq()
+        self.join()
+
+        # off all servo
+        self.mservo.off()
+
+        self.__log.debug("done")
+
     def __enter__(self):
         """Enter for 'with'."""
         self.__log.debug("")
-
         self.start()
-
         return self
 
     def __exit__(self, ex_type, ex_value, trace):
@@ -163,7 +181,6 @@ class ThreadWorker(threading.Thread):
         self.__log.debug(
             "ex_type=%s, ex_value=%s, trace=%s", ex_type, ex_value, trace
         )
-
         if ex_type:
             self.__log.error("%s: %s", ex_type.__name__, ex_value)
             return True
@@ -180,14 +197,6 @@ class ThreadWorker(threading.Thread):
         """del"""
         self._active = False
         self.__log.debug("")
-
-    def end(self):
-        """end worker"""
-        self.__log.debug("")
-        self._active = False
-        self.clear_cmdq()
-        self.join()
-        self.__log.debug("done")
 
     def clear_cmdq(self):
         """clear command queue"""
@@ -255,7 +264,7 @@ class ThreadWorker(threading.Thread):
             cmd_name = cmd_json.get("method")
             if cmd_name is None:
                 err_msg = "Not a command"
-                _ret = self.mk_reply_error("INVALID_JSON", err_msg, cmd_json)
+                _ret = self.mk_reply_error("NO_METHOD", err_msg, cmd_json)
                 self.__log.debug("_ret=%s", _ret)
                 return _ret
 
@@ -267,28 +276,30 @@ class ThreadWorker(threading.Thread):
                 self.__log.debug("_ret=%s", _ret)
                 return _ret
 
-            if cmd_name == self.CMD_CANCEL:
+            # コマンドごとの処理
+            # キューに入れない特別な処理を先に行う
+            if cmd_name == self.CMD_CANCEL:  # キャンセル
                 _count = self.clear_cmdq()
                 _ret = self.mk_reply_result(_count, cmd_data)
-                self.__log.debug("_ret=%s", _ret)
+                self.__log.debug("%s: _ret=%s", cmd_name, _ret)
                 return _ret
 
-            if cmd_name == self.CMD_QSIZE:
+            if cmd_name == self.CMD_QSIZE:  # キューサイズ
                 _ret = self.mk_reply_result(self.qsize, cmd_data)
-                self.__log.debug("_ret=%s", _ret)
+                self.__log.debug("%s: _ret=%s", cmd_name, _ret)
                 return _ret
 
-            if cmd_name == self.CMD_WAIT:
+            if cmd_name == self.CMD_WAIT:  # Wait
+                # すべてのコマンドが終了するまで待つ
                 while self._busy_flag or self.qsize > 0:
                     self.__log.debug("waiting..")
-                    time.sleep(0.5)
+                    time.sleep(0.3)
                 _ret = self.mk_reply_result(self.qsize, cmd_data)
-                self.__log.debug("done")
+                self.__log.debug("%s: _ret=%s", cmd_name, _ret)
                 return _ret
 
             # 通常のコマンドは、コマンドキューに入れる。
             self._cmdq.put(cmd_json)
-
             self.__log.debug(
                 "cmd_json=%s, qsize=%s", cmd_json, self._cmdq.qsize()
             )

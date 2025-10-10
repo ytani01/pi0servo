@@ -1,4 +1,3 @@
-#
 import time
 
 CMD = "uv run pi0servo api-server"
@@ -19,7 +18,7 @@ class TestBasic:
         assert session.expect("Ready")
 
         session.close()
-        time.sleep(3)
+        time.sleep(1)
 
     def test_start_err(self, cli_runner):
         """server start error"""

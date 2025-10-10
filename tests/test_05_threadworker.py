@@ -14,12 +14,14 @@ import pytest
 from pi0servo.core.multi_servo import MultiServo
 from pi0servo.helper.thread_worker import ThreadWorker
 
+PINS = [17, 18]
+
 
 @pytest.fixture
 def mocker_multiservo():
     """MultiServoをモックするためのフィクスチャ"""
     with patch(
-        "pi0servo.core.multi_servo.MultiServo"
+        "pi0servo.helper.thread_worker.MultiServo"
     ) as mock_mservo_constructor:
         mock_mservo_instance = MagicMock(spec=MultiServo)
         mock_mservo_constructor.return_value = mock_mservo_instance
@@ -27,10 +29,11 @@ def mocker_multiservo():
 
 
 @pytest.fixture
-def thread_worker(mocker_multiservo):
+def thread_worker(mocker_multiservo, mocker_pigpio):
     """ThreadWorkerのテスト用インスタンスを生成するフィクスチャ"""
-    mservo = mocker_multiservo()
-    worker = ThreadWorker(mservo, debug=False)
+    pi = mocker_pigpio()
+    mocker_multiservo()
+    worker = ThreadWorker(pi, PINS, debug=False)
     worker.start()  # スレッドを開始
     yield worker
     worker.end()  # テスト終了時にスレッドを終了

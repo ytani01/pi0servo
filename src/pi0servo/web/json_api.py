@@ -12,7 +12,7 @@ import pigpio
 from fastapi import Body, FastAPI, Request
 from pyclickutils import get_logger
 
-from pi0servo import MultiServo, ThreadWorker
+from pi0servo import ThreadWorker
 
 
 class JsonApi:
@@ -31,8 +31,7 @@ class JsonApi:
         if not self.pi.connected:
             raise ConnectionError("pigpio daemon")
 
-        self.mservo = MultiServo(self.pi, self.pins)  # debug=self._debug)
-        self.thr_worker = ThreadWorker(self.mservo, debug=self._debug)
+        self.thr_worker = ThreadWorker(self.pi, self.pins, debug=self._debug)
         self.thr_worker.start()
         self.__log.info("Ready")
 
