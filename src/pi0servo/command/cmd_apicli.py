@@ -27,25 +27,24 @@ class CmdApiCli(CliBase):
         self.pins = pins
 
         try:
-            self.thworker = ThreadWorker(
+            self.thr_worker = ThreadWorker(
                 self.pi, self.pins, debug=self.__debug
             )
         except Exception as _e:
             self.__log.error("%s: %s", type(_e).__name__, _e)
 
-    def main(self):
-        """main loop"""
+    def start(self):
         self.__log.debug("")
-        self.thworker.start()
-        super().main()
+        super().start()
+        self.thr_worker.start()
 
     def end(self):
         """end"""
         self.__log.debug("")
         super().end()
 
-        if self.thworker:
-            self.thworker.end()
+        if self.thr_worker:
+            self.thr_worker.end()
         print("\n* Bye!\n")
 
     def parse_line(self, line: str) -> str:
@@ -86,7 +85,7 @@ class CmdApiCli(CliBase):
         try:
             for _j in line_json:
                 print(f">>> {_j}", flush=True)
-                _res = self.thworker.send(_j)
+                _res = self.thr_worker.send(_j)
                 print(f" <<< {_res}", flush=True)
                 result_json.append(_res)
         except Exception as _e:
