@@ -5,10 +5,7 @@
 
 import json
 
-from pyclibase import CliBase
-from pyclickutils import get_logger
-
-from pi0servo import ApiClient
+from pi0servo import ApiClient, CliBase, get_logger
 
 
 class CmdApiClient(CliBase):

@@ -7,7 +7,6 @@ import os
 
 import click
 import pigpio
-from pyclickutils import click_common_opts, get_logger
 
 from . import __version__
 from .command.cmd_apicli import CmdApiCli
@@ -18,6 +17,8 @@ from .command.cmd_servo import CmdServo
 from .command.cmd_strcli import CmdStrCli
 from .command.cmd_strclient import CmdStrClient
 from .core.calibrable_servo import CalibrableServo
+from .utils.clickutils import click_common_opts
+from .utils.mylogger import errmsg, get_logger
 
 
 def get_pi(debug=False) -> pigpio.pi:
@@ -84,7 +85,7 @@ def servo(ctx, pin: int, pulse: int, wait_sec: float, debug: bool) -> None:
         app.main(ctx)
 
     except Exception as _e:
-        __log.error("%s: %s", type(_e).__name__, _e)
+        __log.error(errmsg(_e))
 
     finally:
         if app:
@@ -132,7 +133,7 @@ def calib(ctx, pin, conf_file, debug):
         pass
 
     except Exception as _e:
-        __log.error("%s: %s", type(_e).__name__, _e)
+        __log.error(errmsg(_e))
 
     finally:
         if app:
@@ -178,7 +179,7 @@ def api_cli(ctx, pins, history_file, script_file, debug):
         app.main()
 
     except Exception as _e:
-        __log.error("%s: $%s", type(_e).__name__, _e)
+        __log.error(errmsg(_e))
 
     finally:
         # if app:
@@ -242,7 +243,7 @@ def str_cli(ctx, pins, history_file, script_file, angle_factor, debug):
         app.main()
 
     except Exception as _e:
-        __log.error("%s: $%s", type(_e).__name__, _e)
+        __log.error(errmsg(_e))
 
     finally:
         # if app:
@@ -378,7 +379,7 @@ def str_client(ctx, url, history_file, script_file, angle_factor, debug):
         )
         app.main()
     except Exception as _e:
-        __log.error("%s: $%s", type(_e).__name__, _e)
+        __log.error(errmsg(_e))
 
 
 @cli.command()

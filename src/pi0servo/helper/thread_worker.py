@@ -6,10 +6,9 @@ import queue
 import threading
 import time
 
-from pyclickutils import get_logger
-
 from ..core.calibrable_servo import CalibrableServo
 from ..core.multi_servo import MultiServo
+from ..utils.mylogger import get_logger
 
 
 class ThreadWorker(threading.Thread):

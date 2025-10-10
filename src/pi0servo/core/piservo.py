@@ -3,7 +3,7 @@
 #
 """piservo.py"""
 
-from pyclickutils import get_logger
+from ..utils.mylogger import get_logger
 
 
 class PiServo:

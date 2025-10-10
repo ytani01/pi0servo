@@ -5,10 +5,7 @@
 
 import json
 
-from pyclibase import CliBase
-from pyclickutils import get_logger
-
-from ..helper.thread_worker import ThreadWorker
+from pi0servo import CliBase, ThreadWorker, get_logger
 
 
 class CmdApiCli(CliBase):

@@ -4,9 +4,8 @@
 import pprint
 
 import blessed
-from pyclickutils import get_logger
 
-from pi0servo import CalibrableServo
+from pi0servo import CalibrableServo, get_logger
 
 
 class CalibApp:

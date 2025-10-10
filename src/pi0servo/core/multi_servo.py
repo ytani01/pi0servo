@@ -5,8 +5,7 @@
 
 import time
 
-from pyclickutils import get_logger
-
+from ..utils.mylogger import get_logger
 from .calibrable_servo import CalibrableServo
 
 

@@ -1,8 +1,7 @@
 #
 # (c) 2025 Yoichi Tanibayashi
 #
-from pyclickutils import get_logger
-
+from ..utils.mylogger import get_logger
 from ..utils.servo_config_manager import ServoConfigManager
 from .piservo import PiServo
 

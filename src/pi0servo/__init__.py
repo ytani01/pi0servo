@@ -14,14 +14,23 @@ from .core.piservo import PiServo
 from .helper.str_cmd_to_json import StrCmdToJson
 from .helper.thread_multi_servo import ThreadMultiServo
 from .helper.thread_worker import ThreadWorker
+from .utils.clibase import CliBase
+from .utils.clickutils import click_common_opts
+from .utils.mylogger import errmsg, get_logger
+from .utils.servo_config_manager import ServoConfigManager
 from .web.api_client import ApiClient
 
 __all__ = [
     "__version__",
+    "click_common_opts",
+    "errmsg",
+    "get_logger",
     "ApiClient",
     "CalibrableServo",
+    "CliBase",
     "MultiServo",
     "PiServo",
+    "ServoConfigManager",
     "StrCmdToJson",
     "ThreadMultiServo",
     "ThreadWorker",

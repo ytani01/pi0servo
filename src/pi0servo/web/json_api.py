@@ -10,9 +10,8 @@ from typing import Any, Dict, List, Union
 
 import pigpio
 from fastapi import Body, FastAPI, Request
-from pyclickutils import get_logger
 
-from pi0servo import ThreadWorker
+from pi0servo import ThreadWorker, get_logger
 
 
 class JsonApi:

@@ -6,7 +6,8 @@
 import os
 
 import uvicorn
-from pyclickutils import get_logger
+
+from pi0servo import get_logger
 
 
 class CmdApiServer:
