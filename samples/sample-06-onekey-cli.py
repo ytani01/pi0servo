@@ -1,30 +1,43 @@
+import json
+
 import blessed
 import click
 import pigpio
-from pyclickutils import click_common_opts, errmsg, get_logger
 
-from pi0servo import StrCmdToJson, ThreadWorker
+from pi0servo import (
+    CliBase,
+    StrCmdToJson,
+    ThreadWorker,
+    click_common_opts,
+    errmsg,
+    get_logger,
+)
 
 VERSION_STR = "0.0.1"
 
 
-class OneKeyCli:
+class OneKeyCli(CliBase):
     """One key CLI sample."""
 
+    CMD_QUIT = "QUIT"
+
     KEY_BIND = {
-        "d": "ms:.1 mr:10,0",
-        "f": "ms:.1 mr:-10,0",
-        "k": "ms:.1 mr:0,10",
-        "j": "ms:.1 mr:0,-10",
-        "h": "ms:.1 mv:0,0",
-        "q": "QUIT",
-        "Q": "QUIT",
-        "KEY_ESCAPE": "QUIT",
-        "\x04": "QUIT",
+        "d": "ms:2 mr:10,0",
+        "f": "ms:2 mr:-10,0",
+        "k": "ms:2 mr:0,10",
+        "j": "ms:2 mr:0,-10",
+        "h": "ms:2 mv:0,0",
+        "q": CMD_QUIT,
+        "Q": CMD_QUIT,
+        "KEY_ESCAPE": CMD_QUIT,
+        "\x04": CMD_QUIT,
     }
 
-    def __init__(self, pi, pins, anglefactor_str: str, debug=False):
+    def __init__(
+        self, pi, pins, anglefactor_str: str, prompt_str, debug=False
+    ):
         """Constractor."""
+        super().__init__(prompt_str, debug=debug)
         self.__debug = debug
         self.__log = get_logger(self.__class__.__name__, self.__debug)
         self.__log.debug(
@@ -33,6 +46,7 @@ class OneKeyCli:
 
         self.pi = pi
         self.pins = pins
+        self.prompt_str = prompt_str
 
         self.angle_factor = self.str_to_anglefactor(anglefactor_str)
         self.__log.debug("angle_factor=%s", self.angle_factor)
@@ -40,7 +54,6 @@ class OneKeyCli:
         self.parser = StrCmdToJson(self.angle_factor, debug=self.__debug)
         self.thr_worker = ThreadWorker(self.pi, self.pins, debug=self.__debug)
         self.term = blessed.Terminal()
-        self.running = False
 
     def str_to_anglefactor(self, af_str: str) -> list[int]:
         """String to angle factor."""
@@ -63,67 +76,52 @@ class OneKeyCli:
 
     def start(self):
         """Start."""
+        super().start()
         self.__log.debug("")
-        self.running = True
         self.thr_worker.start()
 
     def end(self):
         """End."""
         self.__log.debug("")
+        self.thr_worker.send({"method": "cancel"})
+        self.thr_worker.send({"method": "wait"})
         self.thr_worker.end()
-        self.running = False
+        super().end()
 
-    def func_quit(self):
-        print("\n=== QUIT ===\n")
-        self.end()
-
-    def send_strcmd(self, strcmd):
-        print(strcmd)
-        jsoncmdlist = self.parser.cmdstr_to_jsonlist(strcmd)
-        for jsoncmd in jsoncmdlist:
-            self.thr_worker.send(jsoncmd)
-
-    def main(self):
-        """Main loop."""
-        self.__log.debug("")
-
-        self.start()
-
-        while self.running:
-            inkey = ""
-            try:
-                with self.term.cbreak():
-                    inkey = self.term.inkey()
-                    self.__log.debug("inkey=%a", inkey)
-
-            except KeyboardInterrupt as _e:
-                self.__log.warning("%s: %s", type(_e).__name__, _e)
-                break
-            except Exception as _e:
-                self.__log.warning("%s: %s", type(_e).__name__, _e)
-                break
-
-            if not inkey:
-                continue
-
+    def key_input(self) -> str:
+        inkey_str = ""
+        with self.term.cbreak():
+            print(self.prompt_str, end="", flush=True)
+            inkey = self.term.inkey()
             if inkey.is_sequence:
-                inkey_str = inkey.name
+                inkey_str = str(inkey.name)
             else:
                 inkey_str = str(inkey)
-            self.__log.debug("inkey_str=%a", inkey_str)
-            if not inkey_str:
-                continue
+            print(inkey_str)
+        return str(inkey_str)
 
-            strcmd = self.KEY_BIND.get(inkey_str)
-            self.__log.debug("strcmd=%a", strcmd)
+    def parse_line(self, line: str) -> str:
+        strcmd = self.KEY_BIND.get(line)
+        self.__log.debug("strcmd=%a", strcmd)
+        if not strcmd:
+            return ""
+        if strcmd == self.CMD_QUIT:
+            return strcmd
 
-            if strcmd:
-                if strcmd == "QUIT":
-                    self.func_quit()
-                else:
-                    self.send_strcmd(strcmd)
+        jsoncmdliststr = self.parser.cmdstr_to_jsonliststr(strcmd)
+        self.__log.debug("=%a", jsoncmdliststr)
+        return jsoncmdliststr
 
-        self.end()
+    def exec(self, line: str) -> str:
+        if line == self.CMD_QUIT:
+            raise EOFError(self.CMD_QUIT)
+
+        result_list = []
+        for jsoncmd in json.loads(line):
+            result_list.append(self.thr_worker.send(jsoncmd))
+
+        self.__log.debug("result_list=%s", result_list)
+        return str(result_list)
 
 
 @click.command()
@@ -151,12 +149,8 @@ def main(ctx, pins, anglefactor, debug):
     app = None
     try:
         pi = pigpio.pi()
-        app = OneKeyCli(pi, pins, anglefactor, debug=debug)
+        app = OneKeyCli(pi, pins, anglefactor, "> ", debug=debug)
         app.main()
-    except Exception as _e:
-        msg = errmsg(_e)
-        __log.error(msg)
-        print(ctx.get_help())
     finally:
         if app:
             app.end()

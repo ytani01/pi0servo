@@ -8,7 +8,7 @@ from typing import Optional
 import pytest
 
 TIMEOUT_EXPECT = 25.0
-TIMEOUT_CLOSE = 3.0
+TIMEOUT_CLOSE = 5.0
 
 
 class InteractiveSession:

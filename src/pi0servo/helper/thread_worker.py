@@ -245,6 +245,7 @@ class ThreadWorker(threading.Thread):
 
     def send(self, cmd_data: str | dict) -> dict:
         """Send cmd_data(JSON)"""
+        self.__log.debug("cmd_data=%s", cmd_data)
         try:
             if isinstance(cmd_data, str):
                 cmd_json = json.loads(cmd_data)

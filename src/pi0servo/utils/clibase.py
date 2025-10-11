@@ -105,7 +105,7 @@ class CliBase:
         **TO BE OVERRIDE**
         """
         self.__log.debug("line=%a", line)
-        return f"*** {line} ***"
+        return line
 
     def exec(self, line: str) -> str:
         """Send line.
