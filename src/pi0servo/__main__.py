@@ -174,7 +174,7 @@ def api_cli(ctx, pins, history_file, script_file, debug):
     try:
         pi = get_pi(debug)
         app = CmdApiCli(
-            cmd_name, pi, pins, history_file, script_file, debug=debug
+            cmd_name + "> ", pi, pins, history_file, script_file, debug=debug
         )
         app.main()
 
@@ -232,7 +232,7 @@ def str_cli(ctx, pins, history_file, script_file, angle_factor, debug):
     try:
         pi = get_pi(debug)
         app = CmdStrCli(
-            cmd_name,
+            cmd_name + "> ",
             pi,
             pins,
             history_file,
@@ -325,7 +325,9 @@ def api_client(ctx, url, history_file, script_file, debug):
 
     app = None
     try:
-        app = CmdApiClient(cmd_name, url, history_file, script_file, debug)
+        app = CmdApiClient(
+            cmd_name + "> ", url, history_file, script_file, debug
+        )
         app.main()
     except Exception as _e:
         __log.error("%s: $%s", type(_e).__name__, _e)
@@ -375,7 +377,12 @@ def str_client(ctx, url, history_file, script_file, angle_factor, debug):
     app = None
     try:
         app = CmdStrClient(
-            cmd_name, url, history_file, script_file, af_list, debug=debug
+            cmd_name + "> ",
+            url,
+            history_file,
+            script_file,
+            af_list,
+            debug=debug,
         )
         app.main()
     except Exception as _e:
