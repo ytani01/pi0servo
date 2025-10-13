@@ -70,6 +70,7 @@ dev = [
     "pylint>=3.3.7",
     "pyright>=1.1.403",
     "hatch",
+    "twine>=6.2.0",
 ]
 samples = [
     "jsonschema>=4.25.1",
