@@ -6,7 +6,7 @@
 import os
 import readline
 
-from pyclickutils import errmsg, get_logger
+from .mylogger import errmsg, get_logger
 
 
 class CliBase:

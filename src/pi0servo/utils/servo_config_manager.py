@@ -5,7 +5,7 @@ import json
 import os
 from pathlib import Path
 
-from pyclickutils import get_logger
+from .mylogger import get_logger
 
 
 class ServoConfigManager:
