@@ -82,5 +82,5 @@ module = ['pigpio', 'fastapi', 'requests']
 ignore_missing_imports = true
 
 [tool.uv.sources]
-pyclickutils = { path = "../pyclickutils" }
 pyclibase = { path = "../pyclibase" }
+pyclickutils = { path = "../pyclickutils" }
