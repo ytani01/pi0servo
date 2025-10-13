@@ -17,6 +17,7 @@ from .helper.thread_worker import ThreadWorker
 from .utils.clibase import CliBase
 from .utils.clickutils import click_common_opts
 from .utils.mylogger import errmsg, get_logger
+from .utils.scriptrunner import ScriptRunner
 from .utils.servo_config_manager import ServoConfigManager
 from .web.api_client import ApiClient
 
@@ -28,6 +29,7 @@ __all__ = [
     "ApiClient",
     "CalibrableServo",
     "CliBase",
+    "ScriptRunner",
     "MultiServo",
     "PiServo",
     "ServoConfigManager",

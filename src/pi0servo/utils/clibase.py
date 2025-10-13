@@ -14,59 +14,57 @@ class CliBase:
 
     PROMPT_STR = "> "
     COMMENT_STR = "#"
-    SPECIAL_COMMAND_PREFIX = ":"
 
     HIST_LEN = 500
+
+    RESULT_STATUS = {
+        "OK": 0,
+        "END": -1,
+        "ERR": 1,
+    }
 
     def __init__(
         self,
         prompt_str: str = PROMPT_STR,
         history_file: str = "",
-        script_file: str = "",
         debug=False,
     ):
         """Contractor."""
         self.__debug = debug
         self.__log = get_logger(self.__class__.__name__, self.__debug)
         self.__log.debug(
-            "prompt_str=%a, history_file=%a, script_file=%a",
-            prompt_str,
-            history_file,
-            script_file,
+            "prompt_str=%a, history_file=%a", prompt_str, history_file
         )
 
         self.prompt_str = prompt_str
+        self.history_file = history_file
 
-        # init script_file
-        self.script_file = script_file
-        if script_file:
-            self.script_file = os.path.expanduser(
-                os.path.expandvars(script_file)
-            )
-            self.history_file = ""
-        self.__log.debug("script_file=%a", self.script_file)
-
-        self.history_file = os.path.expanduser(
-            os.path.expandvars(history_file)
-        )
-        self.__log.debug("history_file=%a", self.history_file)
+        self.end_flag = False  # end()が一度でも呼ばれると True
 
     def main(self):
         """Main."""
         self.__log.debug("")
         try:
-            self.start()
-            if self.script_file:
-                self.run_file(self.script_file)
-            else:
+            if self.start():
                 self.loop()
         finally:
             self.end()
 
-    def start(self):
-        """Start."""
-        self.__log.debug("history_file=%a", self.history_file)
+    def start(self) -> bool:
+        """Start.
+        **TO BE OVERRIDE**
+
+        Returns:
+            ret (bool)
+        """
+
+        # init history
         if self.history_file:
+            self.history_file = os.path.expanduser(
+                os.path.expandvars(self.history_file)
+            )
+            self.__log.debug("history_file=%a", self.history_file)
+
             try:
                 readline.read_history_file(self.history_file)
                 readline.set_history_length(self.HIST_LEN)
@@ -85,8 +83,17 @@ class CliBase:
             except Exception as _e:
                 self.__log.error("%s: %s", type(_e).__name__, _e)
 
+        return True
+
     def end(self):
-        """End."""
+        """End.
+        **TO BE OVERRIDE**
+        """
+        self.__log.debug("end_flag=%s", self.end_flag)
+
+        if self.end_flag:
+            return
+
         self.__log.debug("history_file=%a", self.history_file)
         if self.history_file:
             self.__log.debug("save history: %s", self.history_file)
@@ -94,105 +101,123 @@ class CliBase:
                 readline.write_history_file(self.history_file)
             except Exception as _e:
                 self.__log.error(f"{self.history_file!r}: {errmsg(_e)}")
+
+        self.end_flag = True
         self.__log.debug("done")
 
-    def key_input(self) -> str:
+    def input_data(self) -> str:
         """Key input."""
         return input(self.prompt_str)
 
-    def parse_line(self, line: str) -> str:
-        """Parse line.
-        **TO BE OVERRIDE**
-        """
-        self.__log.debug("line=%a", line)
-        return line
-
-    def exec(self, line: str) -> str:
-        """Send line.
+    def parse_instr(self, instr: str) -> dict:
+        """Parse input string.
         **TO BE OVERRIDE**
 
-        エラー時には、""(空文字列)を返すようにすること。
+        Args:
+            instr (str): 入力された文字列
+
+        Returns:
+            parsed_data (dict):
+                {
+                    "data": (Any)
+                    "status": 0  # OK
+                }
         """
-        self.__log.debug("line=%a", line)
-        if line == "*** error ***":
-            return ""
+        self.__log.debug("instr=%a", instr)
 
-        return f"exec {line}"
+        instr = instr.strip()
 
-    def handle_special(self, line: str):
-        """Handle special command."""
-        self.__log.debug("line=%a", line)
-        self.__log.info("**WIP**: Special comman.")
-        return
+        parsed_data = {
+            "data": instr,
+            "status": 0
+        }
+        return parsed_data
 
-    def process_line(self, line: str):
-        """Process the line."""
-        self.__log.debug("line=%a", line)
+    def handle(self, parsed_data: dict) -> dict:
+        """handle parsed data.
+        **TO BE OVERRIDE**
 
-        line = line.strip()
-        if not line:
-            return True
+        Args:
+            parsed_data (dict):
 
-        if line.startswith(self.COMMENT_STR):
-            self.__log.debug("comment line: ignored")
-            return True
+        Returns:
+            result (dict):
+                {"data": (Any), "status": self.RESULT_STATUS[?]}
+        """
+        self.__log.debug("parsed_data=%s", parsed_data)
+        if parsed_data.get("status") != 0:
+            self.__log.warning("Invalid parsed_data: %s", parsed_dta)
+            result = {
+                "data": f"Invalid parsed_data: {parsed_data}",
+                "status": self.RESULT_STATUS['ERR']
+            }
+            return result
 
-        if line.startswith(self.SPECIAL_COMMAND_PREFIX):
-            self.handle_special(line)
-            return True
+        result_data = parsed_data.get("data")
 
-        _parsed_line = self.parse_line(line)
-        self.__log.debug("parsed_line=%a", _parsed_line)
-        if not _parsed_line:
-            self.__log.warning("parse error: ignored")
-            return True
+        result = {
+            "data": result_data,
+            "status": self.RESULT_STATUS["OK"]
+        }
+        return result
 
+    def process_instr(self, instr: str) -> dict:
+        """Process input data.
+
+        Args:
+            instr (str):
+
+        Returns:
+            result (dict):
+                {
+                    "data": (Any),
+                    "status": self.RESULT_STATUS[?]
+                }
+        """
+        self.__log.debug("instr=%a", instr)
+
+        parsed_data = self.parse_instr(instr)
+        self.__log.debug("parsed_data=%s", parsed_data)
+        if parsed_data.get("status") != self.RESULT_STATUS['OK']:
+            self.__log.warning(f"parse error: {parsed_data.get('status')}")
+            return parsed_data
+
+        result = {
+            "data": None,
+            "status": self.RESULT_STATUS["OK"]
+        }
         try:
-            result = self.exec(_parsed_line)
-            if not result:
-                print("[ERROR]")
+            result = self.handle(parsed_data)
+            self.__log.debug("result=%s", result)
+            if result.get('status') == self.RESULT_STATUS["OK"]:
+                print(f"result.data> {result.get('data')}")
             else:
-                print(f"result={result!r}")
+                print(f"ERROR:{result.get('status')}> {result.get('data')}")
         except Exception as _e:
-            self.__log.warning(errmsg(_e))
-            return False
-
-        return True
+            msg = errmsg(_e)
+            self.__log.warning(msg)
+            result = {
+                "data": msg,
+                "status": self.RESULT_STATUS["ERR"]
+            }
+        return result
 
     def loop(self):
         """loop"""
         try:
             while True:
                 try:
-                    _line = self.key_input()
-                    self.__log.debug("line=%a", _line)
+                    instr = self.input_data()
+                    self.__log.debug("instr=%a", instr)
                 except EOFError as _e:
-                    print(" [EOF]")
+                    print("[EOF]")
                     self.__log.debug(errmsg(_e))
                     break
 
-                if self.process_line(_line):
-                    continue
-                else:
+                result = self.process_instr(instr)
+                if result.get("status") == self.RESULT_STATUS["END"]:
                     break
 
         except KeyboardInterrupt as _e:
             print("^C [Interrupt]")
             self.__log.debug(errmsg(_e))
-
-    def run_file(self, script_file=""):
-        """Run command file."""
-        if not script_file:
-            script_file = self.script_file
-        self.__log.debug("script_file=%a", self.script_file)
-        if not script_file:
-            return
-
-        with open(script_file, "r") as f:
-            for _line in f:
-                self.__log.debug("line=%a", _line)
-
-                if not self.process_line(_line):
-                    continue
-                else:
-                    break
