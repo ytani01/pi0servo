@@ -34,10 +34,13 @@ class CmdStrCli(CmdApiCli):
         self.angle_factor = angle_factor
         self.parser = StrCmdToJson(self.angle_factor, debug=self.__debug)
 
-    def parse_line(self, line):
+    def parse_instr(self, instr: str) -> dict:
         """Parse comand line to json stirng"""
-        self.__log.debug("line=%a", line)
+        self.__log.debug("instr=%a", instr)
 
-        parsed_str = self.parser.cmdstr_to_jsonliststr(line)
-        self.__log.debug("parsed_str=%a", parsed_str)
-        return parsed_str
+        parsed_json = self.parser.cmdstr_to_jsonlist(instr)
+        self.__log.debug("parsed_json=%a", parsed_json)
+        return {
+            "data": parsed_json,
+            "status": self.RESULT_STATUS["OK"]
+        }

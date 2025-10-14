@@ -48,7 +48,9 @@ class TestStrCmdToJson:
         """_create_error_dataのテスト"""
         instance = StrCmdToJson()
         error_data = instance._create_error_data("INVALID_PARAM", "mv:abc")
-        assert error_data == {"error": "INVALID_PARAM", "data": "mv:abc"}
+        assert error_data == {
+            "method": "ERROR", "error": "INVALID_PARAM", "data": "mv:abc"
+        }
 
     def test_parse_angles_angle_factor_shorter(self):
         """_parse_anglesでangle_factorがanglesより短い場合のテスト"""
@@ -81,7 +83,9 @@ class TestStrCmdToJson:
         """cmdstr_to_jsonでスペースを含む不正な文字列のテスト"""
         instance = StrCmdToJson()
         cmd_str = "mv:10 20"
-        expected_json_obj = {"error": "INVALID_REQUEST", "data": "mv:10 20"}
+        expected_json_obj = {
+            "method": "ERROR", "error": "INVALID_REQUEST", "data": "mv:10 20"
+        }
         result = instance.cmdstr_to_json(cmd_str)
         assert result == expected_json_obj
 
@@ -89,7 +93,9 @@ class TestStrCmdToJson:
         """cmdstr_to_jsonで文字列ではない入力のテスト"""
         instance = StrCmdToJson()
         cmd_str = 123  # int型
-        expected_json_obj = {"error": "INVALID_REQUEST", "data": 123}
+        expected_json_obj = {
+            "method": "ERROR", "error": "INVALID_REQUEST", "data": 123
+        }
         result = instance.cmdstr_to_json(cmd_str)
         assert result == expected_json_obj
 
@@ -99,7 +105,9 @@ class TestStrCmdToJson:
             angle_factor=[1], debug=True
         )  # angle_factorが短い
         cmd_str = "mp:1,-50"  # servo_idx=1 はangle_factorの範囲外
-        expected_json_obj = {"error": "INVALID_PARAM", "data": "mp:1,-50"}
+        expected_json_obj = {
+            "method": "ERROR", "error": "INVALID_PARAM", "data": "mp:1,-50"
+        }
         result = instance.cmdstr_to_json(cmd_str)
         assert result == expected_json_obj
 
@@ -109,7 +117,9 @@ class TestStrCmdToJson:
             angle_factor=[1], debug=True
         )  # angle_factorが短い
         cmd_str = "sn:1"  # servo_idx=1 はangle_factorの範囲外
-        expected_json_obj = {"error": "INVALID_PARAM", "data": "sn:1"}
+        expected_json_obj = {
+            "method": "ERROR","error": "INVALID_PARAM", "data": "sn:1"
+        }
         result = instance.cmdstr_to_json(cmd_str)
         assert result == expected_json_obj
 
@@ -125,7 +135,9 @@ class TestStrCmdToJson:
         """cmdstr_to_jsonで負のsecパラメータのテスト"""
         instance = StrCmdToJson()
         cmd_str = "sl:-0.5"
-        expected_json_obj = {"error": "INVALID_PARAM", "data": "sl:-0.5"}
+        expected_json_obj = {
+            "method": "ERROR", "error": "INVALID_PARAM", "data": "sl:-0.5"
+        }
         result = instance.cmdstr_to_json(cmd_str)
         assert result == expected_json_obj
 
@@ -133,7 +145,9 @@ class TestStrCmdToJson:
         """cmdstr_to_jsonでstep_nが1未満のテスト"""
         instance = StrCmdToJson()
         cmd_str = "st:0"
-        expected_json_obj = {"error": "INVALID_PARAM", "data": "st:0"}
+        expected_json_obj = {
+            "method": "ERROR", "error": "INVALID_PARAM", "data": "st:0"
+        }
         result = instance.cmdstr_to_json(cmd_str)
         assert result == expected_json_obj
 
@@ -208,14 +222,26 @@ class TestStrCmdToJson:
                     }
                 ],
             ),
-            ("mv:100", [{"error": "INVALID_PARAM", "data": "100"}]),
-            ("mv:abc", [{"error": "INVALID_PARAM", "data": "abc"}]),
+            ("mv:100", [{
+                "method": "ERROR", "error": "INVALID_PARAM", "data": "100"
+            }]),
+            ("mv:abc", [{
+                "method": "ERROR", "error": "INVALID_PARAM", "data": "abc"
+            }]),
             (
                 "unknown:10",
-                [{"error": "METHOD_NOT_FOUND", "data": "unknown:10"}],
+                [{
+                    "method": "ERROR",
+                    "error": "METHOD_NOT_FOUND",
+                    "data": "unknown:10"
+                }],
             ),
-            ("sl:abc", [{"error": "INVALID_PARAM", "data": "sl:abc"}]),
-            ("mv:", [{"error": "INVALID_PARAM", "data": "mv:"}]),
+            ("sl:abc", [{
+                "method": "ERROR", "error": "INVALID_PARAM", "data": "sl:abc"
+            }]),
+            ("mv:", [{
+                "method": "ERROR", "error": "INVALID_PARAM", "data": "mv:"
+            }]),
         ],
     )
     def test_cmdstr_to_jsonliststr(
@@ -310,7 +336,11 @@ class TestStrCmdToJson:
                 "method": "move_all_angles_sync",
                 "params": {"angles": [40, 30]},
             },
-            {"error": "METHOD_NOT_FOUND", "data": "unknown:10"},
+            {
+                "method": "ERROR",
+                "error": "METHOD_NOT_FOUND",
+                "data": "unknown:10"
+            },
             {"method": "sleep", "params": {"sec": 0.1}},
         ]
         result = str_cmd_to_json_instance.cmdstr_to_jsonliststr(cmd_line)

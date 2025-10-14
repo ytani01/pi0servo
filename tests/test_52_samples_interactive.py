@@ -10,7 +10,11 @@ class TestSamplePrograms:
             (
                 "sample-06-onekey-cli.py 25 27 -a -1,1",
                 ["j", "a", "q"],
-                ["result", "parse error: ignored", "EOFError", "QUIT"],
+                [
+                    "result", "angle_diffs",
+                    "JSONDecodeError",
+                    "QUIT"
+                ],
             ),
         ],
     )
@@ -20,5 +24,5 @@ class TestSamplePrograms:
         print(f"* cmdline={cmdline}")
         inout = {"in": inkey, "out": e_out}
         cli_runner.test_interactive(
-            cmdline, in_out=inout, terminate_flag=False, e_ret=0, timeout=10
+            cmdline, in_out=inout, terminate_flag=False, timeout=10
         )

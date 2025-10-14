@@ -136,7 +136,15 @@ class CliBase:
                 # parse
                 parsed_data = self.parse_instr(instr)
                 self.__log.debug("parsed_data=%s", parsed_data)
-                if parsed_data.get("status") != self.RESULT_STATUS["OK"]:
+
+                parsed_status = parsed_data.get("status")
+                self.__log.debug("parsed_status=%s", parsed_status)
+
+                if parsed_status == self.RESULT_STATUS["END"]:
+                    self.__log.warning(parsed_data)
+                    raise EOFError(parsed_data)
+
+                if parsed_status != self.RESULT_STATUS["OK"]:
                     self.__log.warning(
                         f"parse error: {parsed_data.get('status')}"
                     )

@@ -105,7 +105,7 @@ class OneKeyCmdCli(OneKeyCli):
         if strcmd == self.CMD_QUIT:
             parsed_data = {
                 "data": self.CMD_QUIT,
-                "status": self.RESULT_STATUS["EOF"],
+                "status": self.RESULT_STATUS["END"],
             }
             return parsed_data
 

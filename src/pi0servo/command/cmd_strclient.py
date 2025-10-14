@@ -3,7 +3,7 @@
 #
 """cmd_strclient.py."""
 
-from pi0servo import StrCmdToJson, get_logger
+from pi0servo import StrCmdToJson, get_logger, errmsg
 
 from .cmd_apiclient import CmdApiClient
 
@@ -31,11 +31,18 @@ class CmdStrClient(CmdApiClient):
 
         self.parser = StrCmdToJson(self.angle_factor, debug=self.__debug)
 
-    def parse_line(self, line: str) -> str:
-        """parse string command to json."""
-        self.__log.debug("line=%s", line)
+    def parse_instr(self, instr: str) -> dict:
+        """parse string command to json.
 
-        parsed_line = self.parser.cmdstr_to_jsonliststr(line)
-        self.__log.debug("parsed_line=%s", parsed_line)
+        **TBD**
+        parse errors
+        """
+        self.__log.debug("instr=%s", instr)
 
-        return parsed_line
+        parsed_json = self.parser.cmdstr_to_jsonlist(instr)
+        self.__log.debug("parsed_json=%s", parsed_json)
+
+        return {
+            "data": parsed_json,
+            "status": self.RESULT_STATUS["OK"]
+        }
