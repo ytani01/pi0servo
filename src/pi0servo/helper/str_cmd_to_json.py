@@ -72,11 +72,7 @@ class StrCmdToJson:
 
     def _create_error_data(self, code_key: str, strcmd: str) -> dict:
         """Create error data."""
-        return {
-            "method": "ERROR",
-            "error": code_key,
-            "data": strcmd
-        }
+        return {"method": "ERROR", "error": code_key, "data": strcmd}
 
     def _parse_angles(
         self, angle_str: str

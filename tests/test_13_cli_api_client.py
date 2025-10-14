@@ -11,11 +11,7 @@ class TestBasic:
         [
             (
                 '{"method": "cancel"}\n',
-                [
-                    "'status': 'ERR'",
-                    "NewConnectionError",
-                    "api-client>"
-                ],
+                ["'status': 'ERR'", "NewConnectionError", "api-client>"],
             ),
             ("a\n", ["JSONDecodeError", "api-client>"]),
         ],

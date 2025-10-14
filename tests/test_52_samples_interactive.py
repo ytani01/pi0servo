@@ -10,11 +10,7 @@ class TestSamplePrograms:
             (
                 "sample-06-onekey-cli.py 25 27 -a -1,1",
                 ["j", "a", "q"],
-                [
-                    "result", "angle_diffs",
-                    "JSONDecodeError",
-                    "QUIT"
-                ],
+                ["result", "angle_diffs", "JSONDecodeError", "QUIT"],
             ),
         ],
     )

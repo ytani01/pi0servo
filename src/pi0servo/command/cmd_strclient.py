@@ -3,7 +3,7 @@
 #
 """cmd_strclient.py."""
 
-from pi0servo import StrCmdToJson, get_logger, errmsg
+from pi0servo import StrCmdToJson, get_logger
 
 from .cmd_apiclient import CmdApiClient
 
@@ -42,7 +42,4 @@ class CmdStrClient(CmdApiClient):
         parsed_json = self.parser.cmdstr_to_jsonlist(instr)
         self.__log.debug("parsed_json=%s", parsed_json)
 
-        return {
-            "data": parsed_json,
-            "status": self.RESULT_STATUS["OK"]
-        }
+        return {"data": parsed_json, "status": self.RESULT_STATUS["OK"]}

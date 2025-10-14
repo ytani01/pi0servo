@@ -5,7 +5,7 @@
 
 import json
 
-from pi0servo import ApiClient, CliWithHistory, get_logger, errmsg
+from pi0servo import ApiClient, CliWithHistory, errmsg, get_logger
 
 
 class CmdApiClient(CliWithHistory):
@@ -34,9 +34,7 @@ class CmdApiClient(CliWithHistory):
         print("\n* Bye\n")
 
     def parse_instr(self, instr: str) -> dict:
-        """parse string to json
-
-        """
+        """parse string to json"""
         self.__log.debug("instr=%a", instr)
 
         parsed_instr = instr.replace("'", '"')
@@ -48,7 +46,7 @@ class CmdApiClient(CliWithHistory):
             parsed_json = {"error": "INVALID_JSON", "data": instr}
             parsed_data = {
                 "data": parsed_json,
-                "status": self.RESULT_STATUS["ERR"]
+                "status": self.RESULT_STATUS["ERR"],
             }
             return parsed_data
 
@@ -57,7 +55,7 @@ class CmdApiClient(CliWithHistory):
 
         parsed_data = {
             "data": parsed_json,
-            "status": self.RESULT_STATUS["OK"]
+            "status": self.RESULT_STATUS["OK"],
         }
         self.__log.debug("parsed_data=%a", parsed_data)
         return parsed_data
@@ -69,15 +67,12 @@ class CmdApiClient(CliWithHistory):
         cmd_json = parsed_data.get("data")
 
         if not cmd_json:
-            result_data = {
-                "data": "",
-                "status": self.RESULT_STATUS["ERR"]
-            }
+            result_data = {"data": "", "status": self.RESULT_STATUS["ERR"]}
             return result_data
 
         if not isinstance(cmd_json, list):
             cmd_json = [cmd_json]
-        
+
         result_json = []
         for _j in cmd_json:
             try:
@@ -90,12 +85,6 @@ class CmdApiClient(CliWithHistory):
             except Exception as _e:
                 msg = errmsg(_e)
                 self.__log.error(msg)
-                return {
-                    "data": msg,
-                    "status": self.RESULT_STATUS["ERR"]
-                }
+                return {"data": msg, "status": self.RESULT_STATUS["ERR"]}
 
-        return {
-            "data": result_json,
-            "status": self.RESULT_STATUS["OK"]
-        }
+        return {"data": result_json, "status": self.RESULT_STATUS["OK"]}

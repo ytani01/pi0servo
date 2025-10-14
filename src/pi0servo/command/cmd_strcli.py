@@ -40,7 +40,4 @@ class CmdStrCli(CmdApiCli):
 
         parsed_json = self.parser.cmdstr_to_jsonlist(instr)
         self.__log.debug("parsed_json=%a", parsed_json)
-        return {
-            "data": parsed_json,
-            "status": self.RESULT_STATUS["OK"]
-        }
+        return {"data": parsed_json, "status": self.RESULT_STATUS["OK"]}
