@@ -29,8 +29,6 @@ class CliWithHistory(CliBase):
 
         self.history_file = history_file
 
-        self.end_flag = False  # end()が一度でも呼ばれると True
-
     def start(self) -> bool:
         """Start.
         **TO BE OVERRIDE**
@@ -61,7 +59,7 @@ class CliWithHistory(CliBase):
                 # ヒストリーファイルが壊れていると思われるので削除する。
                 os.remove(self.history_file)
             except Exception as _e:
-                self.__log.error("%s: %s", type(_e).__name__, _e)
+                self.__log.error(errmsg(_e))
 
         return True
 

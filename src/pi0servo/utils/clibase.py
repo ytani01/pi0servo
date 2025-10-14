@@ -129,7 +129,7 @@ class CliBase:
                     instr = self.input_data()
                     self.__log.debug("instr=%a", instr)
                 except EOFError as _e:
-                    print("[EOF]")
+                    # print("[EOF]")
                     self.__log.debug(errmsg(_e))
                     break
 

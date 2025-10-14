@@ -52,7 +52,4 @@ class ScriptRunner(CliBase):
             self.__log.debug("instr=%a(%s)", instr, type(instr).__name__)
             if instr:
                 return instr
-            else:
-                raise EOFError
-        else:
-            raise EOFError
+        raise EOFError
