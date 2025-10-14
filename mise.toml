@@ -102,6 +102,6 @@ description = "Test PyPI"
 run = '''
 pwd
 . ./.env
-uv run twine upload -v --repository-url https://test.pypi.org/legacy/ dist/* -u __token__ -p ${TESTPYPI_PASSWD}
+uv run twine upload --verbose --repository-url https://test.pypi.org/legacy/ dist/* -u __token__ -p ${TESTPYPI_PASSWD}
 '''
 depends = ["build"]
