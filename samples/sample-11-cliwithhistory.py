@@ -25,6 +25,7 @@ def main(ctx, history_file, debug):
         prompt_str = command_name + "> "
         app = CliWithHistory(prompt_str, history_file, debug=debug)
         app.main()
+
     finally:
         if app:
             app.end()

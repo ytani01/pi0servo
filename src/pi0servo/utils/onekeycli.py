@@ -3,11 +3,16 @@ import blessed
 from .clibase import CliBase
 from .mylogger import get_logger
 
-KEY_EOF = "\x04"
-
 
 class OneKeyCli(CliBase):
     """One key CLI"""
+
+    KEY_EOF = "\x04"
+    CMD_EXIT = [
+        KEY_EOF,
+        "Q",
+        "q",
+    ]
 
     def __init__(self, prompt_str="> ", debug=False):
         super().__init__(prompt_str, debug=debug)
@@ -32,7 +37,7 @@ class OneKeyCli(CliBase):
             self.__log.debug("instr=%a(%s)", instr, type(instr).__name__)
             print(f"{instr!r}")
 
-            if instr == KEY_EOF:
+            if instr in self.CMD_EXIT:
                 raise EOFError
 
         if instr is None:

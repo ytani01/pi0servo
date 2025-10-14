@@ -17,6 +17,11 @@ class CliBase:
         "ERR": 1,
     }
 
+    CMD_EXIT = [
+        "exit",
+        "quit",
+    ]
+
     def __init__(self, prompt_str: str = PROMPT_STR, debug=False):
         """Contractor."""
         self.__debug = debug
@@ -107,6 +112,8 @@ class CliBase:
         result = data  # result = something(data)
 
         result_data = {"data": result, "status": self.RESULT_STATUS["OK"]}
+        if isinstance(data, str) and data.lower() in self.CMD_EXIT:
+            result_data["status"] = self.RESULT_STATUS["END"]
         self.__log.debug("result_data=%s", result_data)
         return result_data
 
