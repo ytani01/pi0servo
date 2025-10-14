@@ -9,7 +9,7 @@ import click
 import pigpio
 
 from . import __version__
-from .command.cmd_apicli import CmdApiCli
+from .command.cmd_apicli import CmdApiCli, CmdApiScriptRunner
 from .command.cmd_apiclient import CmdApiClient
 from .command.cmd_apiserver import CmdApiServer
 from .command.cmd_calib import CalibApp
@@ -173,17 +173,19 @@ def api_cli(ctx, pins, history_file, script_file, debug):
     app = None
     try:
         pi = get_pi(debug)
-        app = CmdApiCli(
-            cmd_name + "> ", pi, pins, history_file, script_file, debug=debug
-        )
+        if script_file:
+            app = CmdApiScriptRunner(pi, pins, script_file, debug=debug)
+        else:
+            prompt_str = cmd_name + "> "
+            app = CmdApiCli(prompt_str, pi, pins, history_file, debug=debug)
         app.main()
 
     except Exception as _e:
         __log.error(errmsg(_e))
 
     finally:
-        # if app:
-        #     app.end()
+        if app:
+            app.end()
         if pi:
             pi.stop()
 
@@ -231,12 +233,12 @@ def str_cli(ctx, pins, history_file, script_file, angle_factor, debug):
     pi = None
     try:
         pi = get_pi(debug)
+        prompt_str = cmd_name + "> "
         app = CmdStrCli(
-            cmd_name + "> ",
+            prompt_str,
             pi,
             pins,
             history_file,
-            script_file,
             af_list,
             debug=debug,
         )
@@ -246,8 +248,8 @@ def str_cli(ctx, pins, history_file, script_file, angle_factor, debug):
         __log.error(errmsg(_e))
 
     finally:
-        # if app:
-        #     app.end()
+        if app:
+            app.end()
         if pi:
             pi.stop()
 

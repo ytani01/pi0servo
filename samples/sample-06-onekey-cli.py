@@ -5,7 +5,7 @@ import click
 import pigpio
 
 from pi0servo import (
-    CliBase,
+    OneKeyCli,
     StrCmdToJson,
     ThreadWorker,
     click_common_opts,
@@ -16,7 +16,7 @@ from pi0servo import (
 VERSION_STR = "0.0.1"
 
 
-class OneKeyCli(CliBase):
+class OneKeyCmdCli(OneKeyCli):
     """One key CLI sample."""
 
     CMD_QUIT = "QUIT"
@@ -74,11 +74,13 @@ class OneKeyCli(CliBase):
 
         return af
 
-    def start(self):
+    def start(self) -> bool:
         """Start."""
-        super().start()
+        if not super().start():
+            return False
         self.__log.debug("")
         self.thr_worker.start()
+        return True
 
     def end(self):
         """End."""
@@ -88,40 +90,49 @@ class OneKeyCli(CliBase):
         self.thr_worker.end()
         super().end()
 
-    def key_input(self) -> str:
-        inkey_str = ""
-        with self.term.cbreak():
-            print(self.prompt_str, end="", flush=True)
-            inkey = self.term.inkey()
-            if inkey.is_sequence:
-                inkey_str = str(inkey.name)
-            else:
-                inkey_str = str(inkey)
-            print(inkey_str)
-        return str(inkey_str)
-
-    def parse_line(self, line: str) -> str:
-        strcmd = self.KEY_BIND.get(line)
+    def parse_instr(self, instr: str) -> dict:
+        """Parse"""
+        strcmd = self.KEY_BIND.get(instr)
         self.__log.debug("strcmd=%a", strcmd)
+
         if not strcmd:
-            return ""
+            parsed_data = {
+                "data": "",
+                "status": self.RESULT_STATUS["OK"],
+            }
+            return parsed_data
+
         if strcmd == self.CMD_QUIT:
-            return strcmd
+            parsed_data = {
+                "data": self.CMD_QUIT,
+                "status": self.RESULT_STATUS["EOF"],
+            }
+            return parsed_data
 
         jsoncmdliststr = self.parser.cmdstr_to_jsonliststr(strcmd)
         self.__log.debug("=%a", jsoncmdliststr)
-        return jsoncmdliststr
+        parsed_data = {
+            "data": jsoncmdliststr,
+            "status": self.RESULT_STATUS["OK"],
+        }
+        return parsed_data
 
-    def exec(self, line: str) -> str:
-        if line == self.CMD_QUIT:
+    def handle(self, parsed_data) -> dict:
+        """Handle parsed data."""
+        self.__log.debug("parsed_data=%s", parsed_data)
+        if parsed_data.get("data") == self.CMD_QUIT:
             raise EOFError(self.CMD_QUIT)
 
         result_list = []
-        for jsoncmd in json.loads(line):
+        for jsoncmd in json.loads(parsed_data["data"]):
             result_list.append(self.thr_worker.send(jsoncmd))
 
         self.__log.debug("result_list=%s", result_list)
-        return str(result_list)
+        result = {
+            "data": result_list,
+            "status": self.RESULT_STATUS["OK"],
+        }
+        return result
 
 
 @click.command()
@@ -149,7 +160,7 @@ def main(ctx, pins, anglefactor, debug):
     app = None
     try:
         pi = pigpio.pi()
-        app = OneKeyCli(pi, pins, anglefactor, "> ", debug=debug)
+        app = OneKeyCmdCli(pi, pins, anglefactor, "> ", debug=debug)
         app.main()
     finally:
         if app:

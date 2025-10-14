@@ -1,20 +1,29 @@
 import click
 
-from pi0servo import CliBase, click_common_opts, get_logger
+from pi0servo import CliWithHistory, click_common_opts, get_logger
 
 
 @click.command()
+@click.option(
+    "--history_file",
+    "-f",
+    type=str,
+    default="/tmp/hist",
+    show_default=True,
+    help="History file",
+)
 @click_common_opts("0.0.1", use_h=False)
-def main(ctx, debug):
+def main(ctx, history_file, debug):
     """Main."""
     command_name = ctx.command.name
     __log = get_logger(__name__, debug)
     __log.debug("command_name=%a", command_name)
+    __log.debug("history_file=%a", history_file)
 
     app = None
     try:
         prompt_str = command_name + "> "
-        app = CliBase(prompt_str, debug=debug)
+        app = CliWithHistory(prompt_str, history_file, debug=debug)
         app.main()
     finally:
         if app:

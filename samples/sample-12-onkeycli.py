@@ -1,20 +1,19 @@
 import click
 
-from pi0servo import CliBase, click_common_opts, get_logger
+from pi0servo import click_common_opts, get_logger
+from pi0servo.utils.onekeycli import OneKeyCli
 
 
 @click.command()
 @click_common_opts("0.0.1", use_h=False)
 def main(ctx, debug):
     """Main."""
-    command_name = ctx.command.name
     __log = get_logger(__name__, debug)
-    __log.debug("command_name=%a", command_name)
+    __log.debug("")
 
     app = None
     try:
-        prompt_str = command_name + "> "
-        app = CliBase(prompt_str, debug=debug)
+        app = OneKeyCli(debug=debug)
         app.main()
     finally:
         if app:

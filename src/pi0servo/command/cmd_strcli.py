@@ -17,14 +17,11 @@ class CmdStrCli(CmdApiCli):
         pi,
         pins,
         history_file,
-        script_file,
         angle_factor,
         debug=False,
     ) -> None:
         """Constractor."""
-        super().__init__(
-            cmd_name, pi, pins, history_file, script_file, debug=debug
-        )
+        super().__init__(cmd_name, pi, pins, history_file, debug=debug)
         self.__debug = debug
         self.__log = get_logger(self.__class__.__name__, self.__debug)
         self.__log.debug(

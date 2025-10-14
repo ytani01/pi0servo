@@ -5,17 +5,17 @@
 
 import json
 
-from pi0servo import ApiClient, CliBase, get_logger
+from pi0servo import ApiClient, CliWithHistory, get_logger
 
 
-class CmdApiClient(CliBase):
+class CmdApiClient(CliWithHistory):
     """CmdApiClient."""
 
     def __init__(
         self, cmd_name, url, history_file, script_file, debug=False
     ) -> None:
         """Constractor."""
-        super().__init__(cmd_name, history_file, script_file, debug=debug)
+        super().__init__(cmd_name, history_file, debug=debug)
         self.__debug = debug
         self.__log = get_logger(self.__class__.__name__, self.__debug)
         self.__log.debug("cmd_name=%s, url=%s", cmd_name, url)

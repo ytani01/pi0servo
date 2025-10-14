@@ -16,7 +16,9 @@ from .helper.thread_multi_servo import ThreadMultiServo
 from .helper.thread_worker import ThreadWorker
 from .utils.clibase import CliBase
 from .utils.clickutils import click_common_opts
+from .utils.cliwithhistory import CliWithHistory
 from .utils.mylogger import errmsg, get_logger
+from .utils.onekeycli import OneKeyCli
 from .utils.scriptrunner import ScriptRunner
 from .utils.servo_config_manager import ServoConfigManager
 from .web.api_client import ApiClient
@@ -29,8 +31,10 @@ __all__ = [
     "ApiClient",
     "CalibrableServo",
     "CliBase",
+    "CliWithHistory",
     "ScriptRunner",
     "MultiServo",
+    "OneKeyCli",
     "PiServo",
     "ServoConfigManager",
     "StrCmdToJson",
