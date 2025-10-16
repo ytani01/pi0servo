@@ -53,7 +53,7 @@ uv pip install -U --group samples -e .
 # uv run pi0servo -V
 '''
 alias = "uplocal"
-depends = ["upgradeuv"]
+# depends = ["upgradeuv"]
 
 [tasks.lint]
 description = "linting"
@@ -75,7 +75,7 @@ uv run mypy src samples tests
 
 uv run pi0servo -V
 '''
-# depends = ["upgradelocal"]
+depends = ["upgradelocal"]
 
 [tasks.test]
 description = "test"
