@@ -41,16 +41,7 @@ echo "# pip"
 uv pip install -U --group dev -e .
 uv pip install -U --group samples -e .
 
-# echo "# pyclickutils"
-# uv add -U ../pyclickutils
-
-# echo "# pyclibase"
-# uv add -U ../pyclibase
-
-# uv pip install -e ../pyclibase
-
-# echo "# uv run pi0servo -V"
-# uv run pi0servo -V
+uv run pi0servo -V
 '''
 alias = "uplocal"
 # depends = ["upgradeuv"]
@@ -83,7 +74,6 @@ run = '''
 uv run pytest tests
 
 uv run pi0servo -V
-uv run pi0servo -V
 '''
 depends = ["lint"]
 
@@ -93,6 +83,7 @@ run = '''
 echo "# build"
 rm -rf dist
 uv build
+
 uv run pi0servo -V
 '''
 depends = ["test"]
