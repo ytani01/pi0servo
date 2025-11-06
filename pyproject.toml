@@ -25,6 +25,7 @@ dependencies = [
     "requests",
     "fastapi",
     "uvicorn",
+    "json-rpc",
 ]
 
 [build-system]

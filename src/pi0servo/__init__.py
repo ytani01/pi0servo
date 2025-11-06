@@ -14,6 +14,7 @@ from .core.piservo import PiServo
 from .helper.str_cmd_to_json import StrCmdToJson
 from .helper.thread_multi_servo import ThreadMultiServo
 from .helper.thread_worker import ThreadWorker
+from .helper.jsonrpc_worker import JsonRpcWorker
 from .utils.clibase import CliBase
 from .utils.clickutils import click_common_opts
 from .utils.cliwithhistory import CliWithHistory
@@ -40,4 +41,5 @@ __all__ = [
     "StrCmdToJson",
     "ThreadMultiServo",
     "ThreadWorker",
+    "JsonRpcWorker",
 ]

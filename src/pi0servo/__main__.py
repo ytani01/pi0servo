@@ -16,6 +16,7 @@ from .command.cmd_calib import CalibApp
 from .command.cmd_servo import CmdServo
 from .command.cmd_strcli import CmdStrCli
 from .command.cmd_strclient import CmdStrClient
+from .command.cmd_jsonrpccli import CmdJsonRpcCli
 from .core.calibrable_servo import CalibrableServo
 from .utils.clickutils import click_common_opts
 from .utils.mylogger import errmsg, get_logger
@@ -394,39 +395,41 @@ def str_client(ctx, url, history_file, script_file, angle_factor, debug):
 @cli.command()
 @click.argument("pins", type=int, nargs=-1)
 @click.option(
-    "--server_host",
-    "-s",
+    "--angle_factor",
+    "-a",
     type=str,
-    default="0.0.0.0",
+    default="1,1,1,1",
     show_default=True,
-    help="server hostname or IP address",
-)
-@click.option(
-    "--port",
-    "-p",
-    type=int,
-    default=8000,
-    show_default=True,
-    help="port number",
+    help="Angle Factor",
 )
 @click_common_opts(__version__)
-def jsonrpc_server(ctx, pins, server_host, port, debug):
-    """JSON-RPC Server ."""
+def jsonrpc_cli(ctx, pins, angle_factor, debug):
+    """JSON-RPC CLI."""
     cmd_name = ctx.command.name
     __log = get_logger(__name__, debug)
     __log.debug("cmd_name=%s", cmd_name)
-    __log.debug("pins=%s", pins)
-    __log.debug("server_host=%s, port=%s", server_host, port)
+    __log.debug("pins=%s, angle_factor", pins, angle_factor)
 
     if not pins:
         print_pins_error(ctx)
         return
 
-    os.environ["PI0SERVO_DEBUG"] = "1" if debug else "0"
+    af_list = [int(i) for i in angle_factor.split(",")]
+    __log.debug("af_list=%s", af_list)
 
-    click.echo("** WIP **")
+    app = None
+    pi = None
+    try:
+        pi = get_pi(debug)
+        app = CmdJsonRpcCli(
+            "> ", pi, pins, af_list, debug=debug
+        )
 
-    # uvicorn.run(
-    #     "pi0servo.web.jsonrpc_api:app",
-    #     host=server_host, port=port, reload=True
-    # )
+    except Exception as _e:
+        __log.error(errmsg(_e))
+
+    finally:
+        if app:
+            app.end()
+        if pi:
+            pi.stop()
