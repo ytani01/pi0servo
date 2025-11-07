@@ -76,5 +76,5 @@ samples = [
 ]
 
 [[tool.mypy.overrides]]
-module = ['pigpio', 'fastapi', 'requests']
+module = ['pigpio', 'fastapi', 'requests', 'jsonrpc']
 ignore_missing_imports = true

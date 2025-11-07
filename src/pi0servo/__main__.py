@@ -3,8 +3,6 @@
 #
 """__main__.py"""
 
-import os
-
 import click
 import pigpio
 
@@ -13,10 +11,10 @@ from .command.cmd_apicli import CmdApiCli, CmdApiScriptRunner
 from .command.cmd_apiclient import CmdApiClient
 from .command.cmd_apiserver import CmdApiServer
 from .command.cmd_calib import CalibApp
+from .command.cmd_jsonrpccli import CmdJsonRpcCli
 from .command.cmd_servo import CmdServo
 from .command.cmd_strcli import CmdStrCli
 from .command.cmd_strclient import CmdStrClient
-from .command.cmd_jsonrpccli import CmdJsonRpcCli
 from .core.calibrable_servo import CalibrableServo
 from .utils.clickutils import click_common_opts
 from .utils.mylogger import errmsg, get_logger
@@ -394,36 +392,26 @@ def str_client(ctx, url, history_file, script_file, angle_factor, debug):
 
 @cli.command()
 @click.argument("pins", type=int, nargs=-1)
-@click.option(
-    "--angle_factor",
-    "-a",
-    type=str,
-    default="1,1,1,1",
-    show_default=True,
-    help="Angle Factor",
-)
 @click_common_opts(__version__)
-def jsonrpc_cli(ctx, pins, angle_factor, debug):
+def jsonrpc_cli(ctx, pins, debug):
     """JSON-RPC CLI."""
     cmd_name = ctx.command.name
     __log = get_logger(__name__, debug)
     __log.debug("cmd_name=%s", cmd_name)
-    __log.debug("pins=%s, angle_factor", pins, angle_factor)
+    __log.debug("pins=%s", pins)
 
     if not pins:
         print_pins_error(ctx)
         return
 
-    af_list = [int(i) for i in angle_factor.split(",")]
-    __log.debug("af_list=%s", af_list)
+    prompt_str = f"{cmd_name}> "
 
     app = None
     pi = None
     try:
         pi = get_pi(debug)
-        app = CmdJsonRpcCli(
-            "> ", pi, pins, af_list, debug=debug
-        )
+        app = CmdJsonRpcCli(prompt_str, pi, pins, debug=debug)
+        app.main()
 
     except Exception as _e:
         __log.error(errmsg(_e))
