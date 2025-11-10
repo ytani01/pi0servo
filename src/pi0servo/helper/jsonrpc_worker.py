@@ -13,8 +13,10 @@ from ..core.multi_servo import MultiServo
 from ..utils.mylogger import errmsg, get_logger
 
 
-class FuncCall:
+class HandleCall:
     """Functions for call."""
+
+    RESULT_QUEUE = "queue"
 
     def __init__(self, cmdq: queue.Queue, debug=False) -> None:
         """Constractor."""
@@ -47,8 +49,11 @@ class FuncCall:
         self.__log.debug("qsize=%s", self._cmdq.qsize())
         return True
 
+    def move_all_angles_sync(self, angles: list[int]):
+        self.__log.debug("angles=%s", angles)
+        return self.RESULT_QUEUE
 
-class FuncExec:
+class HandleExec:
     """Functions for exec."""
 
     def __init__(self, mservo, debug=False) -> None:
@@ -101,12 +106,12 @@ class JsonRpcWorker(threading.Thread):
         self._cmdq: queue.Queue = queue.Queue()
 
         # dispacher for call
-        self.obj_call = FuncCall(self._cmdq)
+        self.obj_call = HandleCall(self._cmdq)
         self.dispacher_call = Dispatcher()
         self.dispacher_call.add_object(self.obj_call)
 
         # dispacher for exec
-        self.obj_exec = FuncExec(self.mservo, debug=self.__debug)
+        self.obj_exec = HandleExec(self.mservo, debug=self.__debug)
         self.dispacher_exec = Dispatcher()
         self.dispacher_exec.add_object(self.obj_exec)
 
@@ -188,18 +193,29 @@ class JsonRpcWorker(threading.Thread):
         # コマンドごとの処理
         # キューに入れない特別な処理を先に行う
         _ret = JSONRPCResponseManager.handle(cmd_jsonstr, self.dispacher_call)
-        if _ret:  # is not None
-            if isinstance(_ret.data, dict):
-                self.__log.debug("ret.data=%s", _ret.data)
-                if _ret.data.get("result") is not None:
-                    return _ret.data
+        if _ret is None:
+            self.__log.warning("_ret=%s", _ret)
+            return {"error": "_ret is None"}
+        
+        if not isinstance(_ret.data, dict):
+            self.__log.warning("_ret.data=%s", _ret.data)
+            return {"error": f"_ret.data={_ret.data}"}
+        
+        self.__log.debug("ret.data=%s", _ret.data)
+
+        _result = _ret.data.get("result")
+        if _result is None:
+            return {"error": "_result is None"}
+
+        if _result != HandleCall.RESULT_QUEUE:
+            # キューに入れないコマンドを正常実行した。
+            return _ret.data
 
         # 通常のコマンドは、コマンドキューに入れる。
         self._cmdq.put(cmd_jsonstr)
         self.__log.debug(
             "cmd_jsonstr=%s, qsize=%s", cmd_jsonstr, self._cmdq.qsize
         )
-
         return {"result": True, "qsize": self._cmdq.qsize, "cmd": cmd_jsonstr}
 
     def recv(self, timeout=DEF_RECV_TIMEOUT):

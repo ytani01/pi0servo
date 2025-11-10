@@ -18,6 +18,14 @@
             }
         },
         {
+            "method": "move_all_angles_sync_relative",
+            "params": {
+                "angles": [30, null, 0],
+                "move_sec": 0.2,
+                "step_n": 40
+            }
+        },
+        {
             "method": "move_all_angles",
             "params": {
                 "angles": [30, null, "center"]
