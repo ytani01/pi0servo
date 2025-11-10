@@ -32,16 +32,16 @@ def thread_worker(mocker_multiservo, mocker_pigpio):
     pi = mocker_pigpio()
     mocker_multiservo()
     worker = ThreadWorker(pi, PINS, debug=False)
-    yield worker
+    return worker
 
 
 class TestThreadWorker:
     """ThreadWorkerクラスのテスト"""
 
     @pytest.mark.parametrize(
-        ["json_data"],
+        "json_data",
         [
-            ({"method": "move", "params": {"angles": [10, 10]}},),
+            {"method": "move", "params": {"angles": [10, 10]}},
             # (
             #     [{"method": "move", "params": {"angles": [10,10]}}],
             # ),

@@ -41,18 +41,31 @@ pi0servo = "pi0servo.__main__:cli"
 [tool.ruff]
 line-length = 78
 target-version = "py311"
-lint.select = ["E", "F", "I"]
-exclude = ["tests/data", "venv", ".git", "__pycache__"]
 
-[tool.ruff.format]
-docstring-code-line-length = 78
+[tool.ruff.lint]
+# E(pycodestyle Error), W(pycodestyle Warning), F(Pyflakes), I(isort),
+# C90(mccabe complexity), B(flake8-bugbear), A(flake8-builtins),
+# UP(pyupgrade), PT(flake8-pytest-style), SIM(flake8-simplify),
+# S(flake8-bandit)
+select = ["E", "F", "I", "W", "C90", "B", "A", "UP", "PT", "SIM", "S"]
+ignore = ["SIM108", "S104", "C901", "B008"]
+
+exclude = [
+    ".git",
+    "__pycache__",
+    "venv",
+    "tests/data",
+]
 
 [tool.ruff.lint.per-file-ignores]
 "conftest.py" = ["F401", "F811"]
+"tests/*" = ["S101", "S603", "S307"] # assertの使用を許可
+"docs/conf.py" = ["A001"]
+"samples/*" = ["S108"]
+"src/pi0servo/command/*" = ["S108"]
 
-[tool.pyright]
-typeCheckingMode = "standard"
-exclude = ["**/conftest.py"]
+[tool.ruff.format]
+docstring-code-line-length = 78
 
 [tool.pytest.ini_options]
 pythonpath = "tests"
@@ -63,10 +76,6 @@ dev = [
     "pytest>=8.4.1",
     "pytest-mock",
     "ruff>=0.12.3",
-    "flake8>=7.3.0",
-    "isort>=6.0.1",
-    "pylint>=3.3.7",
-    "pyright>=1.1.403",
     "hatch",
     "twine>=6.2.0",
 ]

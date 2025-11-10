@@ -42,7 +42,7 @@ def setup_test_env(tmp_path, monkeypatch):
     print(f"\ntest_cwd={test_cwd}\n")
 
     # 各ディレクトリのパスをyieldで返す
-    yield {
+    return {
         "cwd": test_cwd,
         "home": test_home,
     }
@@ -153,7 +153,7 @@ def config_manager(setup_test_env):
     manager = ServoConfigManager(TEST_CONF_FILENAME, debug=True)
 
     # managerと、期待される設定ファイルのフルパスを渡す
-    yield manager, str(setup_test_env["cwd"] / TEST_CONF_FILENAME)
+    return manager, str(setup_test_env["cwd"] / TEST_CONF_FILENAME)
 
 
 def test_read_write_all_configs(config_manager):
@@ -169,7 +169,7 @@ def test_read_write_all_configs(config_manager):
     manager.save_all_configs(test_data)
 
     # ファイルが書き込まれたか
-    with open(conf_file, "r") as f:
+    with open(conf_file) as f:
         saved_data = json.load(f)
     # pinでソートされて保存されることを確認
     assert saved_data[0]["pin"] == TEST_PIN1

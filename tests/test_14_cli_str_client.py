@@ -19,7 +19,7 @@ class TestBasic:
         cli_runner.test_interactive(CMD, in_out=inout, timeout=20)
 
     @pytest.mark.parametrize(
-        ["instr", "expect"],
+        ("instr", "expect"),
         [
             ("\n", "str-client>"),
             ("a\n", ["error", "METHOD_NOT_FOUND", "str-client>"]),

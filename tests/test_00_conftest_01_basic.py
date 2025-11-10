@@ -13,7 +13,7 @@ class TestBasicCommands:
     """基本的なコマンドのテスト。"""
 
     @pytest.mark.parametrize(
-        "command, expected",
+        ("command", "expected"),
         [
             (["echo", "Hello"], "Hello\n"),
             (["echo", "-n", "No newline"], "No newline"),
@@ -28,7 +28,7 @@ class TestAdvancedCommands:
     """入力やパイプなど、より高度な機能のテスト。"""
 
     @pytest.mark.parametrize(
-        "input_name, expected",
+        ("input_name", "expected"),
         [
             ("World\n", ["Hello World", "Hello", "World"]),
             ("Alice\n", ["Hello Alice"]),

@@ -183,9 +183,7 @@ class JsonRpcWorker(threading.Thread):
         self.__log.debug("count=%s", _count)
         return _count
 
-    def mk_jsonrpc_req(
-        self, cmd:str | dict, prefix=""
-    ) -> str:
+    def mk_jsonrpc_req(self, cmd: str | dict, prefix="") -> str:
         """Make JSON-RPC request."""
         self.__log.debug("cmd=%s", cmd)
 
@@ -218,28 +216,29 @@ class JsonRpcWorker(threading.Thread):
             return ""
 
         return _cmdstr
-            
+
     def call(self, cmd: str | dict) -> dict:
         """Call(JSON-RPC)."""
         self.__log.debug("cmd=%s", cmd)
 
         _cmd_jsonstr = self.mk_jsonrpc_req(
-            cmd,
-            self.obj_call.__class__.__name__.lower()
+            cmd, self.obj_call.__class__.__name__.lower()
         )
         self.__log.debug("_cmd_jsonstr=%a", _cmd_jsonstr)
 
         # コマンドごとの処理
         # キューに入れない特別な処理を先に行う
-        _ret = JSONRPCResponseManager.handle(_cmd_jsonstr, self.dispacher_call)
+        _ret = JSONRPCResponseManager.handle(
+            _cmd_jsonstr, self.dispacher_call
+        )
         if _ret is None:
             self.__log.warning("_ret=%s", _ret)
             return {"error": "_ret is None"}
-        
+
         if not isinstance(_ret.data, dict):
             self.__log.warning("_ret.data=%s", _ret.data)
             return {"error": f"_ret.data={_ret.data}"}
-        
+
         self.__log.debug("ret.data=%s", _ret.data)
 
         _result = _ret.data.get("result")
@@ -257,12 +256,10 @@ class JsonRpcWorker(threading.Thread):
             # メソッド名 "handlecall.foo" -> "handleexec.foo"
             _cmd_dict = json.loads(_cmd_jsonstr)
             _method_name = _cmd_dict["method"]
-            _method_name = _method_name.split('.')[1]
+            _method_name = _method_name.split(".")[1]
             self.__log.debug("_method_name=%a", _method_name)
 
-            _cmd_dict["method"] = (
-                f"{self.exec_class_name}.{_method_name}"
-            )
+            _cmd_dict["method"] = f"{self.exec_class_name}.{_method_name}"
             _cmd_jsonstr = json.dumps(_cmd_dict)
             self.__log.debug("_cmd_jsonstr=%a", _cmd_jsonstr)
 

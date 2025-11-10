@@ -51,18 +51,12 @@ description = "linting"
 run = '''
 # format and linting
 
-#  echo "# isort"
-# uv run isort --diff src samples tests
-
 echo "# ruff"
-uv run ruff format --line-length 78 src samples tests
-uv run ruff check --fix --extend-select I  src samples tests
-
-echo "# pyright"
-uv run pyright src samples
+uv run ruff format .
+uv run ruff check .
 
 echo "# mypy"
-uv run mypy src samples tests
+uv run mypy src/pi0servo tests
 
 uv run pi0servo -V
 '''

@@ -15,7 +15,7 @@ class TestBasic:
     """Basic tests."""
 
     @pytest.mark.parametrize(
-        "arg, opt, inkey1, expect1, inkey2, expect2",
+        ("arg", "opt", "inkey1", "expect1", "inkey2", "expect2"),
         [
             (PIN, "", KEY_TAB, "GPIO", KEY_TAB, "GPIO"),
             (PIN, "", "h", "Select", "h", "Misc"),
@@ -37,7 +37,7 @@ class TestBasic:
         cli_runner.test_interactive(cmdline, in_out=in_out, timeout=10.0)
 
     @pytest.mark.parametrize(
-        "arg, opt, sig",
+        ("arg", "opt", "sig"),
         [
             (PIN, "", signal.SIGTERM),
         ],

@@ -10,7 +10,7 @@ class TestCmdApiCli:
     """Test."""
 
     @pytest.mark.parametrize(
-        "args, stdout, stderr",
+        ("args", "stdout", "stderr"),
         [
             ("", "Please specify GPIO pins", ""),
             ("-d", "Please specify GPIO pins", "DEBUG"),
@@ -24,7 +24,7 @@ class TestCmdApiCli:
         cli_runner.test_command(cmdline, e_stdout=stdout, e_stderr=stderr)
 
     @pytest.mark.parametrize(
-        ["indata", "expected"],
+        ("indata", "expected"),
         [
             ("\n", [f"{CMDNAME}>"]),
             (

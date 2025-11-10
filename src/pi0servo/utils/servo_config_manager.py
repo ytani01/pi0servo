@@ -77,7 +77,7 @@ class ServoConfigManager:
         """
         self.__log.debug("Reading from %s", self.conf_file)
         try:
-            with open(self.conf_file, "r", encoding="utf-8") as f:
+            with open(self.conf_file, encoding="utf-8") as f:
                 return json.load(f)
         except FileNotFoundError:
             self.__log.warning("Config file not found: %s", self.conf_file)
@@ -100,7 +100,7 @@ class ServoConfigManager:
             sorted_data = sorted(data, key=lambda d: d["pin"])
             with open(self.conf_file, "w", encoding="utf-8") as f:
                 json.dump(sorted_data, f, indent=2, ensure_ascii=False)
-        except IOError as e:
+        except OSError as e:
             self.__log.error("Failed to write to %s: %s", self.conf_file, e)
 
     def get_config(self, pin):

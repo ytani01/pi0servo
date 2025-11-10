@@ -7,7 +7,7 @@ from tests.conftest import KEY_DOWN, KEY_ENTER
 
 
 @pytest.mark.parametrize(
-    "e_stdout, in_out",
+    ("e_stdout", "in_out"),
     [
         (
             ["> Menu Item 1", "Menu Item 2", "Menu Item 3"],

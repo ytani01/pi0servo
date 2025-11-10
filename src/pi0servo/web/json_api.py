@@ -6,7 +6,7 @@
 import json
 import os
 from contextlib import asynccontextmanager
-from typing import Any, Dict, List, Union
+from typing import Any
 
 import pigpio
 from fastapi import Body, FastAPI, Request
@@ -85,7 +85,7 @@ async def read_root():
 @app.post("/cmd")
 async def exec_cmd(
     request: Request,
-    cmd: Union[List[Dict[str, Any]], Dict[str, Any]] = Body(),
+    cmd: list[dict[str, Any]] | dict[str, Any] = Body(...),
 ):
     """execute commands.
 
@@ -95,7 +95,7 @@ async def exec_cmd(
     _log = get_logger(__name__, debug)
     _log.debug("cmd=%s: %s", cmd, type(cmd).__name__)
 
-    cmd_list: List[Dict[str, Any]]
+    cmd_list: list[dict[str, Any]]
     if isinstance(cmd, dict):
         cmd_list = [cmd]
     else:

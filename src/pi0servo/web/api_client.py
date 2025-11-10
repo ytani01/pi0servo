@@ -54,7 +54,7 @@ class ApiClient:
             self.__log.debug("post_data=%a", post_data)
 
             res = requests.post(
-                self.url, data=post_data, headers=self.HEADERS
+                self.url, data=post_data, headers=self.HEADERS, timeout=10
             )
             self.__log.debug("res=%s", json.dumps(res.json()))
             return res.json()

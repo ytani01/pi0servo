@@ -7,7 +7,7 @@ class TestBasic:
     """Basic tests."""
 
     @pytest.mark.parametrize(
-        ["in_data", "expect"],
+        ("in_data", "expect"),
         [
             (
                 '{"method": "cancel"}\n',

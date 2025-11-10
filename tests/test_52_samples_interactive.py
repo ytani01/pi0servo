@@ -8,7 +8,7 @@ class TestSamplePrograms:
     """Test sample programs."""
 
     @pytest.mark.parametrize(
-        ["sample", "inkey", "e_out"],
+        ("sample", "inkey", "e_out"),
         [
             (
                 "sample-06-onekey-cli.py 25 27 -a -1,1",

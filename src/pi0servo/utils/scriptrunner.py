@@ -25,7 +25,7 @@ class ScriptRunner(CliBase):
         self.__log.debug("script_file=%a", self.script_file)
 
         try:
-            self.script_f = open(self.script_file, "r", encoding="utf-8")
+            self.script_f = open(self.script_file, encoding="utf-8")  # noqa: SIM115
         except Exception as _e:
             self.script_f = None
             msg = errmsg(_e)

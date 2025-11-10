@@ -32,7 +32,7 @@ class CmdApiCommon:
         except Exception as _e:
             msg = errmsg(_e)
             self.__log.error(msg)
-            raise Exception(msg)
+            raise Exception(msg) from _e
 
     def start(self):
         """Start."""

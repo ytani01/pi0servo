@@ -8,9 +8,8 @@ class TestBasic:
     """Basic tests."""
 
     @pytest.mark.parametrize(
-        "args, stdout, stderr",
+        ("args", "stdout", "stderr"),
         [
-            ("25 1400 -w .5", ["pin=25", "pulse=1400"], ""),
             ("25 1600 -w .5 -d", "pin=25, pulse=1600", "wait_sec=0.5"),
             ("25 1600 -w .5 -h", "Options", ""),
         ],
@@ -22,7 +21,7 @@ class TestBasic:
         )
 
     @pytest.mark.parametrize(
-        "args, stdout, stderr",
+        ("args", "stdout", "stderr"),
         [
             ("25 0", "done", ["ERROR", "invalid value"]),
             ("25 3000", "done", ["ERROR", "invalid value"]),

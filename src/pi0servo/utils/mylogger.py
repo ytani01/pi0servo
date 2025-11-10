@@ -63,7 +63,7 @@ def get_logger(name, debug=False):
         logger.setLevel(debug)
         return logger
 
-    raise ValueError("invalid `debug` value: %s" % (debug))
+    raise ValueError(f"invalid `debug` value: {debug}")
 
 
 def errmsg(e) -> str:

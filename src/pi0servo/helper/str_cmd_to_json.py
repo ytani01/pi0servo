@@ -4,7 +4,7 @@
 """cmd_to_json.py."""
 
 import json
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 from ..utils.mylogger import get_logger
 
@@ -13,7 +13,7 @@ class StrCmdToJson:
     """String Command to JSON."""
 
     # コマンド文字列とJSONコマンド名のマッピング
-    COMMAND_MAP: Dict[str, str] = {
+    COMMAND_MAP: dict[str, str] = {
         # move command
         "mv": "move_all_angles_sync",
         "mr": "move_all_angles_sync_relative",
@@ -39,21 +39,23 @@ class StrCmdToJson:
     }
 
     # 'mv'コマンドの角度パラメータのエイリアスマッピング
-    ANGLE_ALIAS_MAP: Dict[str, str] = {
+    ANGLE_ALIAS_MAP: dict[str, str] = {
         "x": "max",
         "n": "min",
         "c": "center",
     }
 
     # setコマンドのコマンドメイト`target`の対応
-    SET_TARGET: Dict[str, str] = {
+    SET_TARGET: dict[str, str] = {
         "sc": "center",
         "sn": "min",
         "sx": "max",
     }
 
-    def __init__(self, angle_factor: List = [], debug=False):
+    def __init__(self, angle_factor: list | None = None, debug=False):
         """constractor."""
+        if angle_factor is None:
+            angle_factor = []
         self._debug = debug
         self.__log = get_logger(self.__class__.__name__, self._debug)
         self.__log.debug("angle_factor=%s", angle_factor)
@@ -66,17 +68,17 @@ class StrCmdToJson:
         return self._angle_factor
 
     @angle_factor.setter
-    def angle_factor(self, af: List = []):
+    def angle_factor(self, af: list | None = None):
         """Set angle_factor."""
+        if af is None:
+            af = []
         self._angle_factor = af
 
     def _create_error_data(self, code_key: str, strcmd: str) -> dict:
         """Create error data."""
         return {"method": "ERROR", "error": code_key, "data": strcmd}
 
-    def _parse_angles(
-        self, angle_str: str
-    ) -> Optional[List[Union[int, str, None]]]:
+    def _parse_angles(self, angle_str: str) -> list[int | str | None] | None:
         """Parse angle parameters.
         'mv'コマンドのパラメータ文字列をパースして角度のリストを返す.
 
@@ -90,7 +92,7 @@ class StrCmdToJson:
         angle_parts = angle_str.split(",")
         # self.__log.debug("angle_parts=%s", angle_parts)
 
-        angles: List[Union[int, str, None]] = []
+        angles: list[int | str | None] = []
 
         for angle_part in angle_parts:
             _p = angle_part.strip().lower()
@@ -176,7 +178,7 @@ class StrCmdToJson:
         )
 
         # _cmd_dataの初期化
-        _cmd_data: Dict[str, Any] = {"method": cmd_name}
+        _cmd_data: dict[str, Any] = {"method": cmd_name}
 
         # コマンド別の処理
         try:
@@ -275,7 +277,7 @@ class StrCmdToJson:
         """Dict形式をJSON文字列に変換."""
         # self.__log.debug("cmd_line=%s", cmd_line)
 
-        _json_data: List[dict] | dict = self.cmdstr_to_jsonlist(cmd_line)
+        _json_data: list[dict] | dict = self.cmdstr_to_jsonlist(cmd_line)
 
         self.__log.debug('_json_data="%s"', _json_data)
         return json.dumps(_json_data)

@@ -3,7 +3,6 @@ import pty
 import select
 import subprocess
 import time
-from typing import Optional
 
 import pytest
 
@@ -168,10 +167,10 @@ class CLITestBase:
         self,
         command: str | list[str],
         args: str | list[str] | None = None,
-        input_data: Optional[str] = None,
+        input_data: str | None = None,
         timeout: int = DEFAULT_TIMEOUT,
-        cwd: Optional[str] = None,
-        env: Optional[dict[str, str]] = None,
+        cwd: str | None = None,
+        env: dict[str, str] | None = None,
     ) -> subprocess.CompletedProcess:
         """コマンドを実行し、結果を返す。
 
@@ -250,10 +249,10 @@ class CLITestBase:
         self,
         command: str | list[str],
         args: str | list[str] = "",
-        input_data: Optional[str] = None,
+        input_data: str | None = None,
         timeout: int = DEFAULT_TIMEOUT,
-        cwd: Optional[str] = None,
-        env: Optional[dict[str, str]] = None,
+        cwd: str | None = None,
+        env: dict[str, str] | None = None,
         e_stdout: str | list[str] = "",
         e_stderr: str | list[str] = "",
         e_ret: int | None = None,
@@ -293,12 +292,14 @@ class CLITestBase:
         args: str | list[str] = "",
         e_stdout: str | list[str] = "",
         e_stderr: str | list[str] = "",
-        in_out: list[dict] = [],
+        in_out: list[dict] | None = None,
         terminate_flag=True,
         e_ret: int | None = None,
         timeout: float = TIMEOUT_EXPECT,
     ) -> None:
         """Test interactive session."""
+        if in_out is None:
+            in_out = []
         session = self.run_interactive_command(cmdline, args)
         session.assert_out(e_stdout, e_stderr, timeout=timeout)  # 起動直後
         session.assert_in_out_list(in_out, timeout=timeout)  # 入出力
@@ -311,8 +312,8 @@ class CLITestBase:
     def assert_output_contains(
         self,
         result: subprocess.CompletedProcess,
-        stdout: Optional[str] = None,
-        stderr: Optional[str] = None,
+        stdout: str | None = None,
+        stderr: str | None = None,
     ) -> None:
         """標準出力または標準エラー出力に特定の文字列が含まれていることを表明します。"""
         if stdout is not None:
@@ -327,8 +328,8 @@ class CLITestBase:
     def assert_output_equals(
         self,
         result: subprocess.CompletedProcess,
-        stdout: Optional[str] = None,
-        stderr: Optional[str] = None,
+        stdout: str | None = None,
+        stderr: str | None = None,
     ) -> None:
         """stdout, stderrが特定の内容と完全に一致することを確認"""
         if stdout is not None:

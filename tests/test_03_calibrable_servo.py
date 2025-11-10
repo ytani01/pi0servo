@@ -112,7 +112,7 @@ class TestCalibrableServoRefactored:
     # Angle Conversion Tests
     #
     @pytest.mark.parametrize(
-        "deg, expected_pulse_calc",
+        ("deg", "expected_pulse_calc"),
         [
             (0.0, "self.PULSE_CENTER"),
             (90.0, "self.PULSE_MAX"),
@@ -127,7 +127,7 @@ class TestCalibrableServoRefactored:
         assert servo.deg2pulse(deg) == expected_pulse
 
     @pytest.mark.parametrize(
-        "pulse_calc, expected_deg",
+        ("pulse_calc", "expected_deg"),
         [
             ("self.PULSE_CENTER", 0.0),
             ("self.PULSE_MAX", 90.0),
@@ -151,7 +151,7 @@ class TestCalibrableServoRefactored:
     # Movement Tests
     #
     @pytest.mark.parametrize(
-        "angle_in, expected_pulse_calc",
+        ("angle_in", "expected_pulse_calc"),
         [
             (45, "(self.PULSE_CENTER + self.PULSE_MAX) // 2"),
             ("min", "self.PULSE_MIN"),

@@ -4,7 +4,6 @@
 # **WIP**
 #   すべての関数レパートリーを見直す必要あり
 #
-from typing import Optional
 
 from ..core.calibrable_servo import CalibrableServo
 from ..core.multi_servo import MultiServo
@@ -108,7 +107,7 @@ class ThreadMultiServo:
 
     # --- 非同期制御メソッド ---
 
-    def move_all_angles(self, angles: list[Optional[int]]):
+    def move_all_angles(self, angles: list[int | None]):
         """Move all servo.
         即座に移動する。
 
@@ -121,9 +120,9 @@ class ThreadMultiServo:
 
     def move_all_angles_sync(
         self,
-        angles: list[Optional[int]],
-        move_sec: Optional[float] = None,
-        step_n: Optional[int] = None,
+        angles: list[int | None],
+        move_sec: float | None = None,
+        step_n: int | None = None,
     ):
         """
         目標角度まで滑らかに移動するコマンドを非同期で送信します。
@@ -155,9 +154,9 @@ class ThreadMultiServo:
 
     def move_all_angles_sync_relative(
         self,
-        angle_diffs: list[Optional[int]],
-        move_sec: Optional[float] = None,
-        step_n: Optional[int] = None,
+        angle_diffs: list[int | None],
+        move_sec: float | None = None,
+        step_n: int | None = None,
     ):
         """
         現在の角度からの相対角度で、滑らかに移動するコマンドを非同期で送信します。

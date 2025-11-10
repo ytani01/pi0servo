@@ -166,7 +166,7 @@ class TestStrCmdToJson:
         assert result == expected_json_obj
 
     @pytest.mark.parametrize(
-        "cmd_str, expected_json_obj",
+        ("cmd_str", "expected_json_obj"),
         [
             (
                 "mv:40,30,20,10",

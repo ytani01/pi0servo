@@ -10,7 +10,7 @@ class TestCmdStrCli:
     """Test CmdStrCli."""
 
     @pytest.mark.parametrize(
-        "args, stdout, stderr",
+        ("args", "stdout", "stderr"),
         [
             ("", "Please specify GPIO pins", ""),
             ("-d", "Please specify GPIO pins", "DEBUG"),
