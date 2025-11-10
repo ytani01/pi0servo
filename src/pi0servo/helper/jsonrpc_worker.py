@@ -47,54 +47,8 @@ class HandleCall:
 
     def wait(self):
         self.__log.debug("qsize=%s", self.cmdq.qsize())
+        # XXX TBD XXX
         return True
-
-    def move_all_angles_sync(
-        self,
-        angles: list[float],
-        move_sec: float | None = None,
-        step_n: int | None = None,
-    ):
-        self.__log.info(
-            "angles=%s,move_sec=%s,step_n=%s", angles, move_sec, step_n
-        )
-        return self.RESULT_QUEUE
-
-    def move_all_angles_sync_relative(
-        self,
-        angle_diffs: list[float],
-        move_sec: float | None = None,
-        step_n: int | None = None,
-    ):
-        """Move all angles sync."""
-        self.__log.info(
-            "angle_diffs=%s,move_sec=%s,step_n=%s",
-            angle_diffs,
-            move_sec,
-            step_n,
-        )
-        self.__log.debug("angle_diffs=%s", angle_diffs)
-        return self.RESULT_QUEUE
-
-    def sleep(self, sec: float):
-        """Sleep."""
-        self.__log.debug("sec=%s", sec)
-        return self.RESULT_QUEUE
-
-    def move_sec(self, sec: float):
-        """Set move sec."""
-        self.__log.debug("sec=%s", sec)
-        return self.RESULT_QUEUE
-
-    def step_n(self, step_n: int):
-        """Set number steps."""
-        self.__log.debug("step_n=%s", step_n)
-        return self.RESULT_QUEUE
-
-    def interval(self, sec: float):
-        """Set interval sec."""
-        self.__log.debug("sec=%s", sec)
-        return self.RESULT_QUEUE
 
 
 class HandleExec:
@@ -349,9 +303,21 @@ class JsonRpcWorker(threading.Thread):
 
             _result = _ret.data.get("result")
             if _result is None:
-                self.__log.warning("_result is None")
-                _result_list.append("_result is None")
-                continue
+                _err = _ret.data.get("error")
+                self.__log.debug("_err=%s", _err)
+                if _err is None:
+                    self.__log.warning("_result is None")
+                    _result_list.append("_result is None")
+                    continue
+
+                _err_msg = _err.get("message")
+                self.__log.debug("_err_msg=%a", _err_msg)
+                if _err_msg != 'Method not found':
+                    self.__log.warning("error: %s",_err_msg)
+                    _result_list.append(f"error: {_err_msg}")
+
+                # 'Method not found'の場合は、すべてキューイング
+                _result = HandleCall.RESULT_QUEUE
 
             if _result != HandleCall.RESULT_QUEUE:
                 # キューに入れないコマンドを正常実行した。
