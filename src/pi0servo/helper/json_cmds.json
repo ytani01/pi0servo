@@ -15,7 +15,8 @@
                 "angles": [30, null, "center"],
                 "move_sec": 0.2,
                 "step_n": 40
-            }
+            },
+            "comment": "alias of `move_all_angles_sync`"
         },
         {
             "method": "move_all_angles_sync_relative",

@@ -49,13 +49,51 @@ class HandleCall:
         self.__log.debug("qsize=%s", self.cmdq.qsize())
         return True
 
-    def move_all_angles_sync(self, angles: list[float]):
-        self.__log.debug("angles=%s", angles)
+    def move_all_angles_sync(
+        self,
+        angles: list[float],
+        move_sec: float | None = None,
+        step_n: int | None = None,
+    ):
+        self.__log.info(
+            "angles=%s,move_sec=%s,step_n=%s", angles, move_sec, step_n
+        )
         return self.RESULT_QUEUE
 
-    def move_all_angles_sync_relative(self, angle_diffs: list[float]):
+    def move_all_angles_sync_relative(
+        self,
+        angle_diffs: list[float],
+        move_sec: float | None = None,
+        step_n: int | None = None,
+    ):
         """Move all angles sync."""
-        self.__log.info("angle_diffs=%s", angle_diffs)
+        self.__log.info(
+            "angle_diffs=%s,move_sec=%s,step_n=%s",
+            angle_diffs,
+            move_sec,
+            step_n,
+        )
+        self.__log.debug("angle_diffs=%s", angle_diffs)
+        return self.RESULT_QUEUE
+
+    def sleep(self, sec: float):
+        """Sleep."""
+        self.__log.debug("sec=%s", sec)
+        return self.RESULT_QUEUE
+
+    def move_sec(self, sec: float):
+        """Set move sec."""
+        self.__log.debug("sec=%s", sec)
+        return self.RESULT_QUEUE
+
+    def step_n(self, step_n: int):
+        """Set number steps."""
+        self.__log.debug("step_n=%s", step_n)
+        return self.RESULT_QUEUE
+
+    def interval(self, sec: float):
+        """Set interval sec."""
+        self.__log.debug("sec=%s", sec)
         return self.RESULT_QUEUE
 
 
@@ -70,15 +108,66 @@ class HandleExec:
 
         self.mservo = mservo
 
-    def move_all_angles_sync(self, angles: list[float]):
-        """Move all angles sync."""
-        self.__log.info("angles=%s", angles)
-        self.mservo.move_all_angles_sync(angles)
+        self.param_move_sec = MultiServo.DEF_MOVE_SEC
+        self.param_step_n = MultiServo.DEF_STEP_N
+        self.param_interval_sec = 0.0
 
-    def move_all_angles_sync_relative(self, angle_diffs: list[float]):
+    def move_all_angles_sync(
+        self, angles: list[float], move_sec=None, step_n=None
+    ):
         """Move all angles sync."""
-        self.__log.info("angle_diffs=%s", angle_diffs)
+        self.__log.info(
+            "angles=%s,move_sec=%s,step_n=%s", angles, move_sec, step_n
+        )
+        if move_sec is None:
+            move_sec = self.param_move_sec
+        if step_n is None:
+            step_n = self.param_step_n
+
+        self.mservo.move_all_angles_sync(angles, move_sec, step_n)
+
+        if self.param_interval_sec:
+            time.sleep(self.param_interval_sec)
+
+    def move_all_angles_sync_relative(
+        self, angle_diffs: list[float], move_sec=None, step_n=None
+    ):
+        """Move all angles sync."""
+        self.__log.info(
+            "angle_diffs=%s,move_sec=%s,step_n=%s",
+            angle_diffs,
+            move_sec,
+            step_n,
+        )
+        if move_sec is None:
+            move_sec = self.param_move_sec
+        if step_n is None:
+            step_n = self.param_step_n
+
         self.mservo.move_all_angles_sync_relative(angle_diffs)
+
+        if self.param_interval_sec:
+            time.sleep(self.param_interval_sec)
+
+    def sleep(self, sec: float):
+        """Sleep."""
+        self.__log.info("sec=%s", sec)
+        time.sleep(sec)
+
+    def move_sec(self, sec: float):
+        """Set move sec."""
+        self.__log.debug("sec=%s", sec)
+        self.param_move_sec = sec
+
+    def step_n(self, step_n: int):
+        """Set number steps."""
+        self.__log.debug("step_n=%s", step_n)
+        self.param_step_n = step_n
+
+    def interval(self, sec: float):
+        """Set interval sec."""
+        self.__log.debug("sec=%s", sec)
+        self.param_interval_sec = sec
 
 
 class JsonRpcWorker(threading.Thread):
@@ -183,33 +272,33 @@ class JsonRpcWorker(threading.Thread):
         self.__log.debug("count=%s", _count)
         return _count
 
-    def mk_jsonrpc_req(self, cmd: str | dict, prefix="") -> str:
+    def mk_jsonrpc_req(self, cmdstr: str, method_prefix="") -> str:
         """Make JSON-RPC request."""
-        self.__log.debug("cmd=%s", cmd)
+        self.__log.debug("cmdstr=%s", cmdstr)
 
-        _cmdstr = ""
-        _cmddict = {}
         try:
-            if isinstance(cmd, str):
-                _cmdstr = cmd
-                _cmddict = json.loads(cmd)
-            else:  # dict
-                _cmdstr = json.dumps(cmd)
-                _cmddict = cmd
+            _cmddata = json.loads(cmdstr)
+            if not isinstance(_cmddata, list):
+                _cmddata = [_cmddata]  # すべてリストで扱う
 
-            if prefix:
-                _cmddict["method"] = f"{prefix}.{_cmddict['method']}"
+            _new_cmddata = []
+            for _d in _cmddata:
+                if method_prefix:
+                    _d["method"] = f"{method_prefix}.{_d['method']}"
 
-            _id = _cmddict.get("id")
-            if isinstance(_id, int):
-                self.rpc_id = _id
-            else:
-                self.rpc_id += 1
+                _id = _d.get("id")
+                if isinstance(_id, int):
+                    self.rpc_id = _id
+                    _d["id"] = _id
+                else:
+                    self.rpc_id += 1
+                    _d["id"] = self.rpc_id
 
-            _cmddict["jsonrpc"] = "2.0"
-            _cmddict["id"] = self.rpc_id
+                _d["jsonrpc"] = "2.0"
 
-            _cmdstr = json.dumps(_cmddict)
+                _new_cmddata.append(_d)
+
+            _cmdstr = json.dumps(_new_cmddata)
 
         except Exception as e:
             self.__log.error(errmsg(e))
@@ -217,64 +306,85 @@ class JsonRpcWorker(threading.Thread):
 
         return _cmdstr
 
-    def call(self, cmd: str | dict) -> dict:
+    def call(self, cmdstr: str) -> str:
         """Call(JSON-RPC)."""
-        self.__log.debug("cmd=%s", cmd)
+        self.__log.debug("cmdstr=%s", cmdstr)
 
+        # JSON-RPCリクエスト形式に整える
         _cmd_jsonstr = self.mk_jsonrpc_req(
-            cmd, self.obj_call.__class__.__name__.lower()
+            cmdstr, self.obj_call.__class__.__name__.lower()
         )
         self.__log.debug("_cmd_jsonstr=%a", _cmd_jsonstr)
 
-        # コマンドごとの処理
-        # キューに入れない特別な処理を先に行う
-        _ret = JSONRPCResponseManager.handle(
-            _cmd_jsonstr, self.dispacher_call
-        )
-        if _ret is None:
-            self.__log.warning("_ret=%s", _ret)
-            return {"error": "_ret is None"}
-
-        if not isinstance(_ret.data, dict):
-            self.__log.warning("_ret.data=%s", _ret.data)
-            return {"error": f"_ret.data={_ret.data}"}
-
-        self.__log.debug("ret.data=%s", _ret.data)
-
-        _result = _ret.data.get("result")
-        if _result is None:
-            return {"error": "_result is None"}
-
-        if _result != HandleCall.RESULT_QUEUE:
-            # キューに入れないコマンドを正常実行した。
-            return _ret.data
-
-        # 通常のコマンドは、コマンドキューに入れ、
-        # 実行を HandleExec クラスに委ねる。
-        # このとき、メソッド名を変換する。
+        _cmd_jsondata: list[dict] = []
         try:
-            # メソッド名 "handlecall.foo" -> "handleexec.foo"
-            _cmd_dict = json.loads(_cmd_jsonstr)
-            _method_name = _cmd_dict["method"]
-            _method_name = _method_name.split(".")[1]
-            self.__log.debug("_method_name=%a", _method_name)
-
-            _cmd_dict["method"] = f"{self.exec_class_name}.{_method_name}"
-            _cmd_jsonstr = json.dumps(_cmd_dict)
-            self.__log.debug("_cmd_jsonstr=%a", _cmd_jsonstr)
-
+            _cmd_jsondata = json.loads(_cmd_jsonstr)
+            self.__log.debug("_cmd_jsondata=%a", json.dumps(_cmd_jsondata))
         except Exception as _e:
             _msg = errmsg(_e)
             self.__log.error(_msg)
-            return {"error": _msg}
+            return _msg
 
-        self.cmdq.put(_cmd_jsonstr)
-        self.__log.debug(
-            "_cmd_jsonstr=%a, qsize=%s", _cmd_jsonstr, self.qsize
-        )
-        return {"result": True, "qsize": self.qsize, "cmd": _cmd_jsonstr}
+        _exec_cmd_jsondata = []  # キューイングすべきコマンドのリスト
+        _result_list = []
+        for _j in _cmd_jsondata:
+            self.__log.debug("_j=%a", json.dumps(_j))
 
-    def recv(self, timeout=DEF_RECV_TIMEOUT):
+            # コマンドごとの処理
+            # キューに入れない特別な処理を先に行う
+            _ret = JSONRPCResponseManager.handle(
+                json.dumps(_j), self.dispacher_call
+            )
+            if _ret is None:
+                self.__log.warning("_ret=%s", _ret)
+                _result_list.append(f"_ret={_ret}")
+                continue
+
+            if not isinstance(_ret.data, dict):
+                self.__log.warning("_ret.data=%s", _ret.data)
+                _result_list.append(f"_ret.data={_ret.data}")
+                continue
+
+            self.__log.debug("ret.data=%s", _ret.data)
+
+            _result = _ret.data.get("result")
+            if _result is None:
+                self.__log.warning("_result is None")
+                _result_list.append("_result is None")
+                continue
+
+            if _result != HandleCall.RESULT_QUEUE:
+                # キューに入れないコマンドを正常実行した。
+                self.__log.debug("_ret.data=%s", _ret.data)
+                _result_list.append(_result)
+                continue
+
+            # キューイングすべきコマンドの処理
+            _result_list.append(_result)
+            try:
+                # メソッド名 "handlecall.foo" -> "handleexec.foo"
+                _method_name = _j["method"].split(".")[1]
+                _j["method"] = f"{self.exec_class_name}.{_method_name}"
+                self.__log.debug("_j=%a", json.dumps(_j))
+
+                _exec_cmd_jsondata.append(_j)
+
+            except Exception as _e:
+                _msg = errmsg(_e)
+                self.__log.error(_msg)
+                return json.dumps({"error": _msg})
+
+        if _exec_cmd_jsondata:
+            self.cmdq.put(_exec_cmd_jsondata)
+            self.__log.debug(
+                "_exec_cmd_jsondata=%a, qsize=%s",
+                json.dumps(_exec_cmd_jsondata),
+                self.qsize,
+            )
+
+        return json.dumps(_result_list)
+
+    def recv(self, timeout=DEF_RECV_TIMEOUT) -> str:
         """Receive command form queue."""
         try:
             _cmd_data = self.cmdq.get(timeout=timeout)
@@ -296,15 +406,15 @@ class JsonRpcWorker(threading.Thread):
             _cmd_data = self.recv()
             if not _cmd_data:
                 continue
+            self.__log.debug("_cmd_data=%a, qsize=%s", _cmd_data, self.qsize)
 
             self._flag_busy = True
 
-            self.__log.debug("_cmd_data=%a, qsize=%s", _cmd_data, self.qsize)
-
             ret = None
             try:
+                _cmd_str = json.dumps(_cmd_data)
                 ret = JSONRPCResponseManager.handle(
-                    _cmd_data, self.dispacher_exec
+                    _cmd_str, self.dispacher_exec
                 )
             except Exception as e:
                 self.__log.error(errmsg(e))
