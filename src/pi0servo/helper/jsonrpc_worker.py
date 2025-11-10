@@ -106,7 +106,7 @@ class JsonRpcWorker(threading.Thread):
         self._cmdq: queue.Queue = queue.Queue()
 
         # dispacher for call
-        self.obj_call = HandleCall(self._cmdq)
+        self.obj_call = HandleCall(self._cmdq, debug=self.__debug)
         self.dispacher_call = Dispatcher()
         self.dispacher_call.add_object(self.obj_call)
 
@@ -214,9 +214,9 @@ class JsonRpcWorker(threading.Thread):
         # 通常のコマンドは、コマンドキューに入れる。
         self._cmdq.put(cmd_jsonstr)
         self.__log.debug(
-            "cmd_jsonstr=%s, qsize=%s", cmd_jsonstr, self._cmdq.qsize
+            "cmd_jsonstr=%s, qsize=%s", cmd_jsonstr, self.qsize
         )
-        return {"result": True, "qsize": self._cmdq.qsize, "cmd": cmd_jsonstr}
+        return {"result": True, "qsize": self.qsize, "cmd": cmd_jsonstr}
 
     def recv(self, timeout=DEF_RECV_TIMEOUT):
         """Receive command form queue."""
