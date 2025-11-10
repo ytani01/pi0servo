@@ -2,6 +2,7 @@
 # (c) 2025 Yoichi Tanibayashi
 #
 import atexit
+import os
 import readline
 
 from pi0servo import JsonRpcWorker, errmsg, get_logger
@@ -12,7 +13,7 @@ class CmdJsonRpcCli:
 
     HIST_LEN = 1000
 
-    def __init__(self, prompt_str, pi, pins, history_file="", debug=False) -> None:
+    def __init__(self, prompt_str, pi, pins, history_file, debug=False) -> None:
         """Constractor."""
         self.__debug = debug
         self.__log = get_logger(self.__class__.__name__, self.__debug)
@@ -27,6 +28,9 @@ class CmdJsonRpcCli:
             self.history_file = history_file
         else:
             self.history_file = f"/tmp/hist_{self.__class__.__name__}"
+        self.history_file = os.path.expanduser(
+            os.path.expandvars(self.history_file)
+        )
         self.__log.debug("history_file=%a", self.history_file)
 
         try:

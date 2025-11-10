@@ -392,13 +392,20 @@ def str_client(ctx, url, history_file, script_file, angle_factor, debug):
 
 @cli.command()
 @click.argument("pins", type=int, nargs=-1)
+@click.option(
+    "--history_file",
+    type=str,
+    default="~/pi0servo_jsonrpc_cli_history",
+    show_default=True,
+    help="History file",
+)
 @click_common_opts(__version__)
-def jsonrpc_cli(ctx, pins, debug):
+def jsonrpc_cli(ctx, pins, history_file, debug):
     """JSON-RPC CLI."""
     cmd_name = ctx.command.name
     __log = get_logger(__name__, debug)
     __log.debug("cmd_name=%s", cmd_name)
-    __log.debug("pins=%s", pins)
+    __log.debug("pins=%s,history_file=%a", pins, history_file)
 
     if not pins:
         print_pins_error(ctx)
@@ -410,7 +417,7 @@ def jsonrpc_cli(ctx, pins, debug):
     pi = None
     try:
         pi = get_pi(debug)
-        app = CmdJsonRpcCli(prompt_str, pi, pins, debug=debug)
+        app = CmdJsonRpcCli(prompt_str, pi, pins, history_file, debug=debug)
         app.main()
 
     except Exception as _e:
