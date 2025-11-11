@@ -70,7 +70,7 @@ class HandleExec:
         self, angles: list[float], move_sec=None, step_n=None
     ):
         """Move all angles sync."""
-        self.__log.info(
+        self.__log.debug(
             "angles=%s,move_sec=%s,step_n=%s", angles, move_sec, step_n
         )
         if move_sec is None:
@@ -87,7 +87,7 @@ class HandleExec:
         self, angle_diffs: list[float], move_sec=None, step_n=None
     ):
         """Move all angles sync."""
-        self.__log.info(
+        self.__log.debug(
             "angle_diffs=%s,move_sec=%s,step_n=%s",
             angle_diffs,
             move_sec,
@@ -105,7 +105,7 @@ class HandleExec:
 
     def sleep(self, sec: float):
         """Sleep."""
-        self.__log.info("sec=%s", sec)
+        self.__log.debug("sec=%s", sec)
         time.sleep(sec)
 
     def move_sec(self, sec: float):
@@ -227,126 +227,155 @@ class JsonRpcWorker(threading.Thread):
         return _count
 
     def mk_jsonrpc_req(self, cmdstr: str, method_prefix="") -> str:
-        """Make JSON-RPC request."""
+        """Make JSON-RPC request.
+
+        Args:
+            cmdstr (str):
+                '{
+                     "method": "aaa.bbb",
+                     "params": [a, b]
+                 }'
+            mothod_prefix (str): "ccc"
+
+        Returns:
+            jsonrpc_req_str (str):
+                '{
+                     "method": "ccc.bbb",
+                     "params": [a, b],
+                     "jsonrpc": "2.0",
+                     "id": 1
+                 }'
+        """
         self.__log.debug("cmdstr=%s", cmdstr)
 
+        _jsonrpc_req_dict = {
+            "jsonrpc": "2.0",
+            "method": "",
+            "params": [],
+            "id": 0,
+        }
         try:
-            _cmddata = json.loads(cmdstr)
-            if not isinstance(_cmddata, list):
-                _cmddata = [_cmddata]  # すべてリストで扱う
+            _cmd_dict = json.loads(cmdstr)
 
-            _new_cmddata = []
-            for _d in _cmddata:
-                if method_prefix:
-                    _d["method"] = f"{method_prefix}.{_d['method']}"
+            _req_id = _cmd_dict.get("id")
+            if _req_id:
+                self.rpc_id = _req_id
+            else:
+                self.rpc_id += 1
+            _jsonrpc_req_dict["id"] = self.rpc_id
 
-                _id = _d.get("id")
-                if isinstance(_id, int):
-                    self.rpc_id = _id
-                    _d["id"] = _id
-                else:
-                    self.rpc_id += 1
-                    _d["id"] = self.rpc_id
+            _method_name = _cmd_dict["method"]
+            if method_prefix:
+                _method_name_base = _method_name.split(".")[-1]
+                _method_name = f"{method_prefix}.{_method_name_base}"
+            _jsonrpc_req_dict["method"] = _method_name
 
-                _d["jsonrpc"] = "2.0"
+            _req_params = _cmd_dict.get("params")
+            if _req_params:
+                _jsonrpc_req_dict["params"] = _cmd_dict["params"]
 
-                _new_cmddata.append(_d)
-
-            _cmdstr = json.dumps(_new_cmddata)
+            _jsonrpc_req_str = json.dumps(_jsonrpc_req_dict)
+            self.__log.debug("_jsonrpc_req_str=%a", _jsonrpc_req_str)
+            return _jsonrpc_req_str
 
         except Exception as e:
             self.__log.error(errmsg(e))
             return ""
 
-        return _cmdstr
-
     def call(self, cmdstr: str) -> str:
         """Call(JSON-RPC)."""
         self.__log.debug("cmdstr=%s", cmdstr)
 
-        # JSON-RPCリクエスト形式に整える
-        _cmd_jsonstr = self.mk_jsonrpc_req(
-            cmdstr, self.obj_call.__class__.__name__.lower()
-        )
-        self.__log.debug("_cmd_jsonstr=%a", _cmd_jsonstr)
-
-        _cmd_jsondata: list[dict] = []
         try:
-            _cmd_jsondata = json.loads(_cmd_jsonstr)
-            self.__log.debug("_cmd_jsondata=%a", json.dumps(_cmd_jsondata))
+            # list[dict]に変換
+            _cmd_dict_list = json.loads(cmdstr)
+            if not isinstance(_cmd_dict_list, list):
+                _cmd_dict_list = [_cmd_dict_list]
         except Exception as _e:
-            _msg = errmsg(_e)
-            self.__log.error(_msg)
-            return _msg
+            _err_msg = errmsg(_e)
+            self.__log.error(_err_msg)
+            return _err_msg
 
-        _exec_cmd_jsondata = []  # キューイングすべきコマンドのリスト
+        _exec_cmd_jsondata_list = []  # キューイングすべきコマンドのリスト
         _result_list = []
-        for _j in _cmd_jsondata:
-            self.__log.debug("_j=%a", json.dumps(_j))
+        for _cmd_dict in _cmd_dict_list:
+            self.__log.debug("_cmd_dict=%a", _cmd_dict)
 
-            # コマンドごとの処理
-            # キューに入れない特別な処理を先に行う
+            # JSON-RPCリクエスト形式に整える
+            _cmd_jsonstr = self.mk_jsonrpc_req(
+                json.dumps(_cmd_dict),
+                self.obj_call.__class__.__name__.lower(),
+            )
+            self.__log.debug("_cmd_jsonstr=%a", _cmd_jsonstr)
+
+            # キューに入れない処理として実行
             _ret = JSONRPCResponseManager.handle(
-                json.dumps(_j), self.dispacher_call
+                _cmd_jsonstr, self.dispacher_call
             )
             if _ret is None:
-                self.__log.warning("_ret=%s", _ret)
-                _result_list.append(f"_ret={_ret}")
+                # _ret is None !?
+                _msg = "_ret is None"
+                self.__log.warning(_msg)
+                _result_list.append(_msg)
                 continue
 
-            if not isinstance(_ret.data, dict):
-                self.__log.warning("_ret.data=%s", _ret.data)
-                _result_list.append(f"_ret.data={_ret.data}")
+            self.__log.debug("_ret.data=%s", _ret.data)
+            if isinstance(_ret.data, list):
+                # _ret.data が list !?
+                _msg = f"_ret.data={_ret.data}"
+                self.__log.warning(_msg)
+                _result_list.append(_msg)
                 continue
 
-            self.__log.debug("ret.data=%s", _ret.data)
+            _ret_result = _ret.data.get("result")
+            self.__log.debug("_ret_result=%s", _ret_result)
 
-            _result = _ret.data.get("result")
-            if _result is None:
-                _err = _ret.data.get("error")
-                self.__log.debug("_err=%s", _err)
-                if _err is None:
-                    self.__log.warning("_result is None")
-                    _result_list.append("_result is None")
-                    continue
+            if _ret_result is not None:
+                # 正常に実行された
+                _result_list.append(_ret_result)
+                continue
 
-                _err_msg = _err.get("message")
-                self.__log.debug("_err_msg=%a", _err_msg)
-                if _err_msg != 'Method not found':
-                    self.__log.warning("error: %s",_err_msg)
-                    _result_list.append(f"error: {_err_msg}")
+            # 以下、JSON-RPCエラーの場合
+            _ret_err = _ret.data.get("error")
+            self.__log.debug("_ret_err=%s", _ret_err)
 
-                # 'Method not found'の場合は、すべてキューイング
-                _result = HandleCall.RESULT_QUEUE
+            if _ret_err is None:
+                _msg = '_ret.data["error"] is None'
+                self.__log.warning(_msg)
+                _result_list.append(_msg)
+                continue
 
-            if _result != HandleCall.RESULT_QUEUE:
-                # キューに入れないコマンドを正常実行した。
-                self.__log.debug("_ret.data=%s", _ret.data)
-                _result_list.append(_result)
+            _ret_err_msg = _ret_err.get("message")
+            self.__log.debug("_ret_err_msg=%a", _ret_err_msg)
+
+            if _ret_err_msg != "Method not found":
+                _msg = f"error: {_ret_err_msg}"
+                self.__log.warning(_msg)
+                _result_list.append(_msg)
                 continue
 
             # キューイングすべきコマンドの処理
-            _result_list.append(_result)
-            try:
-                # メソッド名 "handlecall.foo" -> "handleexec.foo"
-                _method_name = _j["method"].split(".")[1]
-                _j["method"] = f"{self.exec_class_name}.{_method_name}"
-                self.__log.debug("_j=%a", json.dumps(_j))
+            _result_list.append("queue")
 
-                _exec_cmd_jsondata.append(_j)
+            # method の prefix を変更して、
+            # JSON-RPCリクエスト形式に整える
+            _cmd_jsonstr = self.mk_jsonrpc_req(
+                json.dumps(_cmd_dict),
+                self.obj_exec.__class__.__name__.lower(),
+            )
+            self.__log.debug("_cmd_jsonstr=%a", _cmd_jsonstr)
 
-            except Exception as _e:
-                _msg = errmsg(_e)
-                self.__log.error(_msg)
-                return json.dumps({"error": _msg})
+            # キューイングすべきコマンドをリストに追加する。
+            # キューイングは、あとでまとめて行う。
+            _exec_cmd_jsondata_list.append(json.loads(_cmd_jsonstr))
 
-        if _exec_cmd_jsondata:
-            self.cmdq.put(_exec_cmd_jsondata)
+        if _exec_cmd_jsondata_list:
             self.__log.debug(
-                "_exec_cmd_jsondata=%a, qsize=%s",
-                json.dumps(_exec_cmd_jsondata),
+                "_exec_cmd_jsondata_list=%a, qsize=%s",
+                json.dumps(_exec_cmd_jsondata_list),
                 self.qsize,
             )
+            self.cmdq.put(_exec_cmd_jsondata_list)
 
         return json.dumps(_result_list)
 
@@ -369,26 +398,30 @@ class JsonRpcWorker(threading.Thread):
             if self.qsize == 0:
                 self._flag_busy = False
 
-            _cmd_data = self.recv()
-            if not _cmd_data:
+            _cmd_data_list = self.recv()
+            if not _cmd_data_list:
                 continue
-            self.__log.debug("_cmd_data=%a, qsize=%s", _cmd_data, self.qsize)
+            self.__log.debug(
+                "_cmd_data_list=%a, qsize=%s", _cmd_data_list, self.qsize
+            )
 
             self._flag_busy = True
 
-            ret = None
-            try:
-                _cmd_str = json.dumps(_cmd_data)
-                ret = JSONRPCResponseManager.handle(
-                    _cmd_str, self.dispacher_exec
-                )
-            except Exception as e:
-                self.__log.error(errmsg(e))
+            for _cmd_data in _cmd_data_list:
+                self.__log.debug("_cmd_data=%s", _cmd_data)
 
-            if ret:
-                self.__log.debug("ret.data=%s", ret.data)
+                try:
+                    _cmd_str = json.dumps(_cmd_data)
+                    ret = JSONRPCResponseManager.handle(
+                        _cmd_str, self.dispacher_exec
+                    )
+                    if ret:
+                        self.__log.debug("ret.data=%s", ret.data)
 
-                if self.interval_sec > 0.0:
-                    time.sleep(self.interval_sec)
+                        if self.interval_sec > 0.0:
+                            time.sleep(self.interval_sec)
+
+                except Exception as e:
+                    self.__log.error(errmsg(e))
 
         self.__log.debug("done.")
