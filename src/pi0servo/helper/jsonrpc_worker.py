@@ -16,38 +16,41 @@ from ..utils.mylogger import errmsg, get_logger
 class HandleCall:
     """Functions for call."""
 
-    RESULT_QUEUE = "queue"
-
-    def __init__(self, cmdq: queue.Queue, debug=False) -> None:
+    def __init__(self, worker, debug=False) -> None:
         """Constractor."""
         self.__debug = debug
         self.__log = get_logger(self.__class__.__name__, self.__debug)
         self.__log.debug("")
 
-        self.cmdq = cmdq
-
-    def _clear_cmdq(self):
-        """Clear command queue."""
-        _count = 0
-        while not self.cmdq.empty():
-            _count += 1
-            _cmd = self.cmdq.get()
-            self.__log.debug("%2d:%s", _count, _cmd)
-
-        self.__log.debug("count=%s", _count)
-        return _count
+        self.worker = worker
 
     def cancel(self) -> int:
+        """Cancel commands in queue."""
         self.__log.debug("")
-        return self._clear_cmdq()
+        _cancel_count = 0
+        while not self.worker.cmdq.empty():
+            _cancel_count += 1
+            _cmd = self.worker.cmdq.get()
+            self.__log.debug("%2d:%s", _cancel_count, _cmd)
+        return _cancel_count
 
     def qsize(self) -> int:
+        """Queue size."""
         self.__log.debug("")
-        return self.cmdq.qsize()
+        _qsize = self.worker.qsize
+        self.__log.debug("_qsize=%s", _qsize)
+        return _qsize
 
-    def wait(self):
-        self.__log.debug("qsize=%s", self.cmdq.qsize())
-        # XXX TBD XXX
+    def wait(self, wait_interval: float = 0.5):
+        """Wait worker."""
+        self.__log.debug(
+            "wait_interval=%s,qsize=%s", wait_interval, self.worker.qsize
+        )
+        while self.worker.is_busy:
+            self.__log.debug(
+                "waiting worker(busy, qsize=%s)..", self.worker.qsize
+            )
+            time.sleep(wait_interval)
         return True
 
 
@@ -123,6 +126,30 @@ class HandleExec:
         self.__log.debug("sec=%s", sec)
         self.param_interval_sec = sec
 
+    def move_pulse_relative(self, servo_i: int, pulse_diff: int):
+        """Move one servo by relative pulse."""
+        self.__log.debug("servo_i=%s,pulse_diff=%s", servo_i, pulse_diff)
+        self.mservo.move_pulse_relative(servo_i, pulse_diff, forced=True)
+
+    def set(self, servo_i: int, target: str) -> bool:
+        """Set calibrated pulse as target."""
+        self.__log.debug("servo_i=%s,target=%s", servo_i, target)
+
+        _target = target.lower()
+
+        if _target == "center":
+            self.mservo.set_pulse_center(servo_i)
+            return True
+        if _target == "min":
+            self.mservo.set_pulse_min(servo_i)
+            return True
+        if _target == "max":
+            self.mservo.set_pulse_max(servo_i)
+            return True
+
+        self.__log.error("Invalid target: %a", target)
+        return False
+
 
 class JsonRpcWorker(threading.Thread):
     """JSON RPC Worker."""
@@ -151,7 +178,7 @@ class JsonRpcWorker(threading.Thread):
         self.cmdq: queue.Queue = queue.Queue()
 
         # dispacher for call
-        self.obj_call = HandleCall(self.cmdq, debug=self.__debug)
+        self.obj_call = HandleCall(self, debug=self.__debug)
         self.dispacher_call = Dispatcher()
         self.dispacher_call.add_object(self.obj_call)
 
@@ -209,6 +236,11 @@ class JsonRpcWorker(threading.Thread):
     def qsize(self) -> int:
         """Size of command queue."""
         return self.cmdq.qsize()
+
+    @property
+    def is_busy(self) -> bool:
+        """Busy flag."""
+        return self._flag_busy
 
     def __del__(self):
         """Delete."""
