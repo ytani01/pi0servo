@@ -12,11 +12,9 @@ async def handle_api2(data: dict):
     print(f"data={data}")
     return data
 
+
 @api.post("/api2")
-async def handle_api(
-    req: Request,
-    data: dict | list[dict]
-) -> dict:
+async def handle_api(req: Request, data: dict | list[dict]) -> dict:
     """
     ``req: Request``を使うと、環境変数などの受け渡しができる(？)
     """

@@ -15,6 +15,7 @@ from .command.cmd_jsonrpccli import CmdJsonRpcCli
 from .command.cmd_servo import CmdServo
 from .command.cmd_strcli import CmdStrCli
 from .command.cmd_strclient import CmdStrClient
+from .command.cmd_strjsonrpccli import CmdStrJsonRpcCli
 from .core.calibrable_servo import CalibrableServo
 from .utils.clickutils import click_common_opts
 from .utils.mylogger import errmsg, get_logger
@@ -418,6 +419,72 @@ def jsonrpc_cli(ctx, pins, history_file, debug):
     try:
         pi = get_pi(debug)
         app = CmdJsonRpcCli(prompt_str, pi, pins, history_file, debug=debug)
+        app.main()
+
+    except Exception as _e:
+        __log.error(errmsg(_e))
+
+    finally:
+        if app:
+            app.end()
+        if pi:
+            pi.stop()
+
+
+@cli.command()
+@click.argument("pins", type=int, nargs=-1)
+@click.option(
+    "--history_file",
+    type=str,
+    default="~/.pi0servo_strclient_history",
+    show_default=True,
+    help="History file",
+)
+@click.option("--script-file", "-f", type=str, default="", help="script file")
+@click.option(
+    "--angle_factor",
+    "-a",
+    type=str,
+    default="1,1,1,1",
+    show_default=True,
+    help="Angle Factor",
+)
+@click_common_opts(__version__)
+def str_jsonrpc_cli(
+    ctx, pins, history_file, script_file, angle_factor, debug
+):
+    """String command CLI (JSON-RPC)"""
+    cmd_name = ctx.command.name
+    __log = get_logger(__name__, debug)
+    __log.debug("cmd_name=%s", cmd_name)
+    __log.debug(
+        "pins=%s, history_file=%s, script_file=%s, angle_factor=%s",
+        pins,
+        history_file,
+        script_file,
+        angle_factor,
+    )
+
+    if not pins:
+        print_pins_error(ctx)
+        return
+
+    af_list = [int(i) for i in angle_factor.split(",")]
+    __log.debug("af_list=%s", af_list)
+
+    app = None
+    pi = None
+    try:
+        pi = get_pi(debug)
+        prompt_str = cmd_name + "> "
+        app = CmdStrJsonRpcCli(
+            prompt_str,
+            pi,
+            pins,
+            history_file,
+            af_list,
+            debug=debug,
+        )
         app.main()
 
     except Exception as _e:
