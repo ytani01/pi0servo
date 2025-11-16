@@ -245,7 +245,7 @@ class StrCmdToJson:
                     elif target == "max":
                         target = "min"
                 self.__log.debug("servo=%s, target=%s", servo, target)
-                _cmd_data["params"] = {"servo": servo, "target": target}
+                _cmd_data["params"] = {"servo_i": servo, "target": target}
 
             elif cmd_key in ["ca", "zz", "qs", "qq", "wa", "ww"]:
                 pass
