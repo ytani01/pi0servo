@@ -160,9 +160,10 @@ class ThreadWorker(threading.Thread):
         self.__log.debug("")
 
         # stop thread
-        self._active = False
-        self.clear_cmdq()
-        self.join()
+        if self._active:
+            self._active = False
+            self.clear_cmdq()
+            self.join()
 
         # off all servo
         self.mservo.off()
