@@ -221,7 +221,7 @@ class StrCmdToJson:
                 _n = int(cmd_param_str)
                 if _n < 1:
                     return self._create_error_data("INVALID_PARAM", cmd_str)
-                _cmd_data["params"] = {"n": _n}
+                _cmd_data["params"] = {"step_n": _n}
 
             elif cmd_key == "mp":
                 if not cmd_param_str:
