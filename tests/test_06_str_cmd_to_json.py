@@ -78,11 +78,13 @@ class TestStrCmdToJson:
         """_parse_anglesで空の角度要素がある場合のテスト"""
         instance = StrCmdToJson()
         angle_str = "10,,20"
+        expected_angles = [10, None, 20]
+
         result = instance._parse_angles(angle_str)
-        assert result is None
+        assert result == expected_angles
 
     def test_cmdstr_to_json_invalid_str_with_space(self):
-        """cmdstr_to_jsonでスペースを含む不正な文字列のテスト"""
+        """cmdstr_to_jsonでスペースを含む正な文字列のテスト"""
         instance = StrCmdToJson()
         cmd_str = "mv:10 20"
         expected_json_obj = {
@@ -110,7 +112,7 @@ class TestStrCmdToJson:
         instance = StrCmdToJson(
             angle_factor=[1], debug=True
         )  # angle_factorが短い
-        cmd_str = "mp:1,-50"  # servo_idx=1 はangle_factorの範囲外
+        cmd_str = "mp:1,-50"  # servo_i=1 はangle_factorの範囲外
         expected_json_obj = {
             "method": "ERROR",
             "error": "INVALID_PARAM",
@@ -124,7 +126,7 @@ class TestStrCmdToJson:
         instance = StrCmdToJson(
             angle_factor=[1], debug=True
         )  # angle_factorが短い
-        cmd_str = "sn:1"  # servo_idx=1 はangle_factorの範囲外
+        cmd_str = "sn:1"  # servo_i=1 はangle_factorの範囲外
         expected_json_obj = {
             "method": "ERROR",
             "error": "INVALID_PARAM",
@@ -201,7 +203,7 @@ class TestStrCmdToJson:
                 [
                     {
                         "method": "move_pulse_relative",
-                        "params": {"servo_idx": 0, "pulse_diff": -50},
+                        "params": {"servo_i": 0, "pulse_diff": -50},
                     }
                 ],
             ),
@@ -210,7 +212,7 @@ class TestStrCmdToJson:
                 [
                     {
                         "method": "set",
-                        "params": {"servo": 0, "target": "center"},
+                        "params": {"servo_i": 0, "target": "center"},
                     }
                 ],
             ),
@@ -240,9 +242,8 @@ class TestStrCmdToJson:
                 "mv:100",
                 [
                     {
-                        "method": "ERROR",
-                        "error": "INVALID_PARAM",
-                        "data": "100",
+                        "method": "move_all_angles_sync",
+                        "params": {"angles": [90]},
                     }
                 ],
             ),
@@ -330,7 +331,7 @@ class TestStrCmdToJson:
         # servo 0 (angle_factor=1) -> target: center
         cmd_str_sc0 = "sc:0"
         expected_json_obj_sc0 = [
-            {"method": "set", "params": {"servo": 0, "target": "center"}}
+            {"method": "set", "params": {"servo_i": 0, "target": "center"}}
         ]
         result_sc0 = instance.cmdstr_to_jsonliststr(cmd_str_sc0)
         result_obj_sc0 = json.loads(result_sc0)
@@ -339,7 +340,7 @@ class TestStrCmdToJson:
         # servo 1 (angle_factor=-1) -> target: min -> max
         cmd_str_sn1 = "sn:1"
         expected_json_obj_sn1 = [
-            {"method": "set", "params": {"servo": 1, "target": "max"}}
+            {"method": "set", "params": {"servo_i": 1, "target": "max"}}
         ]
         result_sn1 = instance.cmdstr_to_jsonliststr(cmd_str_sn1)
         result_obj_sn1 = json.loads(result_sn1)
@@ -348,7 +349,7 @@ class TestStrCmdToJson:
         # servo 1 (angle_factor=-1) -> target: max -> min
         cmd_str_sx1 = "sx:1"
         expected_json_obj_sx1 = [
-            {"method": "set", "params": {"servo": 1, "target": "min"}}
+            {"method": "set", "params": {"servo_i": 1, "target": "min"}}
         ]
         result_sx1 = instance.cmdstr_to_jsonliststr(cmd_str_sx1)
         result_obj_sx1 = json.loads(result_sx1)

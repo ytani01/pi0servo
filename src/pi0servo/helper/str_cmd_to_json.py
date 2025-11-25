@@ -6,11 +6,15 @@
 import json
 from typing import Any
 
-from ..utils.mylogger import get_logger
+from ..utils.mylogger import errmsg, get_logger
 
 
 class StrCmdToJson:
     """String Command to JSON."""
+
+    ANGLE_MIN = -90
+    ANGLE_CENTER = 0
+    ANGLE_MAX = 90
 
     # コマンド文字列とJSONコマンド名のマッピング
     COMMAND_MAP: dict[str, str] = {
@@ -84,11 +88,15 @@ class StrCmdToJson:
 
         e.g.
             "40,30,20,10"   --> [40,30,20,10]
-            "-40,.,."       --> [-40,null,null]
+            "-40,.,,,"       --> [-40,null,null,null]
             "mx,min,center" --> ["max","min","center"]
             "x,n,c"         --> ["max","min","center"]
             "x,.,center,20" --> ["max",null,"center",20]
         """
+        print(f"anlge_str={angle_str}")
+        if not angle_str:
+            return None
+
         angle_parts = angle_str.split(",")
         # self.__log.debug("angle_parts=%s", angle_parts)
 
@@ -96,35 +104,40 @@ class StrCmdToJson:
 
         for angle_part in angle_parts:
             _p = angle_part.strip().lower()
-            # self.__log.debug("_p=%s", _p)
-            if not _p:  # 空の要素は不正
-                return None
+
+            if not _p:  # None: 動かさない
+                angles.append(None)
+                continue
 
             if _p == ".":  # None: 動かさない
                 angles.append(None)
+                continue
 
-            elif _p in self.ANGLE_ALIAS_MAP:
+            if _p in self.ANGLE_ALIAS_MAP:
                 angles.append(self.ANGLE_ALIAS_MAP[_p])
+                continue
 
-            elif _p in ["max", "min", "center"]:
+            if _p in ["max", "min", "center"]:
                 angles.append(_p)
+                continue
 
-            else:  # 数値
-                try:
-                    angle = int(_p)
-                    if not -90 <= angle <= 90:
-                        return None  # 角度範囲外
-                    angles.append(angle)
-                except ValueError:
-                    return None  # 数値に変換できない
+            # 数値
+            try:
+                angle = int(_p)
+            except ValueError as e:
+                self.__log.error(errmsg(e))
+                return None
+
+            # ANGLE_MIN <= angle <= ANGLE_MAX
+            angle = max(min(angle, self.ANGLE_MAX), self.ANGLE_MIN)
+
+            angles.append(angle)
 
         # self.__log.debug("angles=%s", angles)
 
         # angle_factor に応じて符号反転
-        for _i in range(len(angles)):
-            if _i >= len(self.angle_factor):
-                break
-
+        af_len = min(len(self.angle_factor), len(angles))
+        for _i in range(af_len):
             if isinstance(angles[_i], int):
                 angles[_i] *= self.angle_factor[_i]
 
@@ -171,7 +184,7 @@ class StrCmdToJson:
         else:
             cmd_param_str = cmd_parts[1]
         self.__log.debug(
-            "cmd_key=%s, cmd_name=%s, cmd_param_str=%s",
+            "cmd_key=%s,cmd_name=%s,cmd_param_str=%s",
             cmd_key,
             cmd_name,
             cmd_param_str,
@@ -199,9 +212,19 @@ class StrCmdToJson:
                 if not cmd_param_str:
                     return self._create_error_data("INVALID_PARAM", cmd_str)
 
+                params = [int(a) for a in cmd_param_str.split(",")]
+                params = params[0 : len(self.angle_factor)]
+
+                self.__log.debug(
+                    "cmd_param_str=%a,angle_factor=%s,params=%s",
+                    cmd_param_str,
+                    self.angle_factor,
+                    params,
+                )
+
                 angle_diffs = [
                     int(a) * self.angle_factor[i]
-                    for i, a in enumerate(cmd_param_str.split(","))
+                    for i, a in enumerate(params)
                 ]
 
                 if angle_diffs is None:
@@ -232,7 +255,7 @@ class StrCmdToJson:
                 p_diff = int(p_diff_str) * self.angle_factor[sv_idx]
 
                 _cmd_data["params"] = {
-                    "servo_idx": sv_idx,
+                    "servo_i": sv_idx,
                     "pulse_diff": p_diff,
                 }
 

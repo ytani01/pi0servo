@@ -84,16 +84,16 @@ def str_to_json(cmdstr: str): -> str
 出力: '{"method": "interval", "params": {"sec": 0.5}}'
 
 入力: 'mp:2,-20'
-出力: '{"method": "move_pulse_relative", "params": {"servo_idx": 2, "pulse_diff": -20}}'
+出力: '{"method": "move_pulse_relative", "params": {"servo_i": 2, "pulse_diff": -20}}'
 
 入力: 'sc:1'
-出力: '{"method": "set", "params": {"servo": 1, "target": "center"}}'
+出力: '{"method": "set", "params": {"servo_i": 1, "target": "center"}}'
 
 入力: 'sn:2'
-出力: '{"method": "set", "params": {"servo": 2, "target": "min"}}'
+出力: '{"method": "set", "params": {"servo_i": 2, "target": "min"}}'
 
 入力: 'sx:0'
-出力: '{"method": "set", "params": {"servo": 0, "target": "max"}}'
+出力: '{"method": "set", "params": {"servo_i": 0, "target": "max"}}'
 
 入力: 'ca'
 出力: '{"method": "cancel"}
