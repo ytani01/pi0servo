@@ -103,7 +103,7 @@ class TestThreadWorker:
         mservo_instance = thread_worker.mservo
         cmd = {
             "method": "move_pulse_relative",
-            "params": {"servo_idx": 2, "pulse_diff": -20},
+            "params": {"servo_i": 2, "pulse_diff": -20},
         }
         thread_worker.send(cmd)
         self._wait_for_mock_call(mservo_instance.move_pulse_relative)

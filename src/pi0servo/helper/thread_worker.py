@@ -535,22 +535,20 @@ class ThreadWorker(threading.Thread):
         {
           "method": "move_pulse_relative",
           "params": {
-            "servo_idx": 2, "pulse_diff": -20
+            "servo_i": 2, "pulse_diff": -20
           }
         }
         """
         try:
             _params = cmd["params"]
-            servo_idx = int(_params["servo_idx"])
+            servo_i = int(_params["servo_i"])
             pulse_diff = int(_params["pulse_diff"])
-            self.__log.debug(
-                "servo_idx=%s, pulse_diff=%s", servo_idx, pulse_diff
-            )
+            self.__log.debug("servo_i=%s, pulse_diff=%s", servo_i, pulse_diff)
         except Exception as _e:
             self.__log.error("%s: %s", type(_e).__name__, _e)
             return
 
-        self.mservo.move_pulse_relative(servo_idx, pulse_diff, forced=True)
+        self.mservo.move_pulse_relative(servo_i, pulse_diff, forced=True)
 
     def _handle_set(self, cmd: dict):
         """Handle set cmd. (save calibration)
