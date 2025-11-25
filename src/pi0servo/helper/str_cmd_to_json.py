@@ -93,7 +93,7 @@ class StrCmdToJson:
             "x,n,c"         --> ["max","min","center"]
             "x,.,center,20" --> ["max",null,"center",20]
         """
-        print(f"anlge_str={angle_str}")
+        self.__log.debug("angle_str=%a", angle_str)
         if not angle_str:
             return None
 
