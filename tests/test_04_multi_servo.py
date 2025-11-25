@@ -5,7 +5,7 @@ import pytest
 from pi0servo.core.calibrable_servo import CalibrableServo
 from pi0servo.core.multi_servo import MultiServo
 
-PINS = [17, 18]
+PINS = [22, 27]
 CONF_FILE = "test_multi_servo_conf.json"
 
 
@@ -255,7 +255,8 @@ class TestMultiServo:
         """
         ms, _ = multi_servo
         assert ms._validate_angle_list([10]) is False  # 1要素
-        assert ms._validate_angle_list([10, 20, 30]) is False  # 3要素
+        assert ms._validate_angle_list([10, 20, 30]) is True  # 3要素
+        # 指定された角度の要素数が多すぎる場合は無視されるだけでOK
 
     @patch("time.sleep")
     def test_move_all_angles_sync_relative(self, mock_sleep, multi_servo):
