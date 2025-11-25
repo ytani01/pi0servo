@@ -201,9 +201,9 @@ class MultiServo:
             )
             return False
 
-        if len(angles) != self.servo_n:
+        if len(angles) < self.servo_n:
             self.__log.error(
-                "len(%s)=%s != servo_n=%s", angles, len(angles), self.servo_n
+                "len(%s)=%s < servo_n=%s", angles, len(angles), self.servo_n
             )
             return False
 
@@ -358,6 +358,10 @@ class MultiServo:
         # target_anglesを数値(角度)に変換
         _num_target_angles = []
         for i, _angle in enumerate(target_angles):
+            if i >= self.servo_n:
+                # 指定された角度の数がサーボ数より多い場合は無視
+                break
+
             _servo = self.servo[i]
 
             if isinstance(_angle, str):
