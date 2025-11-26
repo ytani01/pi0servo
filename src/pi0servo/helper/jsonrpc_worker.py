@@ -339,7 +339,7 @@ class JsonRpcWorker(threading.Thread):
 
             _method_name = f"{self.obj_call_classname}.{_cmd_dict['method']}"
             self.__log.debug("_method_name=%a", _method_name)
-            self.__log.debug("dispatcher_call:%s",list(self.dispatcher_call))
+            self.__log.debug("dispatcher_call:%s", list(self.dispatcher_call))
 
             if _method_name in list(self.dispatcher_call):
                 #
@@ -419,7 +419,8 @@ class JsonRpcWorker(threading.Thread):
         if _exec_cmd_jsondata_list:
             self.__log.debug(
                 "_exec_cmd_jsondata_list=%a,qsize=%s",
-                json.dumps(_exec_cmd_jsondata_list), self.qsize
+                json.dumps(_exec_cmd_jsondata_list),
+                self.qsize,
             )
             self.cmdq.put(_exec_cmd_jsondata_list)
 
