@@ -465,6 +465,11 @@ class JsonRpcWorker(threading.Thread):
                     if ret:
                         self.__log.debug("ret.data=%s", ret.data)
 
+                        if ret.data.get("error"):
+                            self.__log.warning(
+                                "_cmd_str=%s, ret.data=%s", _cmd_str, ret.data
+                            )
+
                         if self.interval_sec > 0.0:
                             time.sleep(self.interval_sec)
 
