@@ -147,7 +147,7 @@ class StrCmdToJson:
                 elif angles[_i] == "max":
                     angles[_i] = "min"
 
-        self.__log.debug("angles=%s", angles)
+        # self.__log.debug("angles=%s", angles)
         return angles
 
     def cmdstr_to_json(self, cmd_str: str) -> dict:
@@ -173,7 +173,9 @@ class StrCmdToJson:
         cmd_key = cmd_parts[0].lower()
 
         if cmd_key not in self.COMMAND_MAP:
-            return self._create_error_data("METHOD_NOT_FOUND", cmd_str)
+            _err_dict =  self._create_error_data("METHOD_NOT_FOUND", cmd_str)
+            self.__log.error("%s", _err_dict)
+            return _err_dict
 
         # コマンド名の取得 e.g. "mv" --> "move_all_angles_sync"
         cmd_name = self.COMMAND_MAP[cmd_key]
@@ -183,12 +185,12 @@ class StrCmdToJson:
             cmd_param_str = ""
         else:
             cmd_param_str = cmd_parts[1]
-        self.__log.debug(
-            "cmd_key=%s,cmd_name=%s,cmd_param_str=%s",
-            cmd_key,
-            cmd_name,
-            cmd_param_str,
-        )
+        # self.__log.debug(
+        #     "cmd_key=%s,cmd_name=%s,cmd_param_str=%s",
+        #     cmd_key,
+        #     cmd_name,
+        #     cmd_param_str,
+        # )
 
         # _cmd_dataの初期化
         _cmd_data: dict[str, Any] = {"method": cmd_name}
@@ -200,7 +202,7 @@ class StrCmdToJson:
                     return self._create_error_data("INVALID_PARAM", cmd_str)
 
                 angles = self._parse_angles(cmd_param_str)
-                self.__log.debug("angles=%s", angles)
+                # self.__log.debug("angles=%s", angles)
                 if angles is None:
                     return self._create_error_data(
                         "INVALID_PARAM", cmd_param_str

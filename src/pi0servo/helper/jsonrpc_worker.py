@@ -333,14 +333,18 @@ class JsonRpcWorker(threading.Thread):
             return _err_msg
 
         _exec_cmd_jsondata_list = []  # キューイングすべきコマンドのリスト
-        _result_list = []
+        _result_list = []  # 結果リスト
         for _cmd_dict in _cmd_dict_list:
             self.__log.debug("_cmd_dict=%a", _cmd_dict)
+
+            if _cmd_dict['method'] == 'ERROR':
+                self.__log.error("Ignore: %s", _cmd_dict)
+                _result_list.append(_cmd_dict)
+                continue
 
             _method_name = f"{self.obj_call_classname}.{_cmd_dict['method']}"
             self.__log.debug("_method_name=%a", _method_name)
             self.__log.debug("dispatcher_call:%s", list(self.dispatcher_call))
-
             if _method_name in list(self.dispatcher_call):
                 #
                 # キューに入れない処理
@@ -348,8 +352,7 @@ class JsonRpcWorker(threading.Thread):
 
                 # JSON-RPCリクエスト形式に整える
                 _cmd_jsonstr = self.mk_jsonrpc_req(
-                    json.dumps(_cmd_dict),
-                    self.obj_call.__class__.__name__.lower(),
+                    json.dumps(_cmd_dict), self.obj_call_classname
                 )
                 self.__log.debug("_cmd_jsonstr=%a", _cmd_jsonstr)
 
@@ -399,24 +402,37 @@ class JsonRpcWorker(threading.Thread):
 
                 continue
 
+            _method_name = f"{self.obj_exec_classname}.{_cmd_dict['method']}"
+            self.__log.debug("_method_name=%a", _method_name)
+            self.__log.debug("dispatcher_exec:%s", list(self.dispatcher_exec))
+            if _method_name in list(self.dispatcher_exec):
+                #
+                # キューイングすべきコマンドの処理
+                #
+                _result_list.append("queue")
+
+                # method の prefix を変更して、
+                # JSON-RPCリクエスト形式に整える
+                _cmd_jsonstr = self.mk_jsonrpc_req(
+                    json.dumps(_cmd_dict),
+                    self.obj_exec.__class__.__name__.lower(),
+                )
+                self.__log.debug("_cmd_jsonstr=%a", _cmd_jsonstr)
+
+                # キューイングすべきコマンドをリストに追加する。
+                # キューイングは、あとでまとめて行う。
+                _exec_cmd_jsondata_list.append(json.loads(_cmd_jsonstr))
+                continue
+
+            #
+            # invalid method
+            #
+            self.__log.error("_cmd_dict['method']: Invalid method")
+
+        if _exec_cmd_jsondata_list:
             #
             # キューイングすべきコマンドの処理
             #
-            _result_list.append("queue")
-
-            # method の prefix を変更して、
-            # JSON-RPCリクエスト形式に整える
-            _cmd_jsonstr = self.mk_jsonrpc_req(
-                json.dumps(_cmd_dict),
-                self.obj_exec.__class__.__name__.lower(),
-            )
-            self.__log.debug("_cmd_jsonstr=%a", _cmd_jsonstr)
-
-            # キューイングすべきコマンドをリストに追加する。
-            # キューイングは、あとでまとめて行う。
-            _exec_cmd_jsondata_list.append(json.loads(_cmd_jsonstr))
-
-        if _exec_cmd_jsondata_list:
             self.__log.debug(
                 "_exec_cmd_jsondata_list=%a,qsize=%s",
                 json.dumps(_exec_cmd_jsondata_list),
@@ -424,6 +440,7 @@ class JsonRpcWorker(threading.Thread):
             )
             self.cmdq.put(_exec_cmd_jsondata_list)
 
+        self.__log.debug("_result_list=%s", _result_list)
         return json.dumps(_result_list)
 
     def recv(self, timeout=DEF_RECV_TIMEOUT) -> str:
