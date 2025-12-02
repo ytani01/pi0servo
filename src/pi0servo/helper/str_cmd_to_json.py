@@ -173,7 +173,7 @@ class StrCmdToJson:
         cmd_key = cmd_parts[0].lower()
 
         if cmd_key not in self.COMMAND_MAP:
-            _err_dict =  self._create_error_data("METHOD_NOT_FOUND", cmd_str)
+            _err_dict = self._create_error_data("METHOD_NOT_FOUND", cmd_str)
             self.__log.error("%s", _err_dict)
             return _err_dict
 

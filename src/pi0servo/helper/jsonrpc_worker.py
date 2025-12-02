@@ -337,7 +337,7 @@ class JsonRpcWorker(threading.Thread):
         for _cmd_dict in _cmd_dict_list:
             self.__log.debug("_cmd_dict=%a", _cmd_dict)
 
-            if _cmd_dict['method'] == 'ERROR':
+            if _cmd_dict["method"] == "ERROR":
                 self.__log.error("Ignore: %s", _cmd_dict)
                 _result_list.append(_cmd_dict)
                 continue
