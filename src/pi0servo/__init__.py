@@ -13,7 +13,6 @@ from .core.multi_servo import MultiServo
 from .core.piservo import PiServo
 from .helper.jsonrpc_worker import JsonRpcWorker
 from .helper.str_cmd_to_json import StrCmdToJson
-from .helper.thread_multi_servo import ThreadMultiServo
 from .helper.thread_worker import ThreadWorker
 from .utils.clibase import CliBase
 from .utils.clickutils import click_common_opts
@@ -39,7 +38,6 @@ __all__ = [
     "PiServo",
     "ServoConfigManager",
     "StrCmdToJson",
-    "ThreadMultiServo",
     "ThreadWorker",
     "JsonRpcWorker",
 ]

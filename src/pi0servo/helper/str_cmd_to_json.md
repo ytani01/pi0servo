@@ -41,9 +41,16 @@ def str_to_json(cmdstr: str): -> str
 
 ## 補足ルール
 
-- "angles"の数値は、-90以上、90以下
-- "sec"の値は、0以上のfloat
-- "n"の値は、1以上のint
+- angles: list[float]: -90 <= angle <= 90
+- sec: float: > 0
+- n: int: > 1
+
+### angles
+
+'.', null(None): 動かさない
+"min","n": -90.0
+"max","x": 90.0
+"center","c": 0.0
 
 ## 例
 
