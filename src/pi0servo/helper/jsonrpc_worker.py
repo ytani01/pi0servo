@@ -128,10 +128,10 @@ class HandleExec:
         self.__log.debug("sec=%s", sec)
         self.param_interval_sec = sec
 
-    def move_pulse_relative(self, servo_idx: int, pulse_diff: int):
+    def move_pulse_relative(self, servo_i: int, pulse_diff: int):
         """Move one servo by relative pulse."""
-        self.__log.debug("servo_i=%s,pulse_diff=%s", servo_idx, pulse_diff)
-        self.mservo.move_pulse_relative(servo_idx, pulse_diff, forced=True)
+        self.__log.debug("servo_i=%s,pulse_diff=%s", servo_i, pulse_diff)
+        self.mservo.move_pulse_relative(servo_i, pulse_diff, forced=True)
 
     def set(self, servo_i: int, target: str) -> bool:
         """Set calibrated pulse as target."""

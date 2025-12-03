@@ -3,7 +3,7 @@ import pytest
 
 CMDNAME = "str-cli"
 CMD = f"uv run pi0servo {CMDNAME} --history_file /tmp/testhist"
-PINS = "25 27"
+PINS = "25,27"
 
 
 class TestCmdStrCli:
@@ -12,10 +12,11 @@ class TestCmdStrCli:
     @pytest.mark.parametrize(
         ("args", "stdout", "stderr"),
         [
-            ("", "Please specify GPIO pins", ""),
-            ("-d", "Please specify GPIO pins", "DEBUG"),
+            ("", "", "Missing argument"),
+            ("-d", "", "Missing argument"),
             ("-h", "Usage: ", ""),
             ("-V", "pi0servo", ""),
+            ("25 23 ", "", "extra argument"),
         ],
     )
     def test_cli_cmdline(self, cli_runner, args, stdout, stderr):

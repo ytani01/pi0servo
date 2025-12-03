@@ -11,6 +11,7 @@ else:
 from .core.calibrable_servo import CalibrableServo
 from .core.multi_servo import MultiServo
 from .core.piservo import PiServo
+from .helper.commonlib import CommonLib
 from .helper.jsonrpc_worker import JsonRpcWorker
 from .helper.str_cmd_to_json import StrCmdToJson
 from .helper.thread_multi_servo import ThreadMultiServo
@@ -33,6 +34,7 @@ __all__ = [
     "CalibrableServo",
     "CliBase",
     "CliWithHistory",
+    "CommonLib",
     "ScriptRunner",
     "MultiServo",
     "OneKeyCli",

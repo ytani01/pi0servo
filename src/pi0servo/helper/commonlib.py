@@ -4,7 +4,7 @@
 from ..utils.mylogger import errmsg, get_logger
 
 
-class CmdLib:
+class CommonLib:
     """common functions for commands."""
 
     ERR_PIN = -999
@@ -15,12 +15,21 @@ class CmdLib:
         self.__log = get_logger(self.__class__.__name__, self.__debug)
         self.__log.debug("")
 
-    def parse_pinsstr(self, pins_str: str):
+    def parse_pins_str(self, pins_str: str):
         """Parse pins string.
 
-        "22,27-" --> pins = [22,27], angle_factors = [1, -1]
+        Args:
+            pins_str (str):
+
+        Returns:
+            pins (list[int]):
+            angle_factor (list[int]):
+
+        Examples:
+            "22,27-" --> [22, 27], [1, -1]
+            "aaa, bbb" --> [], []
         """
-        self.__log.debug("pins_str=%s", pins_str)
+        self.__log.debug("pins_str=%a", pins_str)
 
         pins = []
         angle_factors = []
@@ -35,8 +44,12 @@ class CmdLib:
                     angle_factors.append(1)
             except ValueError as e:
                 self.__log.warning(errmsg(e))
-                pins.append(self.ERR_PIN)
-                angle_factors.append(self.ERR_ANGLE_FACTOR)
+                #
+                # 一部分のエラーでも、全体をエラーとする。
+                #
+                # pins.append(self.ERR_PIN)
+                # angle_factors.append(self.ERR_ANGLE_FACTOR)
+                return [], []
 
         self.__log.debug("pins=%s, angle_factors=%s", pins, angle_factors)
 

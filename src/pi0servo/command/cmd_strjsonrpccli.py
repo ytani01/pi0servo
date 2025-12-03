@@ -72,7 +72,7 @@ class CmdStrJsonRpcCli:
                 break
 
             except Exception as e:
-                self.__log.debug(errmsg(e))
+                self.__log.error(errmsg(e))
                 break
 
             if not linestr:

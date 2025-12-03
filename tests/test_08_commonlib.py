@@ -3,18 +3,18 @@
 #
 import pytest
 
-from pi0servo.helper.cmdlib import CmdLib
+from pi0servo.helper.commonlib import CommonLib
 
-_CmdLib = CmdLib(debug=True)
+_CommonLib = CommonLib(debug=True)
 
 
 # @pytest.fixture
-# def cmdlib():
-#     return CmdLib(debug=True)
+# def commonlib():
+#     return CommonLib(debug=True)
 
 
-class TestCmdLine:
-    """Test CmdLine class."""
+class TestCommonLib:
+    """Test CommonLib class."""
 
     @pytest.mark.parametrize(
         ("pins_str", "pins", "angle_factors"),
@@ -24,15 +24,11 @@ class TestCmdLine:
             ("30,31,32,33", [30, 31, 32, 33], [1, 1, 1, 1]),
             ("30-,31,32-,33", [30, 31, 32, 33], [-1, 1, -1, 1]),
             (" 30-, 31 ,32- , 33", [30, 31, 32, 33], [-1, 1, -1, 1]),
-            (
-                "a-, 31 ,32- , bbb",
-                [_CmdLib.ERR_PIN, 31, 32, _CmdLib.ERR_PIN],
-                [_CmdLib.ERR_ANGLE_FACTOR, 1, -1, _CmdLib.ERR_ANGLE_FACTOR],
-            ),
+            ("a-, 31 ,32- , bbb", [], []),
         ],
     )
-    def test_parse_pinsstr(self, pins_str, pins, angle_factors):
-        res_pins, res_angle_factors = _CmdLib.parse_pinsstr(pins_str)
+    def test_parse_pins_str(self, pins_str, pins, angle_factors):
+        res_pins, res_angle_factors = _CommonLib.parse_pins_str(pins_str)
 
         assert res_pins == pins
         assert res_angle_factors == angle_factors
