@@ -5,11 +5,11 @@ import click
 import pigpio
 
 from pi0servo import (
+    CommonLib,
     OneKeyCli,
     StrCmdToJson,
     ThreadWorker,
     click_common_opts,
-    errmsg,
     get_logger,
 )
 
@@ -22,57 +22,31 @@ class OneKeyCmdCli(OneKeyCli):
     CMD_QUIT = "QUIT"
 
     KEY_BIND = {
-        "d": "ms:2 mr:10,0",
-        "f": "ms:2 mr:-10,0",
-        "k": "ms:2 mr:0,10",
-        "j": "ms:2 mr:0,-10",
-        "h": "ms:2 mv:0,0",
+        "d": "ms:1 mr:10,0",
+        "f": "ms:1 mr:-10,0",
+        "k": "ms:1 mr:0,10",
+        "j": "ms:1 mr:0,-10",
+        "h": "ms:1 mv:0,0",
         "q": CMD_QUIT,
         "Q": CMD_QUIT,
         "KEY_ESCAPE": CMD_QUIT,
         "\x04": CMD_QUIT,
     }
 
-    def __init__(
-        self, pi, pins, anglefactor_str: str, prompt_str, debug=False
-    ):
+    def __init__(self, pi, pins, prompt_str, debug=False):
         """Constractor."""
         super().__init__(prompt_str, debug=debug)
         self.__debug = debug
         self.__log = get_logger(self.__class__.__name__, self.__debug)
-        self.__log.debug(
-            "pi=%s, pins=%s, anglefactor_str=%a", pi, pins, anglefactor_str
-        )
+        self.__log.debug("pi=%s, pins=%s", pi, pins)
 
         self.pi = pi
         self.pins = pins
         self.prompt_str = prompt_str
 
-        self.angle_factor = self.str_to_anglefactor(anglefactor_str)
-        self.__log.debug("angle_factor=%s", self.angle_factor)
-
-        self.parser = StrCmdToJson(self.angle_factor, debug=self.__debug)
+        self.parser = StrCmdToJson(debug=self.__debug)
         self.thr_worker = ThreadWorker(self.pi, self.pins, debug=self.__debug)
         self.term = blessed.Terminal()
-
-    def str_to_anglefactor(self, af_str: str) -> list[int]:
-        """String to angle factor."""
-        self.__log.debug("af-str=%a", af_str)
-
-        if not af_str:
-            return [1] * len(self.pins)
-
-        af = []
-        try:
-            af = [int(a) for a in af_str.split(",")]
-        except Exception as _e:
-            self.__log.error(errmsg(_e))
-            raise _e
-
-        if len(af) != len(self.pins):
-            raise ValueError(f"invalid angle_factor: {af_str!r}")
-
-        return af
 
     def start(self) -> bool:
         """Start."""
@@ -136,22 +110,17 @@ class OneKeyCmdCli(OneKeyCli):
 
 
 @click.command()
-@click.argument("pins", type=int, nargs=-1)
-@click.option(
-    "--anglefactor",
-    "-a",
-    type=str,
-    default="",
-    help="angle factor: e.g.'-1,1'",
-)
+@click.argument("pins_str", type=str, nargs=1)
 @click_common_opts(VERSION_STR)
-def main(ctx, pins, anglefactor, debug):
+def main(ctx, pins_str, debug):
     """Main."""
     command_name = ctx.command.name
     __log = get_logger(command_name, debug)
     __log.debug("command_name=%s", command_name)
-    __log.debug("pins=%s, anglefactor=%a", pins, anglefactor)
+    __log.debug("pins_str=%s", pins_str)
 
+    clib = CommonLib(debug=debug)
+    pins = clib.pins_str2list(pins_str)
     if not pins:
         print(ctx.get_help())
         return
@@ -160,7 +129,7 @@ def main(ctx, pins, anglefactor, debug):
     app = None
     try:
         pi = pigpio.pi()
-        app = OneKeyCmdCli(pi, pins, anglefactor, "> ", debug=debug)
+        app = OneKeyCmdCli(pi, pins, "> ", debug=debug)
         app.main()
     finally:
         if app:

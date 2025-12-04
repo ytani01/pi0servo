@@ -47,10 +47,10 @@ class CalibrableServo(PiServo):
         self.__log = get_logger(self.__class__.__name__, self._debug)
         self.__log.debug("pin=%s, conf_file=%s", pin, conf_file)
 
-        self.angle_factor = 1
+        self._angle_factor = 1
         if pin < 0:
-            self.angle_factor = -1
-        self.__log.debug("angle_factor=%s", self.angle_factor)
+            self._angle_factor = -1
+        self.__log.debug("_angle_factor=%s", self._angle_factor)
 
         self._config_manager = ServoConfigManager(conf_file, self._debug)
         self.conf_file = self._config_manager.conf_file
@@ -84,6 +84,11 @@ class CalibrableServo(PiServo):
 
         pulse = max(min(pulse, self.MAX), self.MIN)
         return pulse
+
+    @property
+    def angle_factor(self):
+        """Angle factor."""
+        return self._angle_factor
 
     @property
     def pulse_center(self):
@@ -158,7 +163,7 @@ class CalibrableServo(PiServo):
     def deg2pulse(self, deg: float) -> int:
         """Degree to Pulse."""
 
-        deg = deg * self.angle_factor
+        deg = deg * self._angle_factor
 
         if deg >= self.ANGLE_CENTER:
             d = self.pulse_max - self.pulse_center
@@ -184,7 +189,7 @@ class CalibrableServo(PiServo):
             (pulse - self.pulse_center)
             / d
             * self.ANGLE_MAX
-            * self.angle_factor
+            * self._angle_factor
         )
         self.__log.debug("pulse=%s,deg=%s", pulse, deg)
 

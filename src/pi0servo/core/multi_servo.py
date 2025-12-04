@@ -34,6 +34,7 @@ class MultiServo:
             pigpio.piのインスタンス。
         pins: list[int]
             サーボモーターを接続したGPIOピンのリスト。
+            **ピン番号が負の場合、逆回転になる。**
         first_move: bool
             Trueの場合、初期化時にサーボを0度の位置に移動させる。
         conf_file: str

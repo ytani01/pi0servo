@@ -15,34 +15,11 @@ from pi0servo.helper.str_cmd_to_json import StrCmdToJson
 @pytest.fixture
 def str_cmd_to_json_instance():
     """StrCmdToJsonのテスト用インスタンスを生成するフィクスチャ"""
-    return StrCmdToJson(angle_factor=[1, 1, 1, 1], debug=True)
+    return StrCmdToJson(debug=True)
 
 
 class TestStrCmdToJson:
     """StrCmdToJsonクラスのテスト"""
-
-    def test_init(self, str_cmd_to_json_instance):
-        """初期化のテスト"""
-        assert str_cmd_to_json_instance._debug is True
-        assert str_cmd_to_json_instance.angle_factor == [1, 1, 1, 1]
-
-    def test_init_empty_angle_factor(self):
-        """angle_factorが空のリストの場合の初期化テスト"""
-        instance = StrCmdToJson(angle_factor=[], debug=False)
-        assert instance._debug is False
-        assert instance.angle_factor == []
-
-    def test_init_debug_false(self):
-        """debug=Falseの場合の初期化テスト"""
-        instance = StrCmdToJson(debug=False)
-        assert instance._debug is False
-
-    def test_angle_factor_setter(self):
-        """angle_factorセッターのテスト"""
-        instance = StrCmdToJson()
-        new_factor = [0, 0, 0, 0]
-        instance.angle_factor = new_factor
-        assert instance.angle_factor == new_factor
 
     def test_create_error_data(self):
         """_create_error_dataのテスト"""
@@ -56,11 +33,11 @@ class TestStrCmdToJson:
 
     def test_parse_angles_angle_factor_shorter(self):
         """_parse_anglesでangle_factorがanglesより短い場合のテスト"""
-        instance = StrCmdToJson(angle_factor=[1, -1], debug=True)
+        instance = StrCmdToJson(debug=True)
         angle_str = "40,30,20"
         expected_angles = [
             40,
-            -30,
+            30,
             20,
         ]  # 3番目の角度にはangle_factorが適用されない
         result = instance._parse_angles(angle_str)
@@ -68,17 +45,9 @@ class TestStrCmdToJson:
 
     def test_parse_angles_angle_factor_longer(self):
         """_parse_anglesでangle_factorがanglesより長い場合のテスト"""
-        instance = StrCmdToJson(angle_factor=[1, -1, 1, -1], debug=True)
+        instance = StrCmdToJson(debug=True)
         angle_str = "40,30"
-        expected_angles = [40, -30]
-        result = instance._parse_angles(angle_str)
-        assert result == expected_angles
-
-    def test_parse_angles_empty_part(self):
-        """_parse_anglesで空の角度要素がある場合のテスト"""
-        instance = StrCmdToJson()
-        angle_str = "10,,20"
-        expected_angles = [10, None, 20]
+        expected_angles = [40, 30]
 
         result = instance._parse_angles(angle_str)
         assert result == expected_angles
@@ -93,6 +62,7 @@ class TestStrCmdToJson:
             "data": "mv:10 20",
         }
         result = instance.cmdstr_to_json(cmd_str)
+        print(result)
         assert result == expected_json_obj
 
     def test_cmdstr_to_json_not_string(self):
@@ -103,34 +73,6 @@ class TestStrCmdToJson:
             "method": "ERROR",
             "error": "INVALID_REQUEST",
             "data": 123,
-        }
-        result = instance.cmdstr_to_json(cmd_str)
-        assert result == expected_json_obj
-
-    def test_cmdstr_to_json_mp_index_error(self):
-        """cmdstr_to_jsonでmpコマンドのangle_factorインデックスエラーのテスト"""
-        instance = StrCmdToJson(
-            angle_factor=[1], debug=True
-        )  # angle_factorが短い
-        cmd_str = "mp:1,-50"  # servo_i=1 はangle_factorの範囲外
-        expected_json_obj = {
-            "method": "ERROR",
-            "error": "INVALID_PARAM",
-            "data": "mp:1,-50",
-        }
-        result = instance.cmdstr_to_json(cmd_str)
-        assert result == expected_json_obj
-
-    def test_cmdstr_to_json_set_index_error(self):
-        """cmdstr_to_jsonでsetコマンドのangle_factorインデックスエラーのテスト"""
-        instance = StrCmdToJson(
-            angle_factor=[1], debug=True
-        )  # angle_factorが短い
-        cmd_str = "sn:1"  # servo_i=1 はangle_factorの範囲外
-        expected_json_obj = {
-            "method": "ERROR",
-            "error": "INVALID_PARAM",
-            "data": "sn:1",
         }
         result = instance.cmdstr_to_json(cmd_str)
         assert result == expected_json_obj
@@ -298,62 +240,6 @@ class TestStrCmdToJson:
         )
         result_obj = json.loads(result_json_str)
         assert result_obj == expected_json_obj
-
-    def test_angle_factor_inversion(self):
-        """angle_factorによる符号反転のテスト"""
-        instance = StrCmdToJson(angle_factor=[1, -1, 1, -1], debug=True)
-        cmd_str = "mv:40,30,20,10"
-        expected_json_obj = [
-            {
-                "method": "move_all_angles_sync",
-                "params": {"angles": [40, -30, 20, -10]},
-            }
-        ]
-        result = instance.cmdstr_to_jsonliststr(cmd_str)
-        result_obj = json.loads(result)
-        assert result_obj == expected_json_obj
-
-        cmd_str_alias = "mv:x,n,c,x"
-        expected_json_obj_alias = [
-            {
-                "method": "move_all_angles_sync",
-                "params": {"angles": ["max", "max", "center", "min"]},
-            }
-        ]
-        result_alias = instance.cmdstr_to_jsonliststr(cmd_str_alias)
-        result_obj_alias = json.loads(result_alias)
-        assert result_obj_alias == expected_json_obj_alias
-
-    def test_set_command_target_inversion(self):
-        """setコマンドのtarget反転のテスト"""
-        instance = StrCmdToJson(angle_factor=[1, -1, 1, 1], debug=True)
-
-        # servo 0 (angle_factor=1) -> target: center
-        cmd_str_sc0 = "sc:0"
-        expected_json_obj_sc0 = [
-            {"method": "set", "params": {"servo_i": 0, "target": "center"}}
-        ]
-        result_sc0 = instance.cmdstr_to_jsonliststr(cmd_str_sc0)
-        result_obj_sc0 = json.loads(result_sc0)
-        assert result_obj_sc0 == expected_json_obj_sc0
-
-        # servo 1 (angle_factor=-1) -> target: min -> max
-        cmd_str_sn1 = "sn:1"
-        expected_json_obj_sn1 = [
-            {"method": "set", "params": {"servo_i": 1, "target": "max"}}
-        ]
-        result_sn1 = instance.cmdstr_to_jsonliststr(cmd_str_sn1)
-        result_obj_sn1 = json.loads(result_sn1)
-        assert result_obj_sn1 == expected_json_obj_sn1
-
-        # servo 1 (angle_factor=-1) -> target: max -> min
-        cmd_str_sx1 = "sx:1"
-        expected_json_obj_sx1 = [
-            {"method": "set", "params": {"servo_i": 1, "target": "min"}}
-        ]
-        result_sx1 = instance.cmdstr_to_jsonliststr(cmd_str_sx1)
-        result_obj_sx1 = json.loads(result_sx1)
-        assert result_obj_sx1 == expected_json_obj_sx1
 
     def test_multiple_commands_in_line(self, str_cmd_to_json_instance):
         """複数コマンドが1行にある場合のテスト"""

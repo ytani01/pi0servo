@@ -52,8 +52,8 @@ run = '''
 # format and linting
 
 echo "# ruff"
-uv run ruff format .
-uv run ruff check .
+uv run ruff format --line-length 78 .
+uv run ruff check --fix --extend-select I .
 
 echo "# mypy"
 uv run mypy src/pi0servo tests

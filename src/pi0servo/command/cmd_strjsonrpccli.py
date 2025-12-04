@@ -16,17 +16,16 @@ class CmdStrJsonRpcCli:
     HIST_LEN = 1000
 
     def __init__(
-        self, prompt_str, pi, pins, history_file, angle_factor, debug=False
+        self, prompt_str, pi, pins, history_file, debug=False
     ) -> None:
         """Constractor."""
         self.__debug = debug
         self.__log = get_logger(self.__class__.__name__, self.__debug)
         self.__log.debug(
-            "prompt_str=%a,pins=%s,history_file=%a,angle_factor=%s",
+            "prompt_str=%a,pins=%s,history_file=%a",
             prompt_str,
             pins,
             history_file,
-            angle_factor,
         )
 
         self.prompt_str = prompt_str
@@ -47,7 +46,7 @@ class CmdStrJsonRpcCli:
         atexit.register(readline.write_history_file, self.history_file)
         readline.set_history_length(self.HIST_LEN)
 
-        self.parser = StrCmdToJson(angle_factor, debug=self.__debug)
+        self.parser = StrCmdToJson(debug=self.__debug)
         self.worker = JsonRpcWorker(pi, pins, debug=self.__debug)
 
     def end(self):

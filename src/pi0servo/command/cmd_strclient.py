@@ -17,7 +17,6 @@ class CmdStrClient(CmdApiClient):
         url,
         history_file,
         script_file,
-        angle_factor,
         debug=False,
     ):
         super().__init__(
@@ -25,11 +24,8 @@ class CmdStrClient(CmdApiClient):
         )
         self.__debug = debug
         self.__log = get_logger(self.__class__.__name__, self.__debug)
-        self.__log.debug("angle_factor=%s", angle_factor)
 
-        self.angle_factor = angle_factor
-
-        self.parser = StrCmdToJson(self.angle_factor, debug=self.__debug)
+        self.parser = StrCmdToJson(debug=self.__debug)
 
     def parse_instr(self, instr: str) -> dict:
         """parse string command to json.

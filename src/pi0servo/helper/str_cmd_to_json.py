@@ -56,27 +56,11 @@ class StrCmdToJson:
         "sx": "max",
     }
 
-    def __init__(self, angle_factor: list | None = None, debug=False):
+    def __init__(self, debug=False):
         """constractor."""
-        if angle_factor is None:
-            angle_factor = []
-        self._debug = debug
-        self.__log = get_logger(self.__class__.__name__, self._debug)
-        self.__log.debug("angle_factor=%s", angle_factor)
-
-        self._angle_factor = angle_factor  # property
-
-    @property
-    def angle_factor(self):
-        """Get angle_factor."""
-        return self._angle_factor
-
-    @angle_factor.setter
-    def angle_factor(self, af: list | None = None):
-        """Set angle_factor."""
-        if af is None:
-            af = []
-        self._angle_factor = af
+        self.__debug = debug
+        self.__log = get_logger(self.__class__.__name__, self.__debug)
+        self.__log.debug("")
 
     def _create_error_data(self, code_key: str, strcmd: str) -> dict:
         """Create error data."""
@@ -132,20 +116,6 @@ class StrCmdToJson:
             angle = max(min(angle, self.ANGLE_MAX), self.ANGLE_MIN)
 
             angles.append(angle)
-
-        # self.__log.debug("angles=%s", angles)
-
-        # angle_factor に応じて符号反転
-        af_len = min(len(self.angle_factor), len(angles))
-        for _i in range(af_len):
-            if isinstance(angles[_i], int):
-                angles[_i] *= self.angle_factor[_i]
-
-            elif self.angle_factor[_i] == -1:
-                if angles[_i] == "min":
-                    angles[_i] = "max"
-                elif angles[_i] == "max":
-                    angles[_i] = "min"
 
         # self.__log.debug("angles=%s", angles)
         return angles
@@ -214,20 +184,8 @@ class StrCmdToJson:
                 if not cmd_param_str:
                     return self._create_error_data("INVALID_PARAM", cmd_str)
 
-                params = [int(a) for a in cmd_param_str.split(",")]
-                params = params[0 : len(self.angle_factor)]
-
-                self.__log.debug(
-                    "cmd_param_str=%a,angle_factor=%s,params=%s",
-                    cmd_param_str,
-                    self.angle_factor,
-                    params,
-                )
-
-                angle_diffs = [
-                    int(a) * self.angle_factor[i]
-                    for i, a in enumerate(params)
-                ]
+                angle_diffs = [int(a) for a in cmd_param_str.split(",")]
+                self.__log.debug("angle_diffs=%s", angle_diffs)
 
                 if angle_diffs is None:
                     return self._create_error_data(
@@ -254,7 +212,7 @@ class StrCmdToJson:
 
                 sv_idx_str, p_diff_str = cmd_param_str.split(",")
                 sv_idx = int(sv_idx_str)
-                p_diff = int(p_diff_str) * self.angle_factor[sv_idx]
+                p_diff = int(p_diff_str)
 
                 _cmd_data["params"] = {
                     "servo_i": sv_idx,
@@ -264,11 +222,6 @@ class StrCmdToJson:
             elif cmd_key in ("sc", "sn", "sx"):
                 servo = int(cmd_param_str)
                 target = self.SET_TARGET[cmd_key]
-                if self.angle_factor[servo] < 0:
-                    if target == "min":
-                        target = "max"
-                    elif target == "max":
-                        target = "min"
                 self.__log.debug("servo=%s, target=%s", servo, target)
                 _cmd_data["params"] = {"servo_i": servo, "target": target}
 

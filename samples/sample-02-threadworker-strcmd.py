@@ -2,8 +2,7 @@ import pigpio
 
 from pi0servo import StrCmdToJson, ThreadWorker
 
-PINS = [25, 27]
-ANGLE_FACTOR = [1, -1]
+PINS = [22, 27]
 
 STR_CMDS = [
     "is:0.3",
@@ -30,9 +29,7 @@ def main():
     worker = None
     try:
         pi = pigpio.pi()
-        parser = StrCmdToJson(
-            angle_factor=ANGLE_FACTOR, debug=DEBUG_FLAG["parser"]
-        )
+        parser = StrCmdToJson(debug=DEBUG_FLAG["parser"])
         with ThreadWorker(pi, PINS, debug=DEBUG_FLAG["worker"]) as worker:
             for _strcmd in STR_CMDS:
                 print(f">>> {_strcmd}")

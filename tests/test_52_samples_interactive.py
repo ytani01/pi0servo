@@ -11,7 +11,7 @@ class TestSamplePrograms:
         ("sample", "inkey", "e_out"),
         [
             (
-                "sample-06-onekey-cli.py 25 27 -a -1,1",
+                "sample-06-onekey-cli.py 22-,27",
                 ["j", "a", "q"],
                 ["result", "angle_diffs", "JSONDecodeError"],
             ),

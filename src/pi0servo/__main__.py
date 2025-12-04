@@ -166,8 +166,9 @@ def api_cli(ctx, pins_str, history_file, script_file, debug):
         script_file,
     )
 
-    commonlib = CommonLib(debug=debug)
-    pins, _ = commonlib.parse_pins_str(pins_str)
+    clib = CommonLib(debug=debug)
+    pins = clib.pins_str2list(pins_str)
+    __log.debug("pins=%s", pins)
 
     pi = None
     app = None
@@ -213,10 +214,9 @@ def str_cli(ctx, pins_str, history_file, script_file, debug):
         script_file,
     )
 
-    commonlib = CommonLib(debug=debug)
+    clib = CommonLib(debug=debug)
 
-    pins, af_list = commonlib.parse_pins_str(pins_str)
-    __log.debug("pins=%s,af_list=%s", af_list)
+    pins = clib.pins_str2list(pins_str)
 
     app = None
     pi = None
@@ -228,7 +228,6 @@ def str_cli(ctx, pins_str, history_file, script_file, debug):
             pi,
             pins,
             history_file,
-            af_list,
             debug=debug,
         )
         app.main()
@@ -341,16 +340,8 @@ def api_client(ctx, url, history_file, script_file, debug):
     help="History file",
 )
 @click.option("--script-file", "-f", type=str, default="", help="script file")
-@click.option(
-    "--angle_factor",
-    "-a",
-    type=str,
-    default="1,1-,1,1-",
-    show_default=True,
-    help="Angle Factor",
-)
 @click_common_opts(__version__)
-def str_client(ctx, url, history_file, script_file, angle_factor, debug):
+def str_client(ctx, url, history_file, script_file, debug):
     """String Command API Client."""
     cmd_name = ctx.command.name
     __log = get_logger(__name__, debug)
@@ -362,10 +353,6 @@ def str_client(ctx, url, history_file, script_file, angle_factor, debug):
         script_file,
     )
 
-    commonlib = CommonLib(debug=debug)
-    _, af_list = commonlib.parse_pins_str(angle_factor)
-    __log.debug("af_list=%s", af_list)
-
     app = None
     try:
         app = CmdStrClient(
@@ -373,7 +360,6 @@ def str_client(ctx, url, history_file, script_file, angle_factor, debug):
             url,
             history_file,
             script_file,
-            af_list,
             debug=debug,
         )
         app.main()
@@ -398,9 +384,9 @@ def jsonrpc_cli(ctx, pins_str, history_file, debug):
     __log.debug("cmd_name=%s", cmd_name)
     __log.debug("pins_str=%a,history_file=%a", pins_str, history_file)
 
-    commonlib = CommonLib(debug=debug)
+    clib = CommonLib(debug=debug)
 
-    pins, _ = commonlib.parse_pins_str(pins_str)
+    pins = clib.pins_str2list(pins_str)
     __log.debug("pins=%s", pins)
 
     prompt_str = f"{cmd_name}> "
@@ -445,9 +431,9 @@ def str_jsonrpc_cli(ctx, pins_str, history_file, script_file, debug):
         script_file,
     )
 
-    commonlib = CommonLib(debug=debug)
-    pins, af_list = commonlib.parse_pins_str(pins_str)
-    __log.debug("pins=%s,af_list=%s", pins, af_list)
+    clib = CommonLib(debug=debug)
+    pins = clib.pins_str2list(pins_str)
+    __log.debug("pins=%s", pins)
 
     app = None
     pi = None
@@ -459,7 +445,6 @@ def str_jsonrpc_cli(ctx, pins_str, history_file, script_file, debug):
             pi,
             pins,
             history_file,
-            af_list,
             debug=debug,
         )
         app.main()
