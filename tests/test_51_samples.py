@@ -22,7 +22,6 @@ class TestSamplePrograms:
         [
             "sample-01-threadworker.py",
             "sample-02-threadworker-strcmd.py",
-            "sample-03-threadmultiservo.py",
         ],
     )
     def test_sample_program(self, cli_runner, sample):

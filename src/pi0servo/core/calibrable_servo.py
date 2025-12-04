@@ -37,14 +37,20 @@ class CalibrableServo(PiServo):
         Args:
             pi (pigpio.pi): pigpio.piのインスタンス。
             pin (int): サーボが接続されているGPIOピン番号。
+                       負の場合回転方向が逆になる。
             cenf_file (str, optional): キャリブレーション設定ファイル。
             debug (bool, optional): デバッグログを有効にするフラグ。
         """
-        super().__init__(pi, pin, debug)
+        super().__init__(pi, abs(pin), debug)
 
         self._debug = debug
         self.__log = get_logger(self.__class__.__name__, self._debug)
         self.__log.debug("pin=%s, conf_file=%s", pin, conf_file)
+
+        self.angle_factor = 1
+        if pin < 0:
+            self.angle_factor = -1
+        self.__log.debug("angle_factor=%s", self.angle_factor)
 
         self._config_manager = ServoConfigManager(conf_file, self._debug)
         self.conf_file = self._config_manager.conf_file
@@ -149,23 +155,11 @@ class CalibrableServo(PiServo):
 
         super().move_pulse(pulse)
 
-    def move_center(self):
-        """Move center angle (0 deg)."""
-        self.__log.debug("")
-        self.move_pulse(self.pulse_center)
-
-    def move_min(self):
-        """Move min angle (-90 deg)."""
-        self.__log.debug("")
-        self.move_pulse(self.pulse_min)
-
-    def move_max(self):
-        """Move max angle (90 deg)."""
-        self.__log.debug("")
-        self.move_pulse(self.pulse_max)
-
     def deg2pulse(self, deg: float) -> int:
         """Degree to Pulse."""
+
+        deg = deg * self.angle_factor
+
         if deg >= self.ANGLE_CENTER:
             d = self.pulse_max - self.pulse_center
         else:
@@ -179,19 +173,24 @@ class CalibrableServo(PiServo):
 
         return pulse_int
 
-    def pulse2deg(self, pulse: int) -> int:
+    def pulse2deg(self, pulse: int) -> float:
         """Pulse to degree."""
         if pulse >= self.pulse_center:
             d = self.pulse_max - self.pulse_center
         else:
             d = self.pulse_center - self.pulse_min
 
-        deg = round((pulse - self.pulse_center) / d * self.ANGLE_MAX)
+        deg = (
+            (pulse - self.pulse_center)
+            / d
+            * self.ANGLE_MAX
+            * self.angle_factor
+        )
         self.__log.debug("pulse=%s,deg=%s", pulse, deg)
 
         return deg
 
-    def get_angle(self):
+    def get_angle(self) -> float:
         """Get current angle (deg)."""
         pulse = self.get_pulse()
         angle = self.pulse2deg(pulse)

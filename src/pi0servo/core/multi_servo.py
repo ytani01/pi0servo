@@ -281,7 +281,7 @@ class MultiServo:
 
         self.move_all_pulses(_new_pulses, forced=forced)
 
-    def get_all_angles(self) -> list[int]:
+    def get_all_angles(self) -> list[float]:
         """
         すべてのサーボの現在の角度を取得する。
 
