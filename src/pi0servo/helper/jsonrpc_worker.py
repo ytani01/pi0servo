@@ -165,13 +165,22 @@ class JsonRpcWorker(threading.Thread):
         pins: list[int],
         first_move=True,
         conf_file=CalibrableServo.DEF_CONF_FILE,
+        flag_verbose=True,
         debug=False,
     ) -> None:
         """Constructor."""
         super().__init__(daemon=True)
         self.__debug = debug
         self.__log = get_logger(self.__class__.__name__, self.__debug)
-        self.__log.debug("pins=%s", pins)
+        self.__log.debug(
+            "pins=%s,first_move=%s,conf_file=%s,flag_verbose=%s",
+            pins,
+            first_move,
+            conf_file,
+            flag_verbose,
+        )
+
+        self.flag_verbose = flag_verbose
 
         self.mservo = MultiServo(
             pi, pins, first_move, conf_file, debug=self.__debug
@@ -465,9 +474,13 @@ class JsonRpcWorker(threading.Thread):
             _cmd_data_list = self.recv()
             if not _cmd_data_list:
                 continue
+
             self.__log.debug(
                 "_cmd_data_list=%a, qsize=%s", _cmd_data_list, self.qsize
             )
+            if self.flag_verbose:
+                method_list = [c.get("method") for c in _cmd_data_list]
+                print(f"q:{self.qsize}  exec:{method_list}")
 
             self._flag_busy = True
 
@@ -481,6 +494,8 @@ class JsonRpcWorker(threading.Thread):
                     )
                     if ret:
                         self.__log.debug("ret.data=%s", ret.data)
+                        if self.flag_verbose:
+                            print(f">>> {ret.data}")
 
                         if ret.data.get("error"):
                             self.__log.warning(
