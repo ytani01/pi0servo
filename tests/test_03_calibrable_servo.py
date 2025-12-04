@@ -2,7 +2,6 @@
 #
 """
 tests/test_03_calibrable_servo.py
-(リファクタリング修正版)
 """
 
 from unittest.mock import patch
