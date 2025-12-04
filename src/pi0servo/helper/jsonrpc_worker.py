@@ -480,7 +480,7 @@ class JsonRpcWorker(threading.Thread):
             )
             if self.flag_verbose:
                 method_list = [c.get("method") for c in _cmd_data_list]
-                print(f"q:{self.qsize}  exec:{method_list}")
+                print(f">>> q:{self.qsize}  exec:{method_list}")
 
             self._flag_busy = True
 
@@ -495,7 +495,7 @@ class JsonRpcWorker(threading.Thread):
                     if ret:
                         self.__log.debug("ret.data=%s", ret.data)
                         if self.flag_verbose:
-                            print(f">>> {ret.data}")
+                            print(f">>>> {ret.data}")
 
                         if ret.data.get("error"):
                             self.__log.warning(
