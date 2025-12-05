@@ -13,8 +13,8 @@ from ..core.multi_servo import MultiServo
 from ..utils.mylogger import errmsg, get_logger
 
 
-class HandleCall:
-    """Functions for call."""
+class HandleNotqueued:
+    """Functions for notqueued."""
 
     def __init__(self, worker, debug=False) -> None:
         """Constractor."""
@@ -28,9 +28,9 @@ class HandleCall:
         """Cancel commands in queue."""
         self.__log.debug("")
         _cancel_count = 0
-        while not self.worker.cmdq.empty():
+        while not self.worker.reqlist_q.empty():
             _cancel_count += 1
-            _cmd = self.worker.cmdq.get()
+            _cmd = self.worker.reqlist_q.get()
             self.__log.debug("%2d:%s", _cancel_count, _cmd)
         return _cancel_count
 
@@ -54,8 +54,8 @@ class HandleCall:
         return True
 
 
-class HandleExec:
-    """Functions for exec."""
+class HandleQueue:
+    """Functions for queue."""
 
     def __init__(self, mservo: MultiServo, debug=False) -> None:
         """Constractor."""
@@ -165,7 +165,7 @@ class JsonRpcWorker(threading.Thread):
         pins: list[int],
         first_move=True,
         conf_file=CalibrableServo.DEF_CONF_FILE,
-        flag_verbose=True,
+        flag_verbose=False,
         debug=False,
     ) -> None:
         """Constructor."""
@@ -186,20 +186,22 @@ class JsonRpcWorker(threading.Thread):
             pi, pins, first_move, conf_file, debug=self.__debug
         )
 
-        self.cmdq: queue.Queue = queue.Queue()
+        self.reqlist_q: queue.Queue = queue.Queue()
 
-        # dispatcher for call
-        self.obj_call = HandleCall(self, debug=self.__debug)
-        self.obj_call_classname = self.obj_call.__class__.__name__.lower()
-        self.dispatcher_call = Dispatcher()
-        self.dispatcher_call.add_object(self.obj_call)
+        # dispatcher for notqueued
+        self.obj_notqueued = HandleNotqueued(self, debug=self.__debug)
+        self.obj_notqueued_classname = (
+            self.obj_notqueued.__class__.__name__.lower()
+        )
+        self.dispatcher_notqueued = Dispatcher()
+        self.dispatcher_notqueued.add_object(self.obj_notqueued)
 
-        # dispatcher for exec
-        self.obj_exec = HandleExec(self.mservo, debug=self.__debug)
-        self.obj_exec_classname = self.obj_exec.__class__.__name__.lower()
-        self.dispatcher_exec = Dispatcher()
-        self.dispatcher_exec.add_object(self.obj_exec)
-        self.exec_class_name = self.obj_exec.__class__.__name__.lower()
+        # dispatcher for queue
+        self.obj_queue = HandleQueue(self.mservo, debug=self.__debug)
+        self.obj_queue_classname = self.obj_queue.__class__.__name__.lower()
+        self.dispatcher_queue = Dispatcher()
+        self.dispatcher_queue.add_object(self.obj_queue)
+        self.queue_class_name = self.obj_queue.__class__.__name__.lower()
 
         # flags
         self._flag_active = False
@@ -219,7 +221,7 @@ class JsonRpcWorker(threading.Thread):
 
         # stop thread
         self._flag_active = False
-        self.clear_cmdq()
+        self.clear_reqlist_q()
         self.join()
 
         # off all servo
@@ -248,7 +250,7 @@ class JsonRpcWorker(threading.Thread):
     @property
     def qsize(self) -> int:
         """Size of command queue."""
-        return self.cmdq.qsize()
+        return self.reqlist_q.qsize()
 
     @property
     def is_busy(self) -> bool:
@@ -260,38 +262,39 @@ class JsonRpcWorker(threading.Thread):
         self._active = False
         self.__log.debug("")
 
-    def clear_cmdq(self):
+    def clear_reqlist_q(self):
         """Clear command queue."""
         _count = 0
-        while not self.cmdq.empty():
+        while not self.reqlist_q.empty():
             _count += 1
-            _cmd = self.cmdq.get()
+            _cmd = self.reqlist_q.get()
             self.__log.debug("%2d:%s", _count, _cmd)
 
         self.__log.debug("count=%s", _count)
         return _count
 
-    def mk_jsonrpc_req(self, cmdstr: str, method_prefix="") -> str:
+    def mk_jsonrpc_req(self, cmd_dict: dict, method_prefix: str = "") -> dict:
         """Make JSON-RPC request.
 
         Args:
-            cmdstr (str):
-                '{
-                     "method": "aaa.bbb",
-                     "params": [a, b]
-                 }'
-            mothod_prefix (str): "ccc"
+            cmd_dict (dict): e.g. {"method": "aaa", "params": [bbb, ccc]},
+            mothod_prefix (str): e.g. "ppp"
 
         Returns:
             jsonrpc_req_str (str):
                 '{
-                     "method": "ccc.bbb",
-                     "params": [a, b],
+                     "method": "ppp.aaa"
+                     "params": [bbb, ccc],
                      "jsonrpc": "2.0",
                      "id": 1
                  }'
         """
-        self.__log.debug("cmdstr=%a, method_prefix=%a", cmdstr, method_prefix)
+        self.__log.debug(
+            "cmd_dict=%s, method_prefix=%a", cmd_dict, method_prefix
+        )
+
+        if not cmd_dict or not cmd_dict.get("method"):
+            return {}
 
         _jsonrpc_req_dict = {
             "jsonrpc": "2.0",
@@ -299,167 +302,125 @@ class JsonRpcWorker(threading.Thread):
             "params": [],
             "id": 0,
         }
-        try:
-            _cmd_dict = json.loads(cmdstr)
 
-            _req_id = _cmd_dict.get("id")
+        try:
+            # "id"
+            _req_id = cmd_dict.get("id")
             if _req_id:
                 self.rpc_id = _req_id
             else:
                 self.rpc_id += 1
             _jsonrpc_req_dict["id"] = self.rpc_id
 
-            _method_name = _cmd_dict["method"]
+            # "method"
+            _method_name = cmd_dict.get("method")
             if method_prefix:
-                _method_name_base = _method_name.split(".")[-1]
-                _method_name = f"{method_prefix}.{_method_name_base}"
+                _method_name = f"{method_prefix}.{_method_name}"
             _jsonrpc_req_dict["method"] = _method_name
 
-            _req_params = _cmd_dict.get("params")
+            # "params"
+            _req_params = cmd_dict.get("params")
             if _req_params:
-                _jsonrpc_req_dict["params"] = _cmd_dict["params"]
+                _jsonrpc_req_dict["params"] = _req_params
 
-            _jsonrpc_req_str = json.dumps(_jsonrpc_req_dict)
-            self.__log.debug("_jsonrpc_req_str=%a", _jsonrpc_req_str)
-            return _jsonrpc_req_str
+            # return
+            self.__log.debug("_jsonrpc_req_dict=%s", _jsonrpc_req_dict)
+            return _jsonrpc_req_dict
 
         except Exception as e:
             self.__log.error(errmsg(e))
-            return ""
+            return {}
 
-    def call(self, cmdstr: str) -> str:
-        """Call(JSON-RPC)."""
-        self.__log.debug("cmdstr=%s", cmdstr)
+    def call(self, cmd_dict_list: list[dict]) -> list:
+        """Call(JSON-RPC).
 
-        try:
-            # list[dict]に変換
-            _cmd_dict_list = json.loads(cmdstr)
-            if not isinstance(_cmd_dict_list, list):
-                _cmd_dict_list = [_cmd_dict_list]
-        except Exception as _e:
-            _err_msg = errmsg(_e)
-            self.__log.error(_err_msg)
-            return _err_msg
+        Args:
+            cmd_dict_list (list[dict]):
 
-        _exec_cmd_jsondata_list = []  # キューイングすべきコマンドのリスト
+        Returns:
+            _reslut_list (list)
+        """
+        self.__log.debug("cmd_dict_list=%s", cmd_dict_list)
+
+        _queue_jsonrpc_req_list = []  # キューイングすべきコマンドのリスト
         _result_list = []  # 結果リスト
-        for _cmd_dict in _cmd_dict_list:
-            self.__log.debug("_cmd_dict=%a", _cmd_dict)
+        for _cmd_dict in cmd_dict_list:
+            self.__log.debug("_cmd_dict=%s", _cmd_dict)
 
             if _cmd_dict["method"] == "ERROR":
                 self.__log.error("Ignore: %s", _cmd_dict)
                 _result_list.append(_cmd_dict)
                 continue
 
-            _method_name = f"{self.obj_call_classname}.{_cmd_dict['method']}"
-            self.__log.debug("_method_name=%a", _method_name)
-            self.__log.debug("dispatcher_call:%s", list(self.dispatcher_call))
-            if _method_name in list(self.dispatcher_call):
+            _method_name = (
+                f"{self.obj_notqueued_classname}.{_cmd_dict['method']}"
+            )
+            if _method_name in list(self.dispatcher_notqueued):
                 #
                 # キューに入れない処理
                 #
 
                 # JSON-RPCリクエスト形式に整える
-                _cmd_jsonstr = self.mk_jsonrpc_req(
-                    json.dumps(_cmd_dict), self.obj_call_classname
+                _jsonrpc_req_dict = self.mk_jsonrpc_req(
+                    _cmd_dict, self.obj_notqueued_classname
                 )
-                self.__log.debug("_cmd_jsonstr=%a", _cmd_jsonstr)
+                self.__log.debug("_jsonrpc_req_dict=%s", _jsonrpc_req_dict)
 
                 # 実行
                 _ret = JSONRPCResponseManager.handle(
-                    _cmd_jsonstr, self.dispatcher_call
+                    json.dumps(_jsonrpc_req_dict), self.dispatcher_notqueued
                 )
-                if _ret is None:
-                    # _ret is None !?
-                    _msg = "_ret is None"
-                    self.__log.warning(_msg)
-                    _result_list.append(_msg)
-                    continue
 
-                # 結果の処理
-                self.__log.debug("_ret.data=%s", _ret.data)
-                if isinstance(_ret.data, list):
-                    # _ret.data が list !?
-                    _msg = f"_ret.data={_ret.data}"
-                    self.__log.warning(_msg)
-                    _result_list.append(_msg)
-                    continue
-
-                _ret_result = _ret.data.get("result")
-                self.__log.debug("_ret_result=%s", _ret_result)
-                if _ret_result is not None:
-                    # 正常に実行された
-                    _result_list.append(_ret_result)
-                    continue
-
-                # 以下、JSON-RPCエラーの場合
-                _ret_err = _ret.data.get("error")
-                self.__log.debug("_ret_err=%s", _ret_err)
-                if _ret_err is None:
-                    _msg = '_ret.data["error"] is None'
-                    self.__log.warning(_msg)
-                    _result_list.append(_msg)
-                    continue
-
-                _ret_err_msg = _ret_err.get("message")
-                self.__log.debug("_ret_err_msg=%a", _ret_err_msg)
-
-                if _ret_err_msg != "Method not found":
-                    _msg = f"error: {_ret_err_msg}"
-                    self.__log.warning(_msg)
-                    _result_list.append(_msg)
+                if _ret and _ret.data:
+                    _result_list.append(_ret.data)
+                else:
+                    _result_list.append({})
 
                 continue
 
-            _method_name = f"{self.obj_exec_classname}.{_cmd_dict['method']}"
-            self.__log.debug("_method_name=%a", _method_name)
-            self.__log.debug("dispatcher_exec:%s", list(self.dispatcher_exec))
-            if _method_name in list(self.dispatcher_exec):
+            _method_name = f"{self.obj_queue_classname}.{_cmd_dict['method']}"
+            if _method_name in list(self.dispatcher_queue):
                 #
                 # キューイングすべきコマンドの処理
                 #
-                _result_list.append("queue")
+                _result_list.append({"result": "queued"})
 
                 # method の prefix を変更して、
                 # JSON-RPCリクエスト形式に整える
-                _cmd_jsonstr = self.mk_jsonrpc_req(
-                    json.dumps(_cmd_dict),
-                    self.obj_exec.__class__.__name__.lower(),
+                _jsonrpc_req_dict = self.mk_jsonrpc_req(
+                    _cmd_dict, self.obj_queue_classname
                 )
-                self.__log.debug("_cmd_jsonstr=%a", _cmd_jsonstr)
+                self.__log.debug("_jsonrpc_req_dict=%s", _jsonrpc_req_dict)
 
                 # キューイングすべきコマンドをリストに追加する。
                 # キューイングは、あとでまとめて行う。
-                _exec_cmd_jsondata_list.append(json.loads(_cmd_jsonstr))
+                _queue_jsonrpc_req_list.append(_jsonrpc_req_dict)
                 continue
 
             #
             # invalid method
             #
-            self.__log.error("_cmd_dict['method']: Invalid method")
+            _result = {
+                "error": {
+                    "message": f"invalid method: '{_cmd_dict['method']}'"
+                }
+            }
+            _result_list.append(_result)
+            self.__log.error("%s", _result)
 
-        if _exec_cmd_jsondata_list:
+        if _queue_jsonrpc_req_list:
             #
             # キューイングすべきコマンドの処理
             #
             self.__log.debug(
-                "_exec_cmd_jsondata_list=%a,qsize=%s",
-                json.dumps(_exec_cmd_jsondata_list),
+                "_queue_jsonrpc_req_list=%s, qsize=%s",
+                _queue_jsonrpc_req_list,
                 self.qsize,
             )
-            self.cmdq.put(_exec_cmd_jsondata_list)
+            self.reqlist_q.put(_queue_jsonrpc_req_list)
 
         self.__log.debug("_result_list=%s", _result_list)
-        return json.dumps(_result_list)
-
-    def recv(self, timeout=DEF_RECV_TIMEOUT) -> str:
-        """Receive command form queue."""
-        try:
-            _cmd_data = self.cmdq.get(timeout=timeout)
-        except queue.Empty:
-            _cmd_data = ""
-
-        return _cmd_data
+        return _result_list
 
     def run(self):
         """Run."""
@@ -471,39 +432,45 @@ class JsonRpcWorker(threading.Thread):
             if self.qsize == 0:
                 self._flag_busy = False
 
-            _cmd_data_list = self.recv()
-            if not _cmd_data_list:
+            try:
+                _req_dict_list = self.reqlist_q.get(
+                    timeout=self.DEF_RECV_TIMEOUT
+                )
+            except queue.Empty:
+                continue
+
+            if not _req_dict_list:
                 continue
 
             self.__log.debug(
-                "_cmd_data_list=%a, qsize=%s", _cmd_data_list, self.qsize
+                "_req_dict_list=%s, qsize=%s", _req_dict_list, self.qsize
             )
             if self.flag_verbose:
-                method_list = [c.get("method") for c in _cmd_data_list]
-                print(f">>> q:{self.qsize}  exec:{method_list}")
+                method_list = [c.get("method") for c in _req_dict_list]
+                self.__log.info(">>> q:%s queue: %s", self.qsize, method_list)
 
             self._flag_busy = True
 
-            for _cmd_data in _cmd_data_list:
-                self.__log.debug("_cmd_data=%s", _cmd_data)
+            for _req_dict in _req_dict_list:
+                self.__log.debug("_req_dict=%s", _req_dict)
 
                 try:
-                    _cmd_str = json.dumps(_cmd_data)
                     ret = JSONRPCResponseManager.handle(
-                        _cmd_str, self.dispatcher_exec
+                        json.dumps(_req_dict), self.dispatcher_queue
                     )
-                    if ret:
-                        self.__log.debug("ret.data=%s", ret.data)
-                        if self.flag_verbose:
-                            print(f">>>> {ret.data}")
+                    if ret is None:
+                        self.__log.warning("ret is %s", ret)
+                        continue
 
-                        if ret.data.get("error"):
-                            self.__log.warning(
-                                "_cmd_str=%s, ret.data=%s", _cmd_str, ret.data
-                            )
+                    #
+                    # ret is not None
+                    #
+                    self.__log.debug("ret.data=%s", ret.data)
+                    if self.flag_verbose:
+                        self.__log.info(">>>> %s", ret.data)
 
-                        if self.interval_sec > 0.0:
-                            time.sleep(self.interval_sec)
+                    if self.interval_sec > 0.0:
+                        time.sleep(self.interval_sec)
 
                 except Exception as e:
                     self.__log.error(errmsg(e))

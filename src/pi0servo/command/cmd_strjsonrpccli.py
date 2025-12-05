@@ -2,6 +2,7 @@
 # (c) 2025 Yoichi Tanibayashi
 #
 import atexit
+import json
 import os
 import readline
 
@@ -77,8 +78,8 @@ class CmdStrJsonRpcCli:
             if not linestr:
                 continue
 
-            jsonrpcstr = self.parser.cmdstr_to_jsonliststr(linestr)
-            self.__log.debug("jsonrpcstr=%a", jsonrpcstr)
+            req = self.parser.cmdstr_to_jsonlist(linestr)
+            self.__log.debug("req=%s", req)
 
-            ret = self.worker.call(jsonrpcstr)
-            print(ret)
+            ret = self.worker.call(req)
+            print(f"ret = {json.dumps(ret, indent=2)}")

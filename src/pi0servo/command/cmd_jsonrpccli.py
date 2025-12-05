@@ -2,6 +2,7 @@
 # (c) 2025 Yoichi Tanibayashi
 #
 import atexit
+import json
 import os
 import readline
 
@@ -14,19 +15,27 @@ class CmdJsonRpcCli:
     HIST_LEN = 1000
 
     def __init__(
-        self, prompt_str, pi, pins, history_file, debug=False
+        self,
+        prompt_str,
+        pi,
+        pins: list[int],
+        history_file: str,
+        flag_verbose: bool = False,
+        debug: bool = False,
     ) -> None:
         """Constractor."""
         self.__debug = debug
         self.__log = get_logger(self.__class__.__name__, self.__debug)
         self.__log.debug(
-            "prompt_str=%a,pins=%s,history_file=%a",
+            "prompt_str=%a,pins=%s,history_file=%a,flag_verbose=%s",
             prompt_str,
             pins,
             history_file,
+            flag_verbose,
         )
 
         self.prompt_str = prompt_str
+        self.flag_verbose = flag_verbose
 
         if history_file:
             self.history_file = history_file
@@ -44,7 +53,9 @@ class CmdJsonRpcCli:
         atexit.register(readline.write_history_file, self.history_file)
         readline.set_history_length(self.HIST_LEN)
 
-        self.worker = JsonRpcWorker(pi, pins, debug=self.__debug)
+        self.worker = JsonRpcWorker(
+            pi, pins, flag_verbose=self.flag_verbose, debug=self.__debug
+        )
 
     def end(self):
         """End."""
@@ -62,9 +73,19 @@ class CmdJsonRpcCli:
             try:
                 linestr = input(self.prompt_str)
                 self.__log.debug("linestr=%a", linestr)
+
             except EOFError as e:
                 self.__log.debug(errmsg(e))
                 break
 
-            ret = self.worker.call(linestr)
-            print(ret)
+            req = []
+            try:
+                req = json.loads(linestr)
+                if isinstance(req, dict):
+                    req = [req]
+            except Exception as e:
+                self.__log.error("%s .. ignored", errmsg(e))
+                continue
+
+            ret = self.worker.call(req)
+            print(f"ret = {json.dumps(ret, indent=2)}")
