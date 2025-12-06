@@ -178,48 +178,7 @@ GPIO17: 0 deg: pulse=1500> === Usage ===
 GPIO17: 0 deg: pulse=1500>
 ```
 
-
-### 3.2 APIサーバーの起動
-
-```bash
-# サブコマンド一覧表示
-uv run pi0servo api-server 17 27 22 25
-```
-
-
-### 3.3 APIクライアントCLI (JSON版)
-
-対話的で JSON形式のコマンドをAPIサーバーに送信するCLI。
-
-JSONコマンドの詳細については、以下を参照してください。
-
-- [JSONCMD_SAMPLES.md](docs/JSONCMD_SAMPLES.md) 
-
-```bash
-uv run pi0servo api-client
-```
-
-
-### 3.4 String Command API Client CLI
-
-対話形式で、簡略化された独自の文字列コマンドを入力すると、内部でJSONに変換しサーバーに送信します。
-
-文字列コマンドについては、以下を参照してください。
-
-- [STR_CMD.md](docs/STR_CMD.md)
-
-```bash
-# ローカルでデフォルト設定の場合
-uv run pi0servo
-
-# モーターの回転方向を指定する場合
-uv run pi0servo --angle_factor -1,-1,1,1
-
-# リモート接続の例
-uv run pi0servo --angle_factor -1,-1,1,1 --url http://192.168.x.x:8000/cmd
-``` 
-
 ## 
 ![Software Architecture](docs/SoftwareArchitecture-20251207a.png)
 
-![Servo Control Flow](docs/ServoControlFlow.png)
+![Servo Control Flow](docs/ServoControlFlow-20251207a.png)
