@@ -220,5 +220,6 @@ uv run pi0servo --angle_factor -1,-1,1,1 --url http://192.168.x.x:8000/cmd
 ``` 
 
 ## 
-![Software Architecture](docs/SoftwareArchitecture.png)
+![Software Architecture](docs/SoftwareArchitecture-20251207a.png)
 
+![Servo Control Flow](docs/ServoControlFlow.png)
