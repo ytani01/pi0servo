@@ -181,4 +181,4 @@ GPIO17: 0 deg: pulse=1500>
 ## 
 ![Software Architecture](docs/SoftwareArchitecture-20251207a.png)
 
-![Servo Control Flow](docs/ServoControlFlow-20251207a.png)
+![Servo Control Flow](docs/ServoControlFlow-20251208a.png)
