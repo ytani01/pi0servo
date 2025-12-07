@@ -78,6 +78,8 @@ dev = [
     "ruff>=0.12.3",
     "hatch",
     "twine>=6.2.0",
+    "ruff-lsp>=0.0.62",
+    "python-language-server[all]>=0.36.2",
 ]
 samples = [
     "jsonschema>=4.25.1",
@@ -87,3 +89,4 @@ samples = [
 [[tool.mypy.overrides]]
 module = ['pigpio', 'fastapi', 'requests', 'jsonrpc']
 ignore_missing_imports = true
+#follow_untyped_imports = true
