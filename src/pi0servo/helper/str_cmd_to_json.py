@@ -49,7 +49,7 @@ class StrCmdToJson:
         "c": "center",
     }
 
-    # setコマンドのコマンドメイト`target`の対応
+    # setコマンドのコマンド名と`target`の対応
     SET_TARGET: dict[str, str] = {
         "sc": "center",
         "sn": "min",
@@ -220,9 +220,23 @@ class StrCmdToJson:
                 }
 
             elif cmd_key in ("sc", "sn", "sx"):
+                """
+                XXX TBD: パスル指定できるよにすべき？
+
+                "sc:1"
+
+                {
+                  "method": "set",
+                  "params": {
+                    "servo_i": 1,
+                    "target": "center"
+                  }
+                }
+                """
                 servo = int(cmd_param_str)
                 target = self.SET_TARGET[cmd_key]
                 self.__log.debug("servo=%s, target=%s", servo, target)
+
                 _cmd_data["params"] = {"servo_i": servo, "target": target}
 
             elif cmd_key in ["ca", "zz", "qs", "qq", "wa", "ww"]:

@@ -446,19 +446,21 @@ def str_jsonrpc_cli(ctx, pins_str, history_file, script_file, debug):
         script_file,
     )
 
-    clib = CommonLib(debug=debug)
-    pins = clib.pins_str2list(pins_str)
-    __log.debug("pins=%s", pins)
-
     app = None
     pi = None
     try:
         pi = get_pi(debug)
+
+        clib = CommonLib(debug=debug)
+        pins = clib.pins_str2list(pins_str)
+        __log.debug("pins=%s", pins)
+
         prompt_str = cmd_name + "> "
+
         app = CmdStrJsonRpcCli(
-            prompt_str,
             pi,
             pins,
+            prompt_str,
             history_file,
             debug=debug,
         )

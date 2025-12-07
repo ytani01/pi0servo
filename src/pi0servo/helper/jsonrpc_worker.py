@@ -344,6 +344,7 @@ class JsonRpcWorker(threading.Thread):
 
         _queue_jsonrpc_req_list = []  # キューイングすべきコマンドのリスト
         _result_list = []  # 結果リスト
+
         for _cmd_dict in cmd_dict_list:
             self.__log.debug("_cmd_dict=%s", _cmd_dict)
 
@@ -428,10 +429,12 @@ class JsonRpcWorker(threading.Thread):
 
         self._flag_active = True
 
+        # メインループ
         while self._flag_active:
             if self.qsize == 0:
                 self._flag_busy = False
 
+            # キューからコマンド(リスト)を取り出す
             try:
                 _req_dict_list = self.reqlist_q.get(
                     timeout=self.DEF_RECV_TIMEOUT
@@ -451,28 +454,33 @@ class JsonRpcWorker(threading.Thread):
 
             self._flag_busy = True
 
+            # コマンドリストの中のコマンドを順番に実行
             for _req_dict in _req_dict_list:
                 self.__log.debug("_req_dict=%s", _req_dict)
 
+                ret = None
                 try:
+                    # ディスパッチ
                     ret = JSONRPCResponseManager.handle(
                         json.dumps(_req_dict), self.dispatcher_queue
                     )
-                    if ret is None:
-                        self.__log.warning("ret is %s", ret)
-                        continue
-
-                    #
-                    # ret is not None
-                    #
-                    self.__log.debug("ret.data=%s", ret.data)
-                    if self.flag_verbose:
-                        self.__log.info(">>>> %s", ret.data)
-
-                    if self.interval_sec > 0.0:
-                        time.sleep(self.interval_sec)
-
                 except Exception as e:
                     self.__log.error(errmsg(e))
+
+                if ret is None:
+                    # ???
+                    self.__log.warning("ret is %s", ret)
+                    continue
+
+                #
+                # ret is not None
+                #
+                self.__log.debug("ret.data=%s", ret.data)
+                if self.flag_verbose:
+                    self.__log.info(">>>> %s", ret.data)
+
+                # インターバルが設定されている場合はsleep
+                if self.interval_sec > 0.0:
+                    time.sleep(self.interval_sec)
 
         self.__log.debug("done.")

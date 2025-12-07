@@ -28,19 +28,17 @@ class MultiServo:
         """
         MultiServoのインスタンスを初期化する。
 
-        Parameters
-        ----------
-        pi: pigpio.pi
-            pigpio.piのインスタンス。
-        pins: list[int]
-            サーボモーターを接続したGPIOピンのリスト。
-            **ピン番号が負の場合、逆回転になる。**
-        first_move: bool
-            Trueの場合、初期化時にサーボを0度の位置に移動させる。
-        conf_file: str
-            キャリブレーション設定ファイルのパス。
-        debug: bool
-            デバッグモードを有効にするかどうかのフラグ。
+        Args:
+            pi (pigpio.pi): pigpio.piのインスタンス。
+
+            pins (list[int]): サーボモーターを接続したGPIOピンのリスト。
+                **ピン番号が負の場合、逆回転になる。**
+
+            first_move (bool): 初期化時にサーボを0度の位置に移動させるかどうか
+
+            conf_file (str): キャリブレーション設定ファイルのパス。
+
+            debug (bool): デバッグフラグ
         """
         self._debug = debug
         self.__log = get_logger(self.__class__.__name__, self._debug)
@@ -71,9 +69,8 @@ class MultiServo:
     def get_pulse_center(self, index: int):
         """Get center(0 deg) pulse.
 
-        Returns
-        -------
-        pulse: int
+        Returns:
+            pulse (int)
         """
         return self.servo[index].pulse_center
 
@@ -81,12 +78,10 @@ class MultiServo:
         """Set center(0 deg) pulse.
         設定した値は、`conf_file`に保存される。
 
-        Parameters
-        ----------
-        index: int
-            index of servo
-        pulse: int | None
-            None: current pulse
+        Args:
+            index (int): index of servo
+
+            pulse (int | None): None=current pulse
         """
         if pulse is None:
             pulse = self.servo[index].get_pulse()
@@ -99,9 +94,8 @@ class MultiServo:
     def get_pulse_min(self, index: int):
         """Get min(-90 deg) pulse.
 
-        Returns
-        -------
-        pulse: int
+        Returns:
+            pulse (int)
         """
         return self.servo[index].pulse_min
 
