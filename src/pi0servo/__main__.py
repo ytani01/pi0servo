@@ -428,7 +428,7 @@ def jsonrpc_cli(ctx, pins_str, history_file, verbose, debug):
 @click.option(
     "--history_file",
     type=str,
-    default="~/pi0servo_strcmd_history",
+    default="~/pi0servo_str_history",
     show_default=True,
     help="History file",
 )
