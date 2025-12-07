@@ -27,7 +27,7 @@ uv tool upgrade --all
 alias = "upuv"
 depends = ["upgrademise"]
 
-[tasks.upgradelocal]
+[tasks.upgradeproject]
 description = "upgrade in this project"
 run = '''
 # upgrade this project
@@ -43,7 +43,7 @@ uv pip install -U --group samples -e .
 
 uv run pi0servo -V
 '''
-alias = "uplocal"
+alias = "uppj"
 # depends = ["upgradeuv"]
 
 [tasks.lint]
@@ -60,7 +60,7 @@ uv run mypy src/pi0servo tests
 
 uv run pi0servo -V
 '''
-depends = ["upgradelocal"]
+depends = ["upgradeproject"]
 
 [tasks.test]
 description = "test"

@@ -21,19 +21,15 @@ class CalibApp:
         self.__log = get_logger(self.__class__.__name__, self._debug)
         self.__log.debug("pin=%s, conf_file=%s", pin, conf_file)
 
-        self.pi = pi
         self.pin = pin
         self.conf_file = conf_file
-
-        if not self.pi.connected:
-            raise ConnectionError("pigpio daemon not connected.")
 
         self.cur_target = self.TARGET_CENTER
         self.__log.debug("cur_target=%s", self.cur_target)
 
         self.term = blessed.Terminal()
         self.servo = CalibrableServo(
-            self.pi, self.pin, conf_file=self.conf_file, debug=self._debug
+            pi, self.pin, conf_file=self.conf_file, debug=self._debug
         )
         self.conf_file = self.servo.conf_file
         self.__log.debug("conf_file=%s", self.conf_file)
