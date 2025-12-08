@@ -445,18 +445,17 @@ class JsonRpcWorker(threading.Thread):
             if not _req_dict_list:
                 continue
 
-            self.__log.debug(
-                "_req_dict_list=%s, qsize=%s", _req_dict_list, self.qsize
-            )
-            if self.flag_verbose:
-                method_list = [c.get("method") for c in _req_dict_list]
-                self.__log.info(">>> q:%s queue: %s", self.qsize, method_list)
+            self.__log.info("qsize=%s", self.qsize)
 
             self._flag_busy = True
 
             # コマンドリストの中のコマンドを順番に実行
             for _req_dict in _req_dict_list:
-                self.__log.debug("_req_dict=%s", _req_dict)
+                self.__log.info(
+                    "req> %s%s",
+                    _req_dict.get("method"),
+                    _req_dict.get("params")
+                )
 
                 ret = None
                 try:
@@ -475,9 +474,11 @@ class JsonRpcWorker(threading.Thread):
                 #
                 # ret is not None
                 #
-                self.__log.debug("ret.data=%s", ret.data)
-                if self.flag_verbose:
-                    self.__log.info(">>>> %s", ret.data)
+                self.__log.info(
+                    "ret>   result:%s, error:%s",
+                    ret.data.get("result"),
+                    ret.data.get("error"),
+                )
 
                 # インターバルが設定されている場合はsleep
                 if self.interval_sec > 0.0:
