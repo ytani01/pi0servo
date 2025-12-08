@@ -1,12 +1,4 @@
-# str_to_json
-
-## 書式
-
-def str_to_json(cmdstr: str): -> str
-
-## 機能
-
-コマンド文字列`cmdstr`を以下の例に基づいて、JSON文字列に変換する。
+# StrCmdToJson
 
 ## 基本ルール
 
@@ -14,12 +6,10 @@ def str_to_json(cmdstr: str): -> str
 
 - コマンドとパラメータの間の区切り文字は、':'
 
-- ':'以降は、コマンド毎に異なるパラメータ
-
 - コマンド文字列の途中に空白文字は入ってはならない。
 
 - 変換できない場合は、以下を返す。
-  '{"err": **元のコマンド文字列**}'
+  {"method": "ERROR", "error": error_message, "data": strcmd}
 
 - コマンドの種類は以下の通り
   - 'mv': {"method": "move_all_angles_sync"}
@@ -86,14 +76,14 @@ def str_to_json(cmdstr: str): -> str
 入力: 'mp:2,-20'
 出力: '{"method": "move_pulse_relative", "params": {"servo_i": 2, "pulse_diff": -20}}'
 
-入力: 'sc:1'
-出力: '{"method": "set", "params": {"servo_i": 1, "target": "center"}}'
+入力: 'sc:1,1500'
+出力: '{"method": "set", "params": {"servo_i": 1, "target": "center", "pulse": 1500}}'
 
-入力: 'sn:2'
-出力: '{"method": "set", "params": {"servo_i": 2, "target": "min"}}'
+入力: 'sn:2,500'
+出力: '{"method": "set", "params": {"servo_i": 2, "target": "min", "pulse": 500}}'
 
-入力: 'sx:0'
-出力: '{"method": "set", "params": {"servo_i": 0, "target": "max"}}'
+入力: 'sx:0,2500'
+出力: '{"method": "set", "params": {"servo_i": 0, "target": "max", "pulse": 2500}}'
 
 入力: 'ca'
 出力: '{"method": "cancel"}

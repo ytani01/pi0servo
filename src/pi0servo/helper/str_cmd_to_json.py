@@ -124,7 +124,7 @@ class StrCmdToJson:
         """Command string to command data(dict).
 
         Args:
-            cmd_str: "mv:40,30", "sl:0.5" のようなコマンド文字列。
+            cmd_str (str): "mv:40,30", "sl:0.5" のようなコマンド文字列。
 
         Returns: (dict)
             変換されたコマンドデータ(dict)。
@@ -134,8 +134,9 @@ class StrCmdToJson:
 
         # 不正な文字列はエラー
         if not isinstance(cmd_str, str) or " " in cmd_str:
-            return self._create_error_data("INVALID_REQUEST", cmd_str)
+            return self._create_error_data("INVALID_REQUEST_FORMAT", cmd_str)
 
+        # コマンド名・パラメータ分割
         # e.g. "mv:10,20,30,40" --> cmd_parts = ["mv", "10,20,30,40"]
         cmd_parts = cmd_str.split(":", 1)
 
@@ -151,9 +152,8 @@ class StrCmdToJson:
         cmd_name = self.COMMAND_MAP[cmd_key]
 
         # パラメータの取得
-        if len(cmd_parts) == 1:
-            cmd_param_str = ""
-        else:
+        cmd_param_str = ""
+        if len(cmd_parts) > 1:
             cmd_param_str = cmd_parts[1]
         # self.__log.debug(
         #     "cmd_key=%s,cmd_name=%s,cmd_param_str=%s",
@@ -195,49 +195,87 @@ class StrCmdToJson:
                 _cmd_data["params"] = {"angle_diffs": angle_diffs}
 
             elif cmd_key in ["sl", "ms", "is"]:
-                sec = float(cmd_param_str)
-                if sec < 0:
+                try:
+                    sec = float(cmd_param_str)
+                    if sec < 0:
+                        return self._create_error_data(
+                            "INVALID_PARAM", cmd_str
+                        )
+                    _cmd_data["params"] = {"sec": sec}
+                except Exception as e:
+                    self.__log.warning(errmsg(e))
                     return self._create_error_data("INVALID_PARAM", cmd_str)
-                _cmd_data["params"] = {"sec": sec}
 
             elif cmd_key == "st":
-                _n = int(cmd_param_str)
-                if _n < 1:
+                try:
+                    _n = int(cmd_param_str)
+                    if _n < 1:
+                        return self._create_error_data(
+                            "INVALID_PARAM", cmd_str
+                        )
+                    _cmd_data["params"] = {"step_n": _n}
+                except Exception as e:
+                    self.__log.warning(errmsg(e))
                     return self._create_error_data("INVALID_PARAM", cmd_str)
-                _cmd_data["params"] = {"step_n": _n}
 
             elif cmd_key == "mp":
                 if not cmd_param_str:
                     return self._create_error_data("INVALID_PARAM", cmd_str)
 
-                sv_idx_str, p_diff_str = cmd_param_str.split(",")
-                sv_idx = int(sv_idx_str)
-                p_diff = int(p_diff_str)
+                try:
+                    sv_idx_str, p_diff_str = cmd_param_str.split(",")
+                    sv_idx = int(sv_idx_str)
+                    p_diff = int(p_diff_str)
 
-                _cmd_data["params"] = {
-                    "servo_i": sv_idx,
-                    "pulse_diff": p_diff,
-                }
+                    _cmd_data["params"] = {
+                        "servo_i": sv_idx,
+                        "pulse_diff": p_diff,
+                    }
+                except Exception as e:
+                    self.__log.warning(errmsg(e))
+                    return self._create_error_data("INVALID_PARAM", cmd_str)
 
             elif cmd_key in ("sc", "sn", "sx"):
                 """
                 XXX TBD: パスル指定できるよにすべき？
 
-                "sc:1"
+                "sc:1,1500"
 
                 {
                   "method": "set",
                   "params": {
                     "servo_i": 1,
                     "target": "center"
+                    "pulse": 1500
                   }
                 }
                 """
-                servo = int(cmd_param_str)
-                target = self.SET_TARGET[cmd_key]
-                self.__log.debug("servo=%s, target=%s", servo, target)
+                try:
+                    params = cmd_param_str.split(",", 1)
 
-                _cmd_data["params"] = {"servo_i": servo, "target": target}
+                    servo_i = int(params[0])
+
+                    pulse: int | None = None
+                    if len(params) > 1:
+                        pulse = int(params[1])
+
+                    target = self.SET_TARGET[cmd_key]
+
+                    self.__log.debug(
+                        "servo_i=%s,target=%s,pulse=%s",
+                        servo_i,
+                        target,
+                        pulse,
+                    )
+
+                    _cmd_data["params"] = {
+                        "servo_i": servo_i,
+                        "target": target,
+                        "pulse": pulse,
+                    }
+                except Exception as e:
+                    self.__log.warning(errmsg(e))
+                    return self._create_error_data("INVALID_PARAM", cmd_str)
 
             elif cmd_key in ["ca", "zz", "qs", "qq", "wa", "ww"]:
                 pass

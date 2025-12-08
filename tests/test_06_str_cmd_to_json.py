@@ -58,7 +58,7 @@ class TestStrCmdToJson:
         cmd_str = "mv:10 20"
         expected_json_obj = {
             "method": "ERROR",
-            "error": "INVALID_REQUEST",
+            "error": "INVALID_REQUEST_FORMAT",
             "data": "mv:10 20",
         }
         result = instance.cmdstr_to_json(cmd_str)
@@ -71,7 +71,7 @@ class TestStrCmdToJson:
         cmd_str = 123  # int型
         expected_json_obj = {
             "method": "ERROR",
-            "error": "INVALID_REQUEST",
+            "error": "INVALID_REQUEST_FORMAT",
             "data": 123,
         }
         result = instance.cmdstr_to_json(cmd_str)
@@ -154,7 +154,24 @@ class TestStrCmdToJson:
                 [
                     {
                         "method": "set",
-                        "params": {"servo_i": 0, "target": "center"},
+                        "params": {
+                            "servo_i": 0,
+                            "target": "center",
+                            "pulse": None,
+                        },
+                    }
+                ],
+            ),
+            (
+                "sn:1,1500",
+                [
+                    {
+                        "method": "set",
+                        "params": {
+                            "servo_i": 1,
+                            "target": "min",
+                            "pulse": 1500,
+                        },
                     }
                 ],
             ),

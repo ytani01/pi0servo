@@ -112,6 +112,7 @@ class HandleQueue:
         """Sleep."""
         self.__log.debug("sec=%s", sec)
         time.sleep(sec)
+        return True
 
     def move_sec(self, sec: float):
         """Set move sec."""
@@ -133,20 +134,28 @@ class HandleQueue:
         self.__log.debug("servo_i=%s,pulse_diff=%s", servo_i, pulse_diff)
         self.mservo.move_pulse_relative(servo_i, pulse_diff, forced=True)
 
-    def set(self, servo_i: int, target: str) -> bool:
+    def set(self, servo_i: int, target: str, pulse: int = None) -> bool:
         """Set calibrated pulse as target."""
-        self.__log.debug("servo_i=%s,target=%s", servo_i, target)
+        self.__log.debug(
+            "servo_i=%s,target=%s,pulse=%s", servo_i, target, pulse
+        )
+
+        if servo_i >= len(self.mservo.pins):
+            self.__log.error(
+                "Invalid servo_i=%s >= %s", servo_i, len(self.mservo.pins)
+            )
+            return False
 
         _target = target.lower()
 
         if _target == "center":
-            self.mservo.set_pulse_center(servo_i)
+            self.mservo.set_pulse_center(servo_i, pulse)
             return True
         if _target == "min":
-            self.mservo.set_pulse_min(servo_i)
+            self.mservo.set_pulse_min(servo_i, pulse)
             return True
         if _target == "max":
-            self.mservo.set_pulse_max(servo_i)
+            self.mservo.set_pulse_max(servo_i, pulse)
             return True
 
         self.__log.error("Invalid target: %a", target)
@@ -391,7 +400,7 @@ class JsonRpcWorker(threading.Thread):
                 _jsonrpc_req_dict = self.mk_jsonrpc_req(
                     _cmd_dict, self.obj_queue_classname
                 )
-                self.__log.debug("_jsonrpc_req_dict=%s", _jsonrpc_req_dict)
+                # self.__log.debug("_jsonrpc_req_dict=%s", _jsonrpc_req_dict)
 
                 # キューイングすべきコマンドをリストに追加する。
                 # キューイングは、あとでまとめて行う。
@@ -454,7 +463,7 @@ class JsonRpcWorker(threading.Thread):
                 self.__log.info(
                     "req> %s%s",
                     _req_dict.get("method"),
-                    _req_dict.get("params")
+                    _req_dict.get("params"),
                 )
 
                 ret = None
