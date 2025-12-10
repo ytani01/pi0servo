@@ -134,7 +134,9 @@ class HandleQueue:
         self.__log.debug("servo_i=%s,pulse_diff=%s", servo_i, pulse_diff)
         self.mservo.move_pulse_relative(servo_i, pulse_diff, forced=True)
 
-    def set(self, servo_i: int, target: str, pulse: int = None) -> bool:
+    def set(
+        self, servo_i: int, target: str, pulse: int | None = None
+    ) -> bool:
         """Set calibrated pulse as target."""
         self.__log.debug(
             "servo_i=%s,target=%s,pulse=%s", servo_i, target, pulse
