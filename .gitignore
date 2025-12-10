@@ -4,7 +4,7 @@ uv.lock
 #
 servo.json
 .markdown*
-.serena/
+#.serena/
 
 .env
 
