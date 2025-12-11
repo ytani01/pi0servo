@@ -7,6 +7,7 @@ Test for ServoConfigManager
 
 import json
 from pathlib import Path
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -32,10 +33,6 @@ def setup_test_env(tmp_path, monkeypatch):
 
     # Path.home()をモンキーパッチで差し替え
     monkeypatch.setattr(Path, "home", lambda: test_home)
-
-    # monkeypatch.setattr(os, "getcwd", lambda: str(test_cwd))
-    #   上記の行は、getcwdを書き換えてしまうので、
-    #   後続のテストで問題が起こる！
 
     # テスト中は作成したカレントディレクトリに移動
     monkeypatch.chdir(test_cwd)
@@ -238,3 +235,45 @@ def test_read_invalid_json(config_manager):
         f.write("this is not json")
 
     assert manager.read_all_configs() == []
+
+
+def test_read_empty_json_file(config_manager):
+    """
+    空のJSONファイルを読んだ場合に空のリストが返るか。
+    """
+    manager, conf_file = config_manager
+    with open(conf_file, "w") as f:
+        f.write("")
+
+    assert manager.read_all_configs() == []
+
+
+def test_read_malformed_json_structure(config_manager):
+    """
+    JSONとしては有効だが、期待される構造ではないファイルを読んだ場合のテスト。
+    """
+    manager, conf_file = config_manager
+
+    # リストではなくオブジェクトの場合
+    with open(conf_file, "w") as f:
+        json.dump({"pin": TEST_PIN1, "center": 1500}, f)
+    assert manager.read_all_configs() == []
+
+    # リストだが、要素がオブジェクトではない場合
+    with open(conf_file, "w") as f:
+        json.dump([1, 2, 3], f)
+    assert manager.read_all_configs() == []
+
+    # リストだが、要素に "pin" キーがない場合
+    with open(conf_file, "w") as f:
+        json.dump([{"foo": "bar"}], f)
+    assert manager.read_all_configs() == []
+
+
+
+
+
+
+
+
+

@@ -35,6 +35,7 @@ def get_pi(debug=False) -> pigpio.pi:
     return pi
 
 
+
 def print_pins_error(ctx):
     """Print error message and help."""
     click.echo()
@@ -60,7 +61,7 @@ def cli(ctx, debug):
 
 @cli.command()
 @click.argument("pin", type=int, nargs=1)
-@click.argument("pulse", type=str, nargs=1)
+@click.argument("pulse", type=click.IntRange(500, 2500), nargs=1)
 @click.option(
     "--wait-sec",
     "-s",

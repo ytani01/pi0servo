@@ -31,6 +31,8 @@ class ThreadWorker(threading.Thread):
         "INVALID_PARAM": -32602,
         "INTERNAL_ERROR": -32603,
         "UNKOWN": -32000,
+        "QUEUE_FULL": -32001,  # 追加
+        "TIMEOUT": -32002,  # 追加
     }
 
     CMD_CANCEL = "cancel"
@@ -84,6 +86,9 @@ class ThreadWorker(threading.Thread):
             "method": "move_all_pulses_relative",
             "params": {"pulse_diffs": [200, -200, 0, 0]},
         },
+        # Query commands
+        {"method": "get_all_angles"},
+        {"method": "get_all_pulses"},
     ]
 
     DEF_RECV_TIMEOUT = 0.2  # sec
@@ -98,6 +103,7 @@ class ThreadWorker(threading.Thread):
         move_sec: float | None = None,
         step_n: int | None = None,
         interval_sec: float = DEF_INTERVAL_SEC,
+        maxqsize: int = 0, # 追加
         debug=False,
     ):
         """Constructor."""
@@ -127,7 +133,7 @@ class ThreadWorker(threading.Thread):
             interval_sec,
         )
 
-        self._cmdq: queue.Queue[dict] = queue.Queue()
+        self._cmdq: queue.Queue[dict] = queue.Queue(maxsize=maxqsize) # 修正
         self._active = False
         self._busy_flag = False
 
@@ -149,6 +155,9 @@ class ThreadWorker(threading.Thread):
             "sleep": self._handle_sleep,
             "move_pulse_relative": self._handle_move_pulse_relative,
             "set": self._handle_set,
+            # Query commands
+            "get_all_angles": self._handle_get_all_angles,
+            "get_all_pulses": self._handle_get_all_pulses,
         }
 
     def end(self):
@@ -265,7 +274,7 @@ class ThreadWorker(threading.Thread):
             cmd_name = cmd_json.get("method")
             if cmd_name is None:
                 err_msg = "Not a command"
-                _ret = self.mk_reply_error("NO_METHOD", err_msg, cmd_json)
+                _ret = self.mk_reply_error("INVALID_REQUEST", err_msg, cmd_json) # エラーコード修正
                 self.__log.debug("_ret=%s", _ret)
                 return _ret
 
@@ -291,25 +300,57 @@ class ThreadWorker(threading.Thread):
                 return _ret
 
             if cmd_name == self.CMD_WAIT:  # Wait
-                # すべてのコマンドが終了するまで待つ
+                _timeout = cmd_json.get("params", {}).get("timeout", None)
+                start_time = time.time()
                 while self._busy_flag or self.qsize > 0:
+                    if _timeout is not None and (time.time() - start_time > _timeout):
+                        _ret = self.mk_reply_error("TIMEOUT", "Timeout", cmd_json)
+                        self.__log.debug("%s: _ret=%s (timeout)", cmd_name, _ret)
+                        return _ret
                     self.__log.debug("waiting..")
-                    time.sleep(0.3)
+                    time.sleep(0.01) # 短いsleepに変更
                 _ret = self.mk_reply_result(self.qsize, cmd_data)
                 self.__log.debug("%s: _ret=%s", cmd_name, _ret)
                 return _ret
 
-            # 通常のコマンドは、コマンドキューに入れる。
-            self._cmdq.put(cmd_json)
-            self.__log.debug(
-                "cmd_json=%s, qsize=%s", cmd_json, self._cmdq.qsize()
-            )
+            # Queryコマンドはキューを介さずに直接実行し結果を返す
+            if cmd_name in ["get_all_angles", "get_all_pulses"]:
+                handler = self._command_handlers.get(cmd_name)
+                if handler:
+                    result = handler()
+                    _ret = self.mk_reply_result(result, cmd_data)
+                    self.__log.debug("%s: _ret=%s", cmd_name, _ret)
+                    return _ret
+                else:
+                    # ここには到達しないはずだが念のため
+                    err_msg = f"No handler for query command: {cmd_name}"
+                    _ret = self.mk_reply_error("INTERNAL_ERROR", err_msg, cmd_json)
+                    self.__log.error("_ret=%s", _ret)
+                    return _ret
 
+            # 通常のコマンドは、コマンドキューに入れる。
+            try:
+                self._cmdq.put(cmd_json, block=False)  # block=False でキュー満杯時に例外発生
+                _ret = self.mk_reply_result(None, cmd_data)  # 成功時は結果を返す
+                self.__log.debug(
+                    "cmd_json=%s, qsize=%s", cmd_json, self._cmdq.qsize()
+                )
+                return _ret
+            except queue.Full:
+                err_msg = "Queue full"
+                _ret = self.mk_reply_error("QUEUE_FULL", err_msg, cmd_json)  # 新しいエラーコード
+                self.__log.debug("_ret=%s", _ret)
+                return _ret
+
+        except json.JSONDecodeError as _e: # JSONパースエラーを追加
+            self.__log.error("%s: %s", type(_e).__name__, _e)
+            _ret = self.mk_reply_error("INVALID_JSON", str(_e), cmd_data)
+            return _ret
         except Exception as _e:
             self.__log.error("%s: %s", type(_e).__name__, _e)
+            _ret = self.mk_reply_error("INTERNAL_ERROR", str(_e), cmd_data) # 内部エラーを追加
+            return _ret
 
-        _ret = self.mk_reply_result(None, cmd_data)
-        return _ret
 
     def recv(self, timeout=DEF_RECV_TIMEOUT):
         """Receive command form queue."""
@@ -581,6 +622,18 @@ class ThreadWorker(threading.Thread):
             self.mservo.set_pulse_max(_servo)
         else:
             self.__log.warning("Invalid target: %s", _target)
+
+    def _handle_get_all_angles(self) -> list[float]:
+        """Handle get_all_angles()."""
+        angles = self.mservo.get_all_angles()
+        self.__log.debug("angles=%s", angles)
+        return angles
+
+    def _handle_get_all_pulses(self) -> list[int]:
+        """Handle get_all_pulses()."""
+        pulses = self.mservo.get_all_pulses()
+        self.__log.debug("pulses=%s", pulses)
+        return pulses
 
     def _dispatch_cmd(self, cmd_data: dict):
         """Dispatch command."""

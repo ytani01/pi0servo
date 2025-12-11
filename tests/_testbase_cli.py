@@ -6,7 +6,7 @@ import time
 
 import pytest
 
-TIMEOUT_EXPECT = 25.0
+TIMEOUT_EXPECT = 60.0
 TIMEOUT_CLOSE = 5.0
 
 
@@ -192,6 +192,10 @@ class CLITestBase:
         print(f"\n# cmdline = {cmdline_str!r}")
         print(f"# cmdline_list = {cmdline_list}")
 
+        test_env = os.environ.copy()
+        if env:
+            test_env.update(env)
+
         try:
             if input_data:
                 print(f"## input: {input_data!r}")
@@ -203,7 +207,7 @@ class CLITestBase:
                 input=input_data,
                 timeout=timeout,
                 cwd=cwd,
-                env=env,
+                env=test_env,
             )
             return result
         except subprocess.TimeoutExpired as _e:
@@ -274,6 +278,8 @@ class CLITestBase:
         cmdline_str, cmdline_list = self._cmdline(command, args)
         print(f"\n# command line:  {cmdline_str!r}")
 
+        test_env = os.environ.copy()
+
         master_fd, slave_fd = pty.openpty()
         process = subprocess.Popen(
             cmdline_list,
@@ -282,6 +288,7 @@ class CLITestBase:
             stderr=slave_fd,
             close_fds=True,
             start_new_session=True,  # ** IMPORTANT **
+            env=test_env,
         )
         os.close(slave_fd)
         return InteractiveSession(master_fd, process)

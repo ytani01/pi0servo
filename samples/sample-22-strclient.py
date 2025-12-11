@@ -11,7 +11,7 @@ print(f"* URL = {URL}\n")
 
 # API Client オブジェクト生成
 api_client = ApiClient(URL, debug=DEBUG_FLAG)
-parser = StrCmdToJson(angle_factor=[1, -1], debug=DEBUG_FLAG)
+parser = StrCmdToJson(debug=DEBUG_FLAG)
 
 str_cmds = ["mv:10,-10", "mv:0,0", "mv:-10,10 mv:0,0", "ww"]
 print(f"strcmds = {str_cmds}")

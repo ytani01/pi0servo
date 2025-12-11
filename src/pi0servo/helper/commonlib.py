@@ -35,6 +35,8 @@ class CommonLib:
         pins_list = []
         for p in pins_str.split(","):
             p = p.strip()
+            if not p:  # 空文字列の場合はスキップ
+                continue
             try:
                 if p[-1] == "-":
                     pins_list.append(abs(int(p[:-1])) * -1)

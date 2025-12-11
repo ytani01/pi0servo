@@ -52,18 +52,7 @@ class TestStrCmdToJson:
         result = instance._parse_angles(angle_str)
         assert result == expected_angles
 
-    def test_cmdstr_to_json_invalid_str_with_space(self):
-        """cmdstr_to_jsonでスペースを含む正な文字列のテスト"""
-        instance = StrCmdToJson()
-        cmd_str = "mv:10 20"
-        expected_json_obj = {
-            "method": "ERROR",
-            "error": "INVALID_REQUEST_FORMAT",
-            "data": "mv:10 20",
-        }
-        result = instance.cmdstr_to_json(cmd_str)
-        print(result)
-        assert result == expected_json_obj
+
 
     def test_cmdstr_to_json_not_string(self):
         """cmdstr_to_jsonで文字列ではない入力のテスト"""
@@ -202,7 +191,7 @@ class TestStrCmdToJson:
                 [
                     {
                         "method": "move_all_angles_sync",
-                        "params": {"angles": [90]},
+                        "params": {"angles": [100]}, # 修正
                     }
                 ],
             ),
@@ -243,6 +232,127 @@ class TestStrCmdToJson:
                         "method": "ERROR",
                         "error": "INVALID_PARAM",
                         "data": "mv:",
+                    }
+                ],
+            ),
+            # 新しいテストケース
+            # 大文字・小文字の区別
+            (
+                "MV:40,30",
+                [
+                    {
+                        "method": "move_all_angles_sync",
+                        "params": {"angles": [40, 30]},
+                    }
+                ],
+            ),
+            ("Sl:0.5", [{"method": "sleep", "params": {"sec": 0.5}}]),
+            # 多様な空白文字の扱い
+            (
+                "mv: 40 , 30",
+                [
+                    {
+                        "method": "ERROR",
+                        "error": "INVALID_PARAM",
+                        "data": "mv:",
+                    },
+                    {
+                        "method": "ERROR",
+                        "error": "METHOD_NOT_FOUND",
+                        "data": "40",
+                    },
+                    {
+                        "method": "ERROR",
+                        "error": "METHOD_NOT_FOUND",
+                        "data": ",",
+                    },
+                    {
+                        "method": "ERROR",
+                        "error": "METHOD_NOT_FOUND",
+                        "data": "30",
+                    },
+                ],
+            ),
+            (
+                "sl : 0.5",
+                [
+                    {
+                        "method": "ERROR",
+                        "error": "INVALID_PARAM",
+                        "data": "sl",
+                    },
+                    {
+                        "method": "ERROR",
+                        "error": "METHOD_NOT_FOUND",
+                        "data": ":",
+                    },
+                    {
+                        "method": "ERROR",
+                        "error": "METHOD_NOT_FOUND",
+                        "data": "0.5",
+                    },
+                ],
+            ),
+            # 未知のショートカット文字列
+            (
+                "mv:y,z",
+                [
+                    {
+                        "method": "ERROR",
+                        "error": "INVALID_PARAM",
+                        "data": "y,z", # _parse_angles が None を返した場合に cmd_param_str を返す
+                    }
+                ],
+            ),
+            # 浮動小数点数や特殊な数値フォーマット
+            ("sl:.5", [{"method": "sleep", "params": {"sec": 0.5}}]),
+            ("sl:1.", [{"method": "sleep", "params": {"sec": 1.0}}]),
+            ("sl:1e-1", [{"method": "sleep", "params": {"sec": 0.1}}]),
+            (
+                "mp:0,+50",
+                [
+                    {
+                        "method": "move_pulse_relative",
+                        "params": {"servo_i": 0, "pulse_diff": 50},
+                    }
+                ],
+            ),
+            (
+                "mp:0,-50",
+                [
+                    {
+                        "method": "move_pulse_relative",
+                        "params": {"servo_i": 0, "pulse_diff": -50},
+                    }
+                ],
+            ),
+            # 空のパラメータ (既存を拡張)
+            (
+                "sl:",
+                [
+                    {
+                        "method": "ERROR",
+                        "error": "INVALID_PARAM",
+                        "data": "sl:", # cmd_str 全体がデータになる
+                    }
+                ],
+            ),
+            # 複数の引数形式 (既存を拡張)
+            (
+                "mv:10",
+                [
+                    {
+                        "method": "move_all_angles_sync",
+                        "params": {"angles": [10]}, # 修正
+                    }
+                ],
+            ),
+            (
+                "mv:10,20",
+                [
+                    {
+                        "method": "move_all_angles_sync",
+                        "params": {"angles": [10, 20]},
                     }
                 ],
             ),

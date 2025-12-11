@@ -3,6 +3,7 @@
 #
 """piservo.py"""
 
+import pigpio
 from ..utils.mylogger import get_logger
 
 
@@ -50,9 +51,13 @@ class PiServo:
         Returns:
             int: pulse width (micro sec)
         """
-        pulse = self.pi.get_servo_pulsewidth(self.pin)
-        self.__log.debug("pulse=%s", pulse)
-        return pulse
+        try:
+            pulse = self.pi.get_servo_pulsewidth(self.pin)
+            self.__log.debug("pulse=%s", pulse)
+            return pulse
+        except pigpio.error as e:
+            self.__log.error("pigpio error in get_pulse: %s", e)
+            return -1
 
     def move_pulse(self, pulse):
         """サーボモーターを指定されたパルス幅に移動させる。
@@ -71,7 +76,10 @@ class PiServo:
             pulse = max(min(pulse, self.MAX), self.MIN)
             self.__log.debug("pulse=%s", pulse)
 
-        self.pi.set_servo_pulsewidth(self.pin, pulse)
+        try:
+            self.pi.set_servo_pulsewidth(self.pin, pulse)
+        except pigpio.error as e:
+            self.__log.error("pigpio error in move_pulse: %s", e)
 
     def move_pulse_relative(self, pulse_diff):
         """Move relative.
@@ -121,4 +129,7 @@ class PiServo:
         サーボモーターのパルス幅をOFF (0) に設定し、動作を停止させる。
         """
         self.__log.debug("pin=%s", self.pin)
-        self.pi.set_servo_pulsewidth(self.pin, self.OFF)
+        try:
+            self.pi.set_servo_pulsewidth(self.pin, self.OFF)
+        except pigpio.error as e:
+            self.__log.error("pigpio error in off: %s", e)

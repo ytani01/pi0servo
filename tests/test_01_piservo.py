@@ -5,6 +5,8 @@ tests/test_01_piservo.py
 """
 
 import pytest
+from unittest.mock import MagicMock
+import pigpio
 
 from pi0servo.core.piservo import PiServo
 
@@ -105,3 +107,23 @@ class TestPiServo:
         """offのテスト"""
         pi_servo.off()
         pi_servo.pi.set_servo_pulsewidth.assert_called_with(PIN, PiServo.OFF)
+
+    def test_move_pulse_pigpio_error(self, pi_servo):
+        """move_pulseでpigpioエラーが発生した場合のテスト"""
+        # pigpio.error のインスタンスを side_effect に直接渡す
+        pi_servo.pi.set_servo_pulsewidth.side_effect = pigpio.error("pigpio error")
+
+        # エラーが発生してもアプリケーションがクラッシュしないことを確認
+        pi_servo.move_pulse(1500)
+        assert pi_servo.pi.set_servo_pulsewidth.called
+
+    def test_get_pulse_pigpio_error(self, pi_servo):
+        """get_pulseでpigpioエラーが発生した場合のテスト"""
+        # pigpio.error のインスタンスを side_effect に直接渡す
+        pi_servo.pi.get_servo_pulsewidth.side_effect = pigpio.error("pigpio error")
+
+        # エラーが発生してもアプリケーションがクラッシュしないことを確認
+        pulse = pi_servo.get_pulse()
+        # pigpio.error の場合は -1 を返す
+        assert pulse == -1
+        assert pi_servo.pi.get_servo_pulsewidth.called

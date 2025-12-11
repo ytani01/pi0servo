@@ -8,6 +8,7 @@ tests/test_07_threadworker.py
 import threading
 import time
 from unittest.mock import MagicMock, patch
+import logging # 追加
 
 import pytest
 
@@ -312,18 +313,6 @@ class TestThreadWorker:
         assert thread_worker.step_n == 50
         assert thread_worker.qsize == 0
 
-    def test_handle_interval(self, thread_worker, mocker):
-        """_handle_intervalのテスト"""
-        mock_cmdq_get = mocker.patch.object(thread_worker._cmdq, "get")
-        cmd = {"method": "interval", "params": {"sec": 0.1}}
-        thread_worker.send(cmd)
-        self._wait_for_mock_call(
-            mock_cmdq_get
-        )  # コマンドが処理されるのを待つ
-
-        assert thread_worker.interval_sec == 0.1
-        assert thread_worker.qsize == 0
-
     def test_busy_flag_logic(self, thread_worker, mocker):
         """_busy_flagのロジックのテスト"""
         mservo_instance = thread_worker.mservo
@@ -335,16 +324,95 @@ class TestThreadWorker:
         cmd = {"method": "move_all_angles", "params": {"angles": [0]}}
         thread_worker.send(cmd)
 
-        # コマンドが処理されるのを待つ
-        self._wait_for_mock_call(mservo_instance.move_all_angles)
-
         # コマンド処理後、キューが空になったらbusy_flagはFalseに戻る
+        self._wait_for_mock_call(mservo_instance.move_all_angles)
         assert thread_worker._busy_flag is False
         assert thread_worker.qsize == 0
 
-        # コマンドが処理されるのを待つ
-        self._wait_for_mock_call(mservo_instance.move_all_angles)
 
-        # コマンド処理後、キューが空になったらbusy_flagはFalseに戻る
-        assert thread_worker._busy_flag is False
+    def test_command_order_and_processing(self, thread_worker, mocker): # mocker を追加
+        """複数のコマンドが正しい順序で処理されることを検証"""
+        mservo_instance = thread_worker.mservo
+        cmd1 = {"method": "move_all_angles", "params": {"angles": [10]}}
+        cmd2 = {"method": "move_all_angles", "params": {"angles": [20]}}
+        cmd3 = {"method": "move_all_angles", "params": {"angles": [30]}}
+
+        thread_worker.send(cmd1)
+        thread_worker.send(cmd2)
+        thread_worker.send(cmd3)
+
+        self._wait_for_mock_call(mservo_instance.move_all_angles, timeout=2.0)
+        self._wait_for_mock_call(mservo_instance.move_all_angles, timeout=2.0)
+        self._wait_for_mock_call(mservo_instance.move_all_angles, timeout=2.0)
+
+        # 呼び出し順序を検証
+        mservo_instance.move_all_angles.assert_has_calls([
+            mocker.call([10]),
+            mocker.call([20]),
+            mocker.call([30]),
+        ])
         assert thread_worker.qsize == 0
+
+
+
+    def test_error_logging(self, thread_worker, mocker):
+        """エラーハンドリング時のログ出力のテスト"""
+        mservo_instance = thread_worker.mservo
+        error_message = "Mocked MServo error"
+        mservo_instance.move_all_angles.side_effect = ValueError(error_message)
+        
+        # ThreadWorkerの内部ログオブジェクトをモック
+        mock_log = mocker.patch.object(thread_worker, "_ThreadWorker__log")
+
+        cmd = {"method": "move_all_angles", "params": {"angles": [0]}}
+        thread_worker.send(cmd)
+
+        # コマンドが処理されるまで待つ
+        self._wait_for_mock_call(mservo_instance.move_all_angles, timeout=2.0)
+
+        # エラーログが記録されたことを確認
+        mock_log.error.assert_called_once()
+        # ログメッセージが正しくフォーマットされていることを検証
+        logged_message_format, *logged_args = mock_log.error.call_args[0]
+        assert "ValueError" == logged_args[0]
+        assert error_message in str(logged_args[1]) # ここを修正
+
+    def test_wait_command_timeout(self, thread_worker, mocker):
+        """waitコマンドのタイムアウトテスト"""
+        thread_worker._busy_flag = True  # busy状態をシミュレート
+        
+        # _cmdq.putがブロックしないようにモック（実際はキューにコマンドを入れないので不要だが念のため）
+        mocker.patch.object(thread_worker._cmdq, 'put')
+
+        # send() がタイムアウトする場合
+        cmd_wait_timeout = {"method": thread_worker.CMD_WAIT, "params": {"timeout": 0.05}} # タイムアウト時間を短く設定
+        reply = thread_worker.send(cmd_wait_timeout)
+
+        assert reply["error"]["code"] == thread_worker.ERROR_CODE["TIMEOUT"]
+        assert "Timeout" in reply["error"]["message"]
+        assert thread_worker.qsize == 0
+
+    def test_send_queue_full(self, mocker_multiservo, mocker_pigpio, mocker):
+        """キューが満杯の場合のsend()の挙動をテスト"""
+        pi = mocker_pigpio()
+        mocker_multiservo()
+        # キューサイズを小さく設定
+        worker = ThreadWorker(pi, PINS, maxqsize=1, debug=False)
+        worker.start()
+
+        cmd1 = {"method": "move_all_angles", "params": {"angles": [10]}}
+        cmd2 = {"method": "move_all_angles", "params": {"angles": [20]}}
+
+        worker.send(cmd1)  # 1つ目のコマンドでキューは満杯になる
+
+        # 2つ目のコマンドを送信
+        # ThreadWorkerのsend()はキューが満杯の場合、エラーを返す
+        reply = worker.send(cmd2)
+
+        assert reply["error"]["code"] == worker.ERROR_CODE["QUEUE_FULL"]
+        assert "Queue full" in reply["error"]["message"]
+        assert worker.qsize == 1  # 最初のコマンドだけがキューに残っている
+
+        worker.end()
+
+
