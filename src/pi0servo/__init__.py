@@ -13,7 +13,7 @@ from .core.multi_servo import MultiServo
 from .core.piservo import PiServo
 from .helper.cmd_parser import CmdParser
 from .helper.commonlib import CommonLib
-from .helper.jsonrpc_worker import JsonRpcWorker
+from .helper.thread_worker import ThreadWorker
 from .utils.clibase import CliBase
 from .utils.clickutils import click_common_opts
 from .utils.cliwithhistory import CliWithHistory
@@ -27,7 +27,7 @@ __all__ = [
     "CalibrableServo",
     "MultiServo",
     "CmdParser",
-    "JsonRpcWorker",
+    "ThreadWorker",
     "ServoConfigManager",
     "__version__",
     "click_common_opts",

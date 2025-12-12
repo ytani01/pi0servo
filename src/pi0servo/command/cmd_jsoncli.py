@@ -6,7 +6,8 @@ import json
 import os
 import readline
 
-from pi0servo import JsonRpcWorker, errmsg, get_logger
+from ..helper.thread_worker import ThreadWorker
+from ..utils.mylogger import errmsg, get_logger
 
 
 class CmdJsonCli:
@@ -53,7 +54,7 @@ class CmdJsonCli:
         atexit.register(readline.write_history_file, self.history_file)
         readline.set_history_length(self.HIST_LEN)
 
-        self.worker = JsonRpcWorker(
+        self.worker = ThreadWorker(
             pi, pins, flag_verbose=self.flag_verbose, debug=self.__debug
         )
 

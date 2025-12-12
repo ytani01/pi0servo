@@ -164,7 +164,7 @@ class HandleQueue:
         return False
 
 
-class JsonRpcWorker(threading.Thread):
+class ThreadWorker(threading.Thread):
     """JSON RPC Worker."""
 
     DEF_RECV_TIMEOUT = 0.2  # sec

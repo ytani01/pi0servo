@@ -7,9 +7,9 @@ import atexit
 import os
 import readline
 
-from pi0servo import JsonRpcWorker, errmsg, get_logger
-
 from ..helper.cmd_parser import CmdParser
+from ..helper.thread_worker import ThreadWorker
+from ..utils.mylogger import errmsg, get_logger
 
 
 class CmdStrCli:
@@ -56,7 +56,7 @@ class CmdStrCli:
         readline.set_history_length(self.HIST_LEN)
 
         self.parser = CmdParser(debug=self.__debug)
-        self.worker = JsonRpcWorker(pi, pins, debug=self.__debug)
+        self.worker = ThreadWorker(pi, pins, debug=self.__debug)
 
     def end(self):
         """End."""
