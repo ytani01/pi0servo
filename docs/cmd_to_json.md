@@ -1,6 +1,6 @@
-# StrCmdToJson
+# Command string to JSON-RPC request data
 
-## 基本ルール
+## 文字列コマンドの基本ルール
 
 - 先頭の2文字は、コマンド種別
 

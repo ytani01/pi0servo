@@ -9,7 +9,7 @@ import readline
 
 from pi0servo import JsonRpcWorker, errmsg, get_logger
 
-from ..helper.str_cmd_to_json import StrCmdToJson
+from ..helper.cmd_parser import CmdParser
 
 
 class CmdStrJsonRpcCli:
@@ -55,7 +55,7 @@ class CmdStrJsonRpcCli:
         atexit.register(readline.write_history_file, self.history_file)
         readline.set_history_length(self.HIST_LEN)
 
-        self.parser = StrCmdToJson(debug=self.__debug)
+        self.parser = CmdParser(debug=self.__debug)
         self.worker = JsonRpcWorker(pi, pins, debug=self.__debug)
 
     def end(self):

@@ -9,7 +9,7 @@ from typing import Any
 from ..utils.mylogger import errmsg, get_logger
 
 
-class StrCmdToJson:
+class CmdParser:
     """String Command to JSON."""
 
     ANGLE_MIN = -90
@@ -118,6 +118,10 @@ class StrCmdToJson:
         # self.__log.debug("angles=%s", angles)
         return angles
 
+    def _parse_params_mv(self, cmd_params) -> dict:
+        """Parse command 'mv'."""
+        pass
+
     def cmdstr_to_json(self, cmd_str: str) -> dict:
         """Command string to command data(dict).
 
@@ -130,104 +134,89 @@ class StrCmdToJson:
         """
         self.__log.debug("cmd_str=%s", cmd_str)
 
-        # 不正な文字列はエラー
-        if not isinstance(
-            cmd_str, str
-        ):  # " " in cmd_str のチェックを再度削除
-            return self._create_error_data("INVALID_REQUEST_FORMAT", cmd_str)
-
-        # コマンド名・パラメータ分割
-        # e.g. "mv:10,20,30,40" --> cmd_parts = ["mv", "10,20,30,40"]
+        # e.g. "mv:10,20,30,40" --> ["mv", "10,20,30,40"]
         cmd_parts = cmd_str.split(":", 1)
 
-        # e.g. cmd_key = "mv"
-        cmd_key = cmd_parts[0].lower()
+        cmd_name = cmd_parts[0].lower()
+        if len(cmd_parts) > 1:
+            cmd_params = cmd_parts[1]
+        else:
+            cmd_params = ""
 
-        if cmd_key not in self.COMMAND_MAP:
+        if cmd_name not in self.COMMAND_MAP:
             _err_dict = self._create_error_data("METHOD_NOT_FOUND", cmd_str)
             self.__log.error("%s", _err_dict)
             return _err_dict
 
-        # コマンド名の取得 e.g. "mv" --> "move_all_angles_sync"
-        cmd_name = self.COMMAND_MAP[cmd_key]
-
-        # パラメータの取得
-        cmd_param_str = ""
-        if len(cmd_parts) > 1:
-            cmd_param_str = cmd_parts[1]
-        # self.__log.debug(
-        #     "cmd_key=%s,cmd_name=%s,cmd_param_str=%s",
-        #     cmd_key,
-        #     cmd_name,
-        #     cmd_param_str,
-        # )
+        # e.g. "mv" --> "move_all_angles_sync"
+        method_name = self.COMMAND_MAP[cmd_name]
 
         # _cmd_dataの初期化
-        _cmd_data: dict[str, Any] = {"method": cmd_name}
+        cmd_data: dict[str, Any] = {"method": method_name}
 
         # コマンド別の処理
         try:
-            if cmd_key == "mv":
-                if not cmd_param_str:
+            if cmd_name == "mv":
+                if not cmd_params:
                     return self._create_error_data("INVALID_PARAM", cmd_str)
 
-                angles = self._parse_angles(cmd_param_str)
+                angles = self._parse_angles(cmd_params)
                 # self.__log.debug("angles=%s", angles)
                 if angles is None:  # _parse_angles が None を返した場合
                     return self._create_error_data(
-                        "INVALID_PARAM", cmd_param_str
+                        "INVALID_PARAM", cmd_params
                     )
 
-                _cmd_data["params"] = {"angles": angles}
+                cmd_data["params"] = {"angles": angles}
 
-            elif cmd_key == "mr":
-                if not cmd_param_str:
+            elif cmd_name == "mr":
+                if not cmd_params:
                     return self._create_error_data("INVALID_PARAM", cmd_str)
 
-                angle_diffs = [int(a) for a in cmd_param_str.split(",")]
+                angle_diffs = [int(a) for a in cmd_params.split(",")]
                 self.__log.debug("angle_diffs=%s", angle_diffs)
 
                 if angle_diffs is None:
                     return self._create_error_data(
-                        "INVALID_PARAM", cmd_param_str
+                        "INVALID_PARAM", cmd_params
                     )
 
-                _cmd_data["params"] = {"angle_diffs": angle_diffs}
+                cmd_data["params"] = {"angle_diffs": angle_diffs}
 
-            elif cmd_key in ["sl", "ms", "is"]:
+            elif cmd_name in ["sl", "ms", "is"]:
                 try:
-                    sec = float(cmd_param_str)
+                    sec = float(cmd_params)
                     if sec < 0:
                         return self._create_error_data(
                             "INVALID_PARAM", cmd_str
                         )
-                    _cmd_data["params"] = {"sec": sec}
+                    cmd_data["params"] = {"sec": sec}
                 except Exception as e:
                     self.__log.warning(errmsg(e))
                     return self._create_error_data("INVALID_PARAM", cmd_str)
 
-            elif cmd_key == "st":
+            elif cmd_name == "st":
                 try:
-                    _n = int(cmd_param_str)
+                    _n = int(cmd_params)
                     if _n < 1:
                         return self._create_error_data(
                             "INVALID_PARAM", cmd_str
                         )
-                    _cmd_data["params"] = {"step_n": _n}
+                    cmd_data["params"] = {"step_n": _n}
                 except Exception as e:
                     self.__log.warning(errmsg(e))
                     return self._create_error_data("INVALID_PARAM", cmd_str)
 
-            elif cmd_key == "mp":
-                if not cmd_param_str:
+            elif cmd_name == "mp":
+                if not cmd_params:
                     return self._create_error_data("INVALID_PARAM", cmd_str)
 
                 try:
-                    sv_idx_str, p_diff_str = cmd_param_str.split(",")
+                    sv_idx_str, p_diff_str = cmd_params.split(",")
                     sv_idx = int(sv_idx_str)
                     p_diff = int(p_diff_str)
 
-                    _cmd_data["params"] = {
+                    cmd_data["params"] = {
                         "servo_i": sv_idx,
                         "pulse_diff": p_diff,
                     }
@@ -235,7 +224,7 @@ class StrCmdToJson:
                     self.__log.warning(errmsg(e))
                     return self._create_error_data("INVALID_PARAM", cmd_str)
 
-            elif cmd_key in ("sc", "sn", "sx"):
+            elif cmd_name in ("sc", "sn", "sx"):
                 """
                 XXX TBD: パスル指定できるよにすべき？
 
@@ -251,7 +240,7 @@ class StrCmdToJson:
                 }
                 """
                 try:
-                    params = cmd_param_str.split(",", 1)
+                    params = cmd_params.split(",", 1)
 
                     servo_i = int(params[0])
 
@@ -259,7 +248,7 @@ class StrCmdToJson:
                     if len(params) > 1:
                         pulse = int(params[1])
 
-                    target = self.SET_TARGET[cmd_key]
+                    target = self.SET_TARGET[cmd_name]
 
                     self.__log.debug(
                         "servo_i=%s,target=%s,pulse=%s",
@@ -268,7 +257,7 @@ class StrCmdToJson:
                         pulse,
                     )
 
-                    _cmd_data["params"] = {
+                    cmd_data["params"] = {
                         "servo_i": servo_i,
                         "target": target,
                         "pulse": pulse,
@@ -277,31 +266,31 @@ class StrCmdToJson:
                     self.__log.warning(errmsg(e))
                     return self._create_error_data("INVALID_PARAM", cmd_str)
 
-            elif cmd_key in ["ca", "zz", "qs", "qq", "wa", "ww"]:
+            elif cmd_name in ["ca", "zz", "qs", "qq", "wa", "ww"]:
                 pass
 
         except (ValueError, TypeError, IndexError) as _e:
             self.__log.error("%s: %s", type(_e).__name__, _e)
             return self._create_error_data("INVALID_PARAM", cmd_str)
 
-        self.__log.debug("_cmd_data=%s", _cmd_data)
-        return _cmd_data
+        self.__log.debug("cmd_data=%s", cmd_data)
+        return cmd_data
 
     def cmdstr_to_jsonlist(self, cmd_line: str) -> list[dict]:
         """Command line to command string list."""
 
-        _cmd_data_list = []
+        cmd_data_list = []
 
         for cmd_str in cmd_line.strip().split():  # .strip() を追加
-            _cmd_data = self.cmdstr_to_json(cmd_str)
-            # self.__log.debug("cmd_data=%s", _cmd_data)
+            cmd_data = self.cmdstr_to_json(cmd_str)
+            # self.__log.debug("cmd_data=%s", cmd_data)
 
-            _cmd_data_list.append(_cmd_data)
+            cmd_data_list.append(cmd_data)
 
-            if _cmd_data.get("err"):
+            if cmd_data.get("err"):
                 break
 
-        return _cmd_data_list
+        return cmd_data_list
 
     def cmdstr_to_jsonliststr(self, cmd_line: str) -> str:
         """Dict形式をJSON文字列に変換."""

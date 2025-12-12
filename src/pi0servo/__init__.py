@@ -11,9 +11,9 @@ else:
 from .core.calibrable_servo import CalibrableServo
 from .core.multi_servo import MultiServo
 from .core.piservo import PiServo
+from .helper.cmd_parser import CmdParser
 from .helper.commonlib import CommonLib
 from .helper.jsonrpc_worker import JsonRpcWorker
-from .helper.str_cmd_to_json import StrCmdToJson
 from .utils.clibase import CliBase
 from .utils.clickutils import click_common_opts
 from .utils.cliwithhistory import CliWithHistory
@@ -23,19 +23,19 @@ from .utils.scriptrunner import ScriptRunner
 from .utils.servo_config_manager import ServoConfigManager
 
 __all__ = [
+    "PiServo",
+    "CalibrableServo",
+    "MultiServo",
+    "CmdParser",
+    "JsonRpcWorker",
+    "ServoConfigManager",
     "__version__",
     "click_common_opts",
     "errmsg",
     "get_logger",
-    "CalibrableServo",
     "CliBase",
     "CliWithHistory",
     "CommonLib",
     "ScriptRunner",
-    "MultiServo",
     "OneKeyCli",
-    "PiServo",
-    "ServoConfigManager",
-    "StrCmdToJson",
-    "JsonRpcWorker",
 ]

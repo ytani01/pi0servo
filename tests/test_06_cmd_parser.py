@@ -2,28 +2,28 @@
 # (c) 2025 Yoichi Tanibayashi
 #
 """
-tests/test_06_str_cmd_to_json.py
+tests/test_06_cmd_parser.py
 """
 
 import json
 
 import pytest
 
-from pi0servo.helper.str_cmd_to_json import StrCmdToJson
+from pi0servo.helper.cmd_parser import CmdParser
 
 
 @pytest.fixture
-def str_cmd_to_json_instance():
-    """StrCmdToJsonのテスト用インスタンスを生成するフィクスチャ"""
-    return StrCmdToJson(debug=True)
+def cmd_parser_instance():
+    """CmdParserのテスト用インスタンスを生成するフィクスチャ"""
+    return CmdParser(debug=True)
 
 
-class TestStrCmdToJson:
-    """StrCmdToJsonクラスのテスト"""
+class TestCmdParser:
+    """CmdParserクラスのテスト"""
 
     def test_create_error_data(self):
         """_create_error_dataのテスト"""
-        instance = StrCmdToJson()
+        instance = CmdParser()
         error_data = instance._create_error_data("INVALID_PARAM", "mv:abc")
         assert error_data == {
             "method": "ERROR",
@@ -33,7 +33,7 @@ class TestStrCmdToJson:
 
     def test_parse_angles_angle_factor_shorter(self):
         """_parse_anglesでangle_factorがanglesより短い場合のテスト"""
-        instance = StrCmdToJson(debug=True)
+        instance = CmdParser(debug=True)
         angle_str = "40,30,20"
         expected_angles = [
             40,
@@ -45,7 +45,7 @@ class TestStrCmdToJson:
 
     def test_parse_angles_angle_factor_longer(self):
         """_parse_anglesでangle_factorがanglesより長い場合のテスト"""
-        instance = StrCmdToJson(debug=True)
+        instance = CmdParser(debug=True)
         angle_str = "40,30"
         expected_angles = [40, 30]
 
@@ -54,7 +54,7 @@ class TestStrCmdToJson:
 
     def test_cmdstr_to_json_not_string(self):
         """cmdstr_to_jsonで文字列ではない入力のテスト"""
-        instance = StrCmdToJson()
+        instance = CmdParser()
         cmd_str = 123  # int型
         expected_json_obj = {
             "method": "ERROR",
@@ -66,7 +66,7 @@ class TestStrCmdToJson:
 
     def test_cmdstr_to_jsonlist_empty_line(self):
         """cmdstr_to_jsonlistで空のコマンドラインのテスト"""
-        instance = StrCmdToJson()
+        instance = CmdParser()
         cmd_line = ""
         expected_json_obj = []
         result = instance.cmdstr_to_jsonlist(cmd_line)
@@ -74,7 +74,7 @@ class TestStrCmdToJson:
 
     def test_cmdstr_to_json_negative_sec(self):
         """cmdstr_to_jsonで負のsecパラメータのテスト"""
-        instance = StrCmdToJson()
+        instance = CmdParser()
         cmd_str = "sl:-0.5"
         expected_json_obj = {
             "method": "ERROR",
@@ -86,7 +86,7 @@ class TestStrCmdToJson:
 
     def test_cmdstr_to_json_step_n_less_than_one(self):
         """cmdstr_to_jsonでstep_nが1未満のテスト"""
-        instance = StrCmdToJson()
+        instance = CmdParser()
         cmd_str = "st:0"
         expected_json_obj = {
             "method": "ERROR",
@@ -358,16 +358,14 @@ class TestStrCmdToJson:
         ],
     )
     def test_cmdstr_to_jsonliststr(
-        self, str_cmd_to_json_instance, cmd_str, expected_json_obj
+        self, cmd_parser_instance, cmd_str, expected_json_obj
     ):
         """cmdstr_to_jsonliststrのテスト"""
-        result_json_str = str_cmd_to_json_instance.cmdstr_to_jsonliststr(
-            cmd_str
-        )
+        result_json_str = cmd_parser_instance.cmdstr_to_jsonliststr(cmd_str)
         result_obj = json.loads(result_json_str)
         assert result_obj == expected_json_obj
 
-    def test_multiple_commands_in_line(self, str_cmd_to_json_instance):
+    def test_multiple_commands_in_line(self, cmd_parser_instance):
         """複数コマンドが1行にある場合のテスト"""
         cmd_line = "mv:40,30 sl:0.1 mv:x,n"
         expected_json_obj = [
@@ -381,11 +379,11 @@ class TestStrCmdToJson:
                 "params": {"angles": ["max", "min"]},
             },
         ]
-        result = str_cmd_to_json_instance.cmdstr_to_jsonliststr(cmd_line)
+        result = cmd_parser_instance.cmdstr_to_jsonliststr(cmd_line)
         result_obj = json.loads(result)
         assert result_obj == expected_json_obj
 
-    def test_multiple_commands_with_error(self, str_cmd_to_json_instance):
+    def test_multiple_commands_with_error(self, cmd_parser_instance):
         """複数コマンド中にエラーがある場合のテスト"""
         cmd_line = "mv:40,30 unknown:10 sl:0.1"
         expected_json_obj = [
@@ -400,6 +398,6 @@ class TestStrCmdToJson:
             },
             {"method": "sleep", "params": {"sec": 0.1}},
         ]
-        result = str_cmd_to_json_instance.cmdstr_to_jsonliststr(cmd_line)
+        result = cmd_parser_instance.cmdstr_to_jsonliststr(cmd_line)
         result_obj = json.loads(result)
         assert result_obj == expected_json_obj
