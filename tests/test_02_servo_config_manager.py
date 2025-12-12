@@ -7,7 +7,6 @@ Test for ServoConfigManager
 
 import json
 from pathlib import Path
-from unittest.mock import MagicMock
 
 import pytest
 
@@ -268,12 +267,3 @@ def test_read_malformed_json_structure(config_manager):
     with open(conf_file, "w") as f:
         json.dump([{"foo": "bar"}], f)
     assert manager.read_all_configs() == []
-
-
-
-
-
-
-
-
-

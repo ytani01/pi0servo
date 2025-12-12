@@ -87,6 +87,9 @@ samples = [
 ]
 
 [[tool.mypy.overrides]]
-module = ['pigpio', 'fastapi', 'requests', 'jsonrpc', 'click', 'blessed']
+module = [
+       'pigpio', 'fastapi', 'requests', 'jsonrpc', 'click', 'blessed',
+       'pi0servo.web.json_api'
+]
 ignore_missing_imports = true
 #follow_untyped_imports = true

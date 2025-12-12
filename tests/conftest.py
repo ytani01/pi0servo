@@ -15,19 +15,6 @@ from ._testbase_cli import (
     InteractiveSession,
 )
 
-# This is necessary to make the fixtures available to all tests.
-(
-    CLITestBase,
-    InteractiveSession,
-    KEY_UP,
-    KEY_DOWN,
-    KEY_ENTER,
-    KEY_EOF,
-    KEY_LEFT,
-    KEY_RIGHT,
-    mocker_pigpio,
-)
-
 
 @pytest.fixture
 def mock_api_server_app():

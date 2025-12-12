@@ -111,7 +111,7 @@ class StrCmdToJson:
             except ValueError as e:
                 self.__log.error(errmsg(e))
                 # エラーの場合は None ではなく、エラーを示すオブジェクトを返す
-                return None # ここは None のままにする
+                return None  # ここは None のままにする
 
             angles.append(angle)
 
@@ -131,7 +131,9 @@ class StrCmdToJson:
         self.__log.debug("cmd_str=%s", cmd_str)
 
         # 不正な文字列はエラー
-        if not isinstance(cmd_str, str): # " " in cmd_str のチェックを再度削除
+        if not isinstance(
+            cmd_str, str
+        ):  # " " in cmd_str のチェックを再度削除
             return self._create_error_data("INVALID_REQUEST_FORMAT", cmd_str)
 
         # コマンド名・パラメータ分割
@@ -171,7 +173,7 @@ class StrCmdToJson:
 
                 angles = self._parse_angles(cmd_param_str)
                 # self.__log.debug("angles=%s", angles)
-                if angles is None: # _parse_angles が None を返した場合
+                if angles is None:  # _parse_angles が None を返した場合
                     return self._create_error_data(
                         "INVALID_PARAM", cmd_param_str
                     )
@@ -290,7 +292,7 @@ class StrCmdToJson:
 
         _cmd_data_list = []
 
-        for cmd_str in cmd_line.strip().split(): # .strip() を追加
+        for cmd_str in cmd_line.strip().split():  # .strip() を追加
             _cmd_data = self.cmdstr_to_json(cmd_str)
             # self.__log.debug("cmd_data=%s", _cmd_data)
 

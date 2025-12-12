@@ -52,8 +52,6 @@ class TestStrCmdToJson:
         result = instance._parse_angles(angle_str)
         assert result == expected_angles
 
-
-
     def test_cmdstr_to_json_not_string(self):
         """cmdstr_to_jsonで文字列ではない入力のテスト"""
         instance = StrCmdToJson()
@@ -130,11 +128,11 @@ class TestStrCmdToJson:
             ),
             ("sl:0.5", [{"method": "sleep", "params": {"sec": 0.5}}]),
             (
-                "mp:0,-50",
+                "mp:0,-40",
                 [
                     {
                         "method": "move_pulse_relative",
-                        "params": {"servo_i": 0, "pulse_diff": -50},
+                        "params": {"servo_i": 0, "pulse_diff": -40},
                     }
                 ],
             ),
@@ -191,7 +189,7 @@ class TestStrCmdToJson:
                 [
                     {
                         "method": "move_all_angles_sync",
-                        "params": {"angles": [100]}, # 修正
+                        "params": {"angles": [100]},  # 修正
                     }
                 ],
             ),
@@ -300,7 +298,8 @@ class TestStrCmdToJson:
                     {
                         "method": "ERROR",
                         "error": "INVALID_PARAM",
-                        "data": "y,z", # _parse_angles が None を返した場合に cmd_param_str を返す
+                        "data": "y,z",
+                        # _parse_anglesがNoneの場合 cmd_param_str
                     }
                 ],
             ),
@@ -333,7 +332,7 @@ class TestStrCmdToJson:
                     {
                         "method": "ERROR",
                         "error": "INVALID_PARAM",
-                        "data": "sl:", # cmd_str 全体がデータになる
+                        "data": "sl:",  # cmd_str 全体がデータになる
                     }
                 ],
             ),
@@ -343,7 +342,7 @@ class TestStrCmdToJson:
                 [
                     {
                         "method": "move_all_angles_sync",
-                        "params": {"angles": [10]}, # 修正
+                        "params": {"angles": [10]},  # 修正
                     }
                 ],
             ),

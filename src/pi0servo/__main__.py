@@ -30,7 +30,6 @@ def get_pi(debug=False) -> pigpio.pi:
     return pi
 
 
-
 def print_pins_error(ctx):
     """Print error message and help."""
     click.echo()

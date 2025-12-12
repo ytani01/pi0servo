@@ -77,9 +77,9 @@ class ServoConfigManager:
         """
         self.__log.debug("Reading from %s", self.conf_file)
         try:
-            with open(self.conf_file, "r", encoding="utf-8") as f:
+            with open(self.conf_file, encoding="utf-8") as f:
                 data = json.load(f)
-            
+
             if not isinstance(data, list):
                 self.__log.error(
                     "Config file %s contains data that is not a list: %s",
@@ -87,13 +87,13 @@ class ServoConfigManager:
                     type(data).__name__,
                 )
                 return []
-            
+
             # 各要素のバリデーションをここで簡易的に行う
             validated_data = []
             for i, entry in enumerate(data):
                 if not isinstance(entry, dict):
                     self.__log.error(
-                        "Config file %s contains non-dictionary entry at index %d: %s",
+                        "%s: contains non-dict entry: %d: %s",
                         self.conf_file,
                         i,
                         type(entry).__name__,
@@ -101,21 +101,21 @@ class ServoConfigManager:
                     continue
                 if "pin" not in entry:
                     self.__log.error(
-                        "Config file %s contains entry without 'pin' key at index %d",
+                        "%s: contains entry without 'pin' key: %d",
                         self.conf_file,
                         i,
                     )
                     continue
                 if not isinstance(entry["pin"], int):
                     self.__log.error(
-                        "Config file %s contains entry with non-integer 'pin' at index %d: %s",
+                        "%s: non-int 'pin': %d: %s",
                         self.conf_file,
                         i,
                         type(entry["pin"]).__name__,
                     )
                     continue
                 validated_data.append(entry)
-            
+
             return validated_data
 
         except FileNotFoundError:
@@ -126,7 +126,7 @@ class ServoConfigManager:
                 "Invalid JSON format in %s: %s", self.conf_file, e
             )
             return []
-        except OSError as e: # ファイルI/Oエラー全般を捕捉
+        except OSError as e:  # ファイルI/Oエラー全般を捕捉
             self.__log.error(
                 "File I/O error when reading %s: %s", self.conf_file, e
             )
@@ -152,9 +152,7 @@ class ServoConfigManager:
                     f"Config entry must contain 'pin' key (index {i})."
                 )
             if not isinstance(entry["pin"], int):
-                raise ValueError(
-                    f"'pin' must be an integer (index {i})."
-                )
+                raise ValueError(f"'pin' must be an integer (index {i}).")
             if entry["pin"] <= 0:
                 raise ValueError(
                     f"'pin' must be a positive integer (index {i})."
@@ -204,7 +202,8 @@ class ServoConfigManager:
         pin_to_save = new_pindata["pin"]
         all_data = self.read_all_configs()
 
-        # read_all_configs から返されるデータが不正な場合でも対応できるようにフィルタリングを強化
+        # read_all_configs から返されるデータが不正な場合でも
+        # 対応できるようにフィルタリングを強化
         other_pins_data = [
             p
             for p in all_data
