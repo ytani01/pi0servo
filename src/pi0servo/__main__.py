@@ -8,9 +8,9 @@ import pigpio
 
 from . import __version__
 from .command.cmd_calib import CalibApp
-from .command.cmd_jsonrpccli import CmdJsonRpcCli
+from .command.cmd_jsoncli import CmdJsonCli
 from .command.cmd_servo import CmdServo
-from .command.cmd_strjsonrpccli import CmdStrJsonRpcCli
+from .command.cmd_strcli import CmdStrCli
 from .core.calibrable_servo import CalibrableServo
 from .helper.commonlib import CommonLib
 from .utils.clickutils import click_common_opts
@@ -156,8 +156,8 @@ def calib(ctx, pin, conf_file, debug):
     help="Verbose flag",
 )
 @click_common_opts(__version__)
-def jsonrpc_cli(ctx, pins_str, history_file, verbose, debug):
-    """JSON-RPC CLI."""
+def json_cli(ctx, pins_str, history_file, verbose, debug):
+    """JSON(JSON-RPC format) CLI."""
     cmd_name = ctx.command.name
     __log = get_logger(__name__, debug)
     __log.debug("cmd_name=%s", cmd_name)
@@ -179,7 +179,7 @@ def jsonrpc_cli(ctx, pins_str, history_file, verbose, debug):
     pi = None
     try:
         pi = get_pi(debug)
-        app = CmdJsonRpcCli(
+        app = CmdJsonCli(
             prompt_str, pi, pins, history_file, verbose, debug=debug
         )
         app.main()
@@ -205,8 +205,8 @@ def jsonrpc_cli(ctx, pins_str, history_file, verbose, debug):
 )
 @click.option("--script-file", "-f", type=str, default="", help="script file")
 @click_common_opts(__version__)
-def str_jsonrpc_cli(ctx, pins_str, history_file, script_file, debug):
-    """String command CLI (JSON-RPC)"""
+def str_cli(ctx, pins_str, history_file, script_file, debug):
+    """String command CLI."""
     cmd_name = ctx.command.name
     __log = get_logger(__name__, debug)
     __log.debug("cmd_name=%s", cmd_name)
@@ -228,7 +228,7 @@ def str_jsonrpc_cli(ctx, pins_str, history_file, script_file, debug):
 
         prompt_str = cmd_name + "> "
 
-        app = CmdStrJsonRpcCli(
+        app = CmdStrCli(
             pi,
             pins,
             prompt_str,
