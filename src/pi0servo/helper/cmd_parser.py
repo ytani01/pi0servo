@@ -93,7 +93,6 @@ class CmdParser:
             return None
 
         angle_parts = angle_str.split(",")
-        # self.__log.debug("angle_parts=%s", angle_parts)
 
         angles: list[int | str | None] = []
 
@@ -250,6 +249,7 @@ class CmdParser:
         return {"servo_i": servo_i, "pulse": pulse}
 
     def cmdstr_to_json(self, cmd_str: str) -> dict:
+        # XXX TBD: mccabe: Cyclomatic complexity too high: 17 (threshold 15)
         """Command string to command data(dict).
 
         Args:
@@ -295,6 +295,7 @@ class CmdParser:
 
         elif cmd_name == "mr":
             ret = self._parse_params_angle_diffs(cmd_params)
+            self.__log.debug("ret=%s", ret)
             if ret.get("result") == "ERROR":
                 return ret
             cmd_data["params"] = ret
