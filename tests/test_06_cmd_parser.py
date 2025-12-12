@@ -141,7 +141,7 @@ class TestCmdParser:
                 ],
             ),
             (
-                "sc:0",
+                "cb:0,c",
                 [
                     {
                         "method": "set",
@@ -154,7 +154,7 @@ class TestCmdParser:
                 ],
             ),
             (
-                "sn:1,1500",
+                "cb:1,n,1500",
                 [
                     {
                         "method": "set",

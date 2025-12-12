@@ -86,6 +86,19 @@ class CmdStrCli:
             if not linestr:
                 continue
 
+            if linestr.lower() in ["?", "h", "help"]:
+                for c in sorted(self.parser.cmd_map):
+                    print(
+                        f"  {c}: {self.parser.cmd_map[c]['method']:34}",
+                        end="",
+                    )
+                    info = self.parser.cmd_map[c]["info"]
+                    if info:
+                        print(f"{info}")
+                    else:
+                        print()
+                continue
+
             req = self.parser.cmdstr_to_jsonlist(linestr)
             self.__log.debug("req=%s", req)
 

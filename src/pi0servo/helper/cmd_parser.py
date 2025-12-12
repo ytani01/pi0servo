@@ -16,32 +16,6 @@ class CmdParser:
     ANGLE_CENTER = 0
     ANGLE_MAX = 90
 
-    # コマンド文字列とJSONコマンド名のマッピング
-    COMMAND_MAP: dict[str, str] = {
-        # move command
-        "mv": "move_all_angles_sync",
-        "mr": "move_all_angles_sync_relative",
-        # move paramters
-        "sl": "sleep",
-        "ms": "move_sec",
-        "st": "step_n",
-        "is": "interval",
-        # for calibration
-        "mp": "move_pulse_relative",
-        "sc": "set",  # set center
-        "sn": "set",  # set min
-        "sx": "set",  # set max
-        # cancel
-        "ca": "cancel",
-        "zz": "cancel",
-        # qsize
-        "qs": "qsize",
-        "qq": "qsize",
-        # wait
-        "wa": "wait",
-        "ww": "wait",
-    }
-
     # 'mv'コマンドの角度パラメータのエイリアスマッピング
     ANGLE_ALIAS_MAP: dict[str, str] = {
         "x": "max",
@@ -49,18 +23,70 @@ class CmdParser:
         "c": "center",
     }
 
-    # setコマンドのコマンド名と`target`の対応
-    SET_TARGET: dict[str, str] = {
-        "sc": "center",
-        "sn": "min",
-        "sx": "max",
-    }
-
     def __init__(self, debug=False):
         """constractor."""
         self.__debug = debug
         self.__log = get_logger(self.__class__.__name__, self.__debug)
         self.__log.debug("")
+
+        # コマンド文字列とメソッド名、パラメータのパーサーのマッピング
+        self._cmd_map = {
+            "mv": {
+                "method": "move_all_angles_sync",
+                "params": self._parse_params_angles,
+                "info": "mv:30,-20  mv:c,n,x  mv:.,=,c,30",
+            },
+            "mr": {
+                "method": "move_all_angles_sync_relative",
+                "params": self._parse_params_angle_diffs,
+                "info": "mr:10,-20",
+            },
+            # move paramters
+            "sl": {
+                "method": "sleep",
+                "params": self._parse_params_sec,
+                "info": "sl:1  sl:.5",
+            },
+            "ms": {
+                "method": "move_sec",
+                "params": self._parse_params_sec,
+                "info": "ms:1  ms:.5",
+            },
+            "st": {
+                "method": "step_n",
+                "params": self._parse_params_step_n,
+                "info": "st:50  st:2",
+            },
+            "is": {
+                "method": "interval",
+                "params": self._parse_params_sec,
+                "info": "is:1  is:.5",
+            },
+            # for calibration
+            "mp": {
+                "method": "move_pulse_relative",
+                "params": self._parse_params_move_pulse,
+                "info": "mp:0,100  mp:1,-200",
+            },
+            "cb": {
+                "method": "set",
+                "params": self._parse_params_cb,
+                "info": "cb:0,c  cb:1,n,500  cb2,x,2500",
+            },
+            # cancel
+            "ca": {"method": "cancel", "params": None, "info": ""},
+            "zz": {"method": "cancel", "params": None, "info": ""},
+            # qsize
+            "qs": {"method": "qsize", "params": None, "info": ""},
+            "qq": {"method": "qsize", "params": None, "info": ""},
+            # wait
+            "wa": {"method": "wait", "params": None, "info": ""},
+            "ww": {"method": "wait", "params": None, "info": ""},
+        }
+
+    @property
+    def cmd_map(self):
+        return self._cmd_map
 
     def _mk_err_data(
         self, method_name: str, err_name: str, err_data: str
@@ -103,7 +129,7 @@ class CmdParser:
                 angles.append(None)
                 continue
 
-            if _p == ".":  # None: 動かさない
+            if _p in [".", "="]:  # None: 動かさない
                 angles.append(None)
                 continue
 
@@ -226,27 +252,28 @@ class CmdParser:
             self.__log.warning(msg)
             return self._mk_err_params(cmd_params, msg)
 
-        return {"servo_i": servo_i, "pulse_dif": pulse_diff}
+        return {"servo_i": servo_i, "pulse_diff": pulse_diff}
 
-    def _parse_params_set(self, cmd_params: str) -> dict:
-        """Parse params: ``set``method (servo_i, target, pulse)."""
+    def _parse_params_cb(self, cmd_params: str) -> dict:
+        """Parse params: ``cb->set``method (servo_i, target, pulse)."""
         self.__log.debug("cmd_params=%a", cmd_params)
 
         params = cmd_params.split(",")
-        if len(params) > 2:
+        if len(params) > 3:
             return self._mk_err_params(cmd_params, cmd_params)
 
         try:
             servo_i = int(params[0])
+            target = self.ANGLE_ALIAS_MAP[params[1]]
             pulse = None
-            if len(params) == 2:
-                pulse = int(params[1])
+            if len(params) == 3:
+                pulse = int(params[2])
         except Exception as e:
             msg = errmsg(e)
             self.__log.warning(msg)
             return self._mk_err_params(cmd_params, msg)
 
-        return {"servo_i": servo_i, "pulse": pulse}
+        return {"servo_i": servo_i, "target": target, "pulse": pulse}
 
     def cmdstr_to_json(self, cmd_str: str) -> dict:
         # XXX TBD: mccabe: Cyclomatic complexity too high: 17 (threshold 15)
@@ -275,79 +302,25 @@ class CmdParser:
         else:
             cmd_params = ""
 
-        if cmd_name not in self.COMMAND_MAP:
+        if cmd_name not in self.cmd_map:
             _err_data = self._mk_err_data("???", "METHOD_NOT_FOUND", cmd_str)
             self.__log.error("%s", _err_data)
             return _err_data
 
         # e.g. "mv" --> "move_all_angles_sync"
-        method_name = self.COMMAND_MAP[cmd_name]
+        method_name = self.cmd_map[cmd_name]["method"]
+        params_parser = self.cmd_map[cmd_name]["params"]
 
         # cmd_dataの初期化
         cmd_data: dict[str, Any] = {"method": method_name}
 
-        # コマンド別の処理
-        if cmd_name == "mv":
-            ret = self._parse_params_angles(cmd_params)
+        # パラメータのパーズ
+        if params_parser:
+            ret = params_parser(cmd_params)
             if ret.get("result") == "ERROR":
                 return ret
+
             cmd_data["params"] = ret
-
-        elif cmd_name == "mr":
-            ret = self._parse_params_angle_diffs(cmd_params)
-            self.__log.debug("ret=%s", ret)
-            if ret.get("result") == "ERROR":
-                return ret
-            cmd_data["params"] = ret
-
-        elif cmd_name == "mp":
-            ret = self._parse_params_pulse_diffs(cmd_params)
-            if ret.get("result") == "ERROR":
-                return ret
-            cmd_data["params"] = ret
-
-        elif cmd_name in ["sl", "ms", "is"]:
-            ret = self._parse_params_sec(cmd_params)
-            if ret.get("result") == "ERROR":
-                return ret
-            cmd_data["params"] = ret
-
-        elif cmd_name == "st":
-            ret = self._parse_params_step_n(cmd_params)
-            if ret.get("result") == "ERROR":
-                return ret
-            cmd_data["params"] = ret
-
-        elif cmd_name in ("sc", "sn", "sx"):
-            """
-            "sc:1,1500"
-            {
-              "method": "set",
-              "params": {
-                "servo_i": 1,
-                "target": "center"
-                "pulse": 1500
-              }
-            }
-            """
-            # {"servo_i": servo_i, "pulse": pulse}
-            ret = self._parse_params_set(cmd_params)
-            if ret.get("result") == "ERROR":
-                return ret
-
-            cmd_data["params"] = {
-                "servo_i": ret["servo_i"],
-                "target": self.SET_TARGET[cmd_name],
-                "pulse": ret["pulse"],
-            }
-
-        elif cmd_name in ["ca", "zz", "qs", "qq", "wa", "ww"]:
-            pass
-
-        else:
-            _err_data = self._mk_err_data("???", "INVALID_CMD", cmd_str)
-            self.__log.error("%s", _err_data)
-            return _err_data
 
         self.__log.debug("cmd_data=%s", cmd_data)
         return cmd_data

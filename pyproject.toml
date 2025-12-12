@@ -80,6 +80,7 @@ dev = [
     "hatch",
     "twine>=6.2.0",
     "ruff-lsp>=0.0.62",
+    "isort>=7.0.0",
 ]
 samples = [
 ]

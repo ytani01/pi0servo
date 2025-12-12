@@ -19,9 +19,13 @@
   - 'st': {"method": "step_n"}
   - 'is': {"method": "interval"}
   - 'mp': {"method": "move_pulse_relative"}
+
+  - 'cb': {"method": "calibration"}
+
   - 'sc': {"method": "set"}  # set center
   - 'sn': {"method": "set"}  # set min
   - 'sx': {"method": "set"}  # set max
+
   - 'ca': {"method": "cancel"}
   - 'zz': {"method": "cancel"}
   - 'qs': {"method": "qsize"}
@@ -37,68 +41,74 @@
 
 ## 例
 
-入力: 'mv:40,30,20,10'
-出力: '{"method": "move_all_angles_sync", "params": {"angles": [40,30,20,10]}}'
+cmd: 'mv:40,30,20,10'
+json: '{"method": "move_all_angles_sync", "params": {"angles": [40,30,20,10]}}'
 
-入力: 'mv:-40,.,.'
-出力: '{"method": "move_all_angles_sync", "params": {"angles": [-40,null,null]}}'
+cmd: 'mv:-40,.,.'
+json: '{"method": "move_all_angles_sync", "params": {"angles": [-40,null,null]}}'
 
-入力: 'mv:max,min,center'
-出力: '{"method": "move_all_angles_sync", "params": {"angles": ["max","min","center"]}}'
+cmd: 'mv:max,min,center'
+json: '{"method": "move_all_angles_sync", "params": {"angles": ["max","min","center"]}}'
 
-入力: 'mv:x,n,c'
-出力: '{"method": "move_all_angles_sync", "params": {"angles": ["max","min","center"]}}'
+cmd: 'mv:x,n,c'
+json: '{"method": "move_all_angles_sync", "params": {"angles": ["max","min","center"]}}'
 
-入力: 'mv:x,.,center,20'
-出力: '{"method": "move_all_angles_sync", "params": {"angles": ["max",null,"center",20]}}'
+cmd: 'mv:x,.,center,20'
+json: '{"method": "move_all_angles_sync", "params": {"angles": ["max",null,"center",20]}}'
 
-入力: 'mr:-10,0,0,10'
-出力: '{"method": "move_all_angles_sync_relative", "params": {"angle-diffs": [-10,0,0,10]}}'
+cmd: 'mr:-10,0,0,10'
+json: '{"method": "move_all_angles_sync_relative", "params": {"angle-diffs": [-10,0,0,10]}}'
 
-入力: 'sl:0.5'
-出力: '{"method": "sleep", "params": {"sec": 0.5}}'
+cmd: 'sl:0.5'
+json: '{"method": "sleep", "params": {"sec": 0.5}}'
 
-入力: 'sl:1'
-出力: '{"method": "sleep", "params": {"sec": 1}}'
+cmd: 'sl:1'
+json: '{"method": "sleep", "params": {"sec": 1}}'
 
-入力: 'ms:1.5'
-出力: '{"method": "move_sec", "params": {"sec": 1.5}}'
+cmd: 'ms:1.5'
+json: '{"method": "move_sec", "params": {"sec": 1.5}}'
 
-入力: 'st:1'
-出力: '{"method": "step_n", "params": {"n": 1}}'
+cmd: 'st:1'
+json: '{"method": "step_n", "params": {"n": 1}}'
 
-入力: 'st:40'
-出力: '{"method": "step_n", "params": {"n": 40}}'
+cmd: 'st:40'
+json: '{"method": "step_n", "params": {"n": 40}}'
 
-入力: 'is:0.5'
-出力: '{"method": "interval", "params": {"sec": 0.5}}'
+cmd: 'is:0.5'
+json: '{"method": "interval", "params": {"sec": 0.5}}'
 
-入力: 'mp:2,-20'
-出力: '{"method": "move_pulse_relative", "params": {"servo_i": 2, "pulse_diff": -20}}'
+cmd: 'mp:2,-20'
+json: '{"method": "move_pulse_relative", "params": {"servo_i": 2, "pulse_diff": -20}}'
 
-入力: 'sc:1,1500'
-出力: '{"method": "set", "params": {"servo_i": 1, "target": "center", "pulse": 1500}}'
+cmd: 'cb:0,c'
+json: '{"method": "set", "params": {"servo_i": 0, "target": "center", "pulse": None}}
 
-入力: 'sn:2,500'
-出力: '{"method": "set", "params": {"servo_i": 2, "target": "min", "pulse": 500}}'
+cmd: 'cb:1,n,1500'
+json: '{"method": "set", "params": {"servo_i": 1, "target": "min", "pulse": 1500}}
 
-入力: 'sx:0,2500'
-出力: '{"method": "set", "params": {"servo_i": 0, "target": "max", "pulse": 2500}}'
+<!-- cmd: 'sc:1,1500' -->
+<!-- json: '{"method": "set", "params": {"servo_i": 1, "target": "center", "pulse": 1500}}' -->
 
-入力: 'ca'
-出力: '{"method": "cancel"}
+<!-- cmd: 'sn:2,500' -->
+<!-- json: '{"method": "set", "params": {"servo_i": 2, "target": "min", "pulse": 500}}' -->
 
-入力: 'zz'
-出力: '{"method": "cancel"}
+<!-- cmd: 'sx:0,2500' -->
+<!-- json: '{"method": "set", "params": {"servo_i": 0, "target": "max", "pulse": 2500}}' -->
 
-入力: 'qs'
-出力: '{"method": "qsize"}
+cmd: 'ca'
+json: '{"method": "cancel"}
 
-入力: 'qq'
-出力: '{"method": "qsize"}
+cmd: 'zz'
+json: '{"method": "cancel"}
 
-入力: 'wa'
-出力: '{"method": "wait"}
+cmd: 'qs'
+json: '{"method": "qsize"}
 
-入力: 'ww'
-出力: '{"method": "wait"}
+cmd: 'qq'
+json: '{"method": "qsize"}
+
+cmd: 'wa'
+json: '{"method": "wait"}
+
+cmd: 'ww'
+json: '{"method": "wait"}
