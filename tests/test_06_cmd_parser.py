@@ -24,9 +24,12 @@ class TestCmdParser:
     def test_create_error_data(self):
         """_create_error_dataのテスト"""
         instance = CmdParser()
-        error_data = instance._create_error_data("INVALID_PARAM", "mv:abc")
+        error_data = instance._mk_err_data(
+            "methodA", "INVALID_PARAM", "mv:abc"
+        )
         assert error_data == {
-            "method": "ERROR",
+            "result": "ERROR",
+            "method": "methodA",
             "error": "INVALID_PARAM",
             "data": "mv:abc",
         }
@@ -57,9 +60,10 @@ class TestCmdParser:
         instance = CmdParser()
         cmd_str = 123  # int型
         expected_json_obj = {
-            "method": "ERROR",
-            "error": "INVALID_REQUEST_FORMAT",
-            "data": 123,
+            "result": "ERROR",
+            "method": "???",
+            "error": "INVALID_CMD_FORMAT",
+            "data": "123",
         }
         result = instance.cmdstr_to_json(cmd_str)
         assert result == expected_json_obj
@@ -77,9 +81,9 @@ class TestCmdParser:
         instance = CmdParser()
         cmd_str = "sl:-0.5"
         expected_json_obj = {
-            "method": "ERROR",
-            "error": "INVALID_PARAM",
-            "data": "sl:-0.5",
+            "result": "ERROR",
+            "params": "-0.5",
+            "error": "< 0",
         }
         result = instance.cmdstr_to_json(cmd_str)
         assert result == expected_json_obj
@@ -89,9 +93,9 @@ class TestCmdParser:
         instance = CmdParser()
         cmd_str = "st:0"
         expected_json_obj = {
-            "method": "ERROR",
-            "error": "INVALID_PARAM",
-            "data": "st:0",
+            "result": "ERROR",
+            "params": "0",
+            "error": "< 1",
         }
         result = instance.cmdstr_to_json(cmd_str)
         assert result == expected_json_obj
@@ -197,9 +201,9 @@ class TestCmdParser:
                 "mv:abc",
                 [
                     {
-                        "method": "ERROR",
-                        "error": "INVALID_PARAM",
-                        "data": "abc",
+                        "result": "ERROR",
+                        "params": "abc",
+                        "error": "invalid angles",
                     }
                 ],
             ),
@@ -207,7 +211,8 @@ class TestCmdParser:
                 "unknown:10",
                 [
                     {
-                        "method": "ERROR",
+                        "result": "ERROR",
+                        "method": "???",
                         "error": "METHOD_NOT_FOUND",
                         "data": "unknown:10",
                     }
@@ -217,9 +222,12 @@ class TestCmdParser:
                 "sl:abc",
                 [
                     {
-                        "method": "ERROR",
-                        "error": "INVALID_PARAM",
-                        "data": "sl:abc",
+                        "result": "ERROR",
+                        "params": "abc",
+                        "error": (
+                            "ValueError: could not convert string to float:"
+                            " 'abc'"
+                        ),
                     }
                 ],
             ),
@@ -227,9 +235,9 @@ class TestCmdParser:
                 "mv:",
                 [
                     {
-                        "method": "ERROR",
-                        "error": "INVALID_PARAM",
-                        "data": "mv:",
+                        "result": "ERROR",
+                        "params": "",
+                        "error": "no params",
                     }
                 ],
             ),
@@ -250,22 +258,25 @@ class TestCmdParser:
                 "mv: 40 , 30",
                 [
                     {
-                        "method": "ERROR",
-                        "error": "INVALID_PARAM",
-                        "data": "mv:",
+                        "result": "ERROR",
+                        "params": "",
+                        "error": "no params",
                     },
                     {
-                        "method": "ERROR",
+                        "result": "ERROR",
+                        "method": "???",
                         "error": "METHOD_NOT_FOUND",
                         "data": "40",
                     },
                     {
-                        "method": "ERROR",
+                        "result": "ERROR",
+                        "method": "???",
                         "error": "METHOD_NOT_FOUND",
                         "data": ",",
                     },
                     {
-                        "method": "ERROR",
+                        "result": "ERROR",
+                        "method": "???",
                         "error": "METHOD_NOT_FOUND",
                         "data": "30",
                     },
@@ -275,17 +286,19 @@ class TestCmdParser:
                 "sl : 0.5",
                 [
                     {
-                        "method": "ERROR",
-                        "error": "INVALID_PARAM",
-                        "data": "sl",
+                        "result": "ERROR",
+                        "params": "",
+                        "error": "no params",
                     },
                     {
-                        "method": "ERROR",
+                        "result": "ERROR",
+                        "method": "???",
                         "error": "METHOD_NOT_FOUND",
                         "data": ":",
                     },
                     {
-                        "method": "ERROR",
+                        "result": "ERROR",
+                        "method": "???",
                         "error": "METHOD_NOT_FOUND",
                         "data": "0.5",
                     },
@@ -296,10 +309,9 @@ class TestCmdParser:
                 "mv:y,z",
                 [
                     {
-                        "method": "ERROR",
-                        "error": "INVALID_PARAM",
-                        "data": "y,z",
-                        # _parse_anglesがNoneの場合 cmd_param_str
+                        "result": "ERROR",
+                        "params": "y,z",
+                        "error": "invalid angles",
                     }
                 ],
             ),
@@ -330,9 +342,9 @@ class TestCmdParser:
                 "sl:",
                 [
                     {
-                        "method": "ERROR",
-                        "error": "INVALID_PARAM",
-                        "data": "sl:",  # cmd_str 全体がデータになる
+                        "result": "ERROR",
+                        "params": "",
+                        "error": "no params",  # cmd_str 全体がデータになる
                     }
                 ],
             ),
@@ -392,7 +404,8 @@ class TestCmdParser:
                 "params": {"angles": [40, 30]},
             },
             {
-                "method": "ERROR",
+                "result": "ERROR",
+                "method": "???",
                 "error": "METHOD_NOT_FOUND",
                 "data": "unknown:10",
             },

@@ -62,9 +62,20 @@ class CmdParser:
         self.__log = get_logger(self.__class__.__name__, self.__debug)
         self.__log.debug("")
 
-    def _create_error_data(self, code_key: str, strcmd: str) -> dict:
-        """Create error data."""
-        return {"method": "ERROR", "error": code_key, "data": strcmd}
+    def _mk_err_data(
+        self, method_name: str, err_name: str, err_data: str
+    ) -> dict:
+        """Make error data."""
+        return {
+            "result": "ERROR",
+            "method": method_name,
+            "error": err_name,
+            "data": err_data,
+        }
+
+    def _mk_err_params(self, params: str, err_str: str) -> dict:
+        """Make error params."""
+        return {"result": "ERROR", "params": params, "error": err_str}
 
     def _parse_angles(self, angle_str: str) -> list[int | str | None] | None:
         """Parse angle parameters.
@@ -118,9 +129,125 @@ class CmdParser:
         # self.__log.debug("angles=%s", angles)
         return angles
 
-    def _parse_params_mv(self, cmd_params) -> dict:
-        """Parse command 'mv'."""
-        pass
+    def _parse_params_angles(self, cmd_params: str) -> dict:
+        """Parse params: angles."""
+        self.__log.debug("cmd_params=%a", cmd_params)
+
+        if not cmd_params:
+            return self._mk_err_params(cmd_params, "no params")
+
+        angles = self._parse_angles(cmd_params)
+        if angles is None:
+            return self._mk_err_params(cmd_params, "invalid angles")
+
+        return {"angles": angles}
+
+    def _parse_params_angle_diffs(self, cmd_params: str) -> dict:
+        """Parse parmas: angle_diffs."""
+        self.__log.debug("cmd_params=%a", cmd_params)
+
+        if not cmd_params:
+            return self._mk_err_params(cmd_params, "no params")
+
+        try:
+            angle_diffs = [int(a) for a in cmd_params.split(",")]
+        except Exception as e:
+            msg = errmsg(e)
+            self.__log.warning(msg)
+            return self._mk_err_params(cmd_params, msg)
+
+        if angle_diffs is None:
+            return self._mk_err_params(cmd_params, "invalid angle_diffs")
+
+        return {"angle_diffs": angle_diffs}
+
+    def _parse_params_pulse_diffs(self, cmd_params: str) -> dict:
+        """Parse parmas: pulse_diff."""
+        self.__log.debug("cmd_params=%a", cmd_params)
+
+        if not cmd_params:
+            return self._mk_err_params(cmd_params, "no params")
+
+        try:
+            servo_i_str, pulse_diff_str = cmd_params.split(",", 1)
+            servo_i = int(servo_i_str)
+            pulse_diff = int(pulse_diff_str)
+        except Exception as e:
+            msg = errmsg(e)
+            self.__log.warning(msg)
+            return self._mk_err_params(cmd_params, msg)
+
+        return {"servo_i": servo_i, "pulse_diff": pulse_diff}
+
+    def _parse_params_sec(self, cmd_params: str) -> dict:
+        """Parse params second."""
+        self.__log.debug("cmd_params=%a", cmd_params)
+
+        if not cmd_params:
+            return self._mk_err_params(cmd_params, "no params")
+
+        try:
+            sec = float(cmd_params)
+        except Exception as e:
+            msg = errmsg(e)
+            self.__log.warning(msg)
+            return self._mk_err_params(cmd_params, msg)
+
+        if sec < 0:
+            return self._mk_err_params(cmd_params, "< 0")
+
+        return {"sec": sec}
+
+    def _parse_params_step_n(self, cmd_params: str) -> dict:
+        """Parse params: step_n(int)."""
+        self.__log.debug("cmd_params=%a", cmd_params)
+
+        try:
+            step_n = int(cmd_params)
+        except Exception as e:
+            msg = errmsg(e)
+            self.__log.warning(msg)
+            return self._mk_err_params(cmd_params, msg)
+
+        if step_n < 1:
+            return self._mk_err_params(cmd_params, "< 1")
+
+        return {"step_n": step_n}
+
+    def _parse_params_move_pulse(self, cmd_params: str) -> dict:
+        """Parse params: move palse (idx, pulse)"""
+        self.__log.debug("cmd_params=%a", cmd_params)
+
+        try:
+            servo_i_str, pulse_diff_str = cmd_params.split(",", 1)
+            servo_i = int(servo_i_str)
+            pulse_diff = int(pulse_diff_str)
+        except Exception as e:
+            msg = errmsg(e)
+            self.__log.warning(msg)
+            return self._mk_err_params(cmd_params, msg)
+
+        return {"servo_i": servo_i, "pulse_dif": pulse_diff}
+
+    def _parse_params_set(self, cmd_params: str) -> dict:
+        """Parse params: ``set``method (servo_i, target, pulse)."""
+        self.__log.debug("cmd_params=%a", cmd_params)
+
+        params = cmd_params.split(",")
+        if len(params) > 2:
+            return self._mk_err_params(cmd_params, cmd_params)
+
+        try:
+            servo_i = int(params[0])
+            pulse = None
+            if len(params) == 2:
+                pulse = int(params[1])
+        except Exception as e:
+            msg = errmsg(e)
+            self.__log.warning(msg)
+            return self._mk_err_params(cmd_params, msg)
+
+        return {"servo_i": servo_i, "pulse": pulse}
 
     def cmdstr_to_json(self, cmd_str: str) -> dict:
         """Command string to command data(dict).
@@ -134,6 +261,11 @@ class CmdParser:
         """
         self.__log.debug("cmd_str=%s", cmd_str)
 
+        if not isinstance(cmd_str, str):
+            return self._mk_err_data(
+                "???", "INVALID_CMD_FORMAT", str(cmd_str)
+            )
+
         # e.g. "mv:10,20,30,40" --> ["mv", "10,20,30,40"]
         cmd_parts = cmd_str.split(":", 1)
 
@@ -144,134 +276,77 @@ class CmdParser:
             cmd_params = ""
 
         if cmd_name not in self.COMMAND_MAP:
-            _err_dict = self._create_error_data("METHOD_NOT_FOUND", cmd_str)
-            self.__log.error("%s", _err_dict)
-            return _err_dict
+            _err_data = self._mk_err_data("???", "METHOD_NOT_FOUND", cmd_str)
+            self.__log.error("%s", _err_data)
+            return _err_data
 
         # e.g. "mv" --> "move_all_angles_sync"
         method_name = self.COMMAND_MAP[cmd_name]
 
-        # _cmd_dataの初期化
+        # cmd_dataの初期化
         cmd_data: dict[str, Any] = {"method": method_name}
 
         # コマンド別の処理
-        try:
-            if cmd_name == "mv":
-                if not cmd_params:
-                    return self._create_error_data("INVALID_PARAM", cmd_str)
+        if cmd_name == "mv":
+            ret = self._parse_params_angles(cmd_params)
+            if ret.get("result") == "ERROR":
+                return ret
+            cmd_data["params"] = ret
 
-                angles = self._parse_angles(cmd_params)
-                # self.__log.debug("angles=%s", angles)
-                if angles is None:  # _parse_angles が None を返した場合
-                    return self._create_error_data(
-                        "INVALID_PARAM", cmd_params
-                    )
+        elif cmd_name == "mr":
+            ret = self._parse_params_angle_diffs(cmd_params)
+            if ret.get("result") == "ERROR":
+                return ret
+            cmd_data["params"] = ret
 
-                cmd_data["params"] = {"angles": angles}
+        elif cmd_name == "mp":
+            ret = self._parse_params_pulse_diffs(cmd_params)
+            if ret.get("result") == "ERROR":
+                return ret
+            cmd_data["params"] = ret
 
-            elif cmd_name == "mr":
-                if not cmd_params:
-                    return self._create_error_data("INVALID_PARAM", cmd_str)
+        elif cmd_name in ["sl", "ms", "is"]:
+            ret = self._parse_params_sec(cmd_params)
+            if ret.get("result") == "ERROR":
+                return ret
+            cmd_data["params"] = ret
 
-                angle_diffs = [int(a) for a in cmd_params.split(",")]
-                self.__log.debug("angle_diffs=%s", angle_diffs)
+        elif cmd_name == "st":
+            ret = self._parse_params_step_n(cmd_params)
+            if ret.get("result") == "ERROR":
+                return ret
+            cmd_data["params"] = ret
 
-                if angle_diffs is None:
-                    return self._create_error_data(
-                        "INVALID_PARAM", cmd_params
-                    )
+        elif cmd_name in ("sc", "sn", "sx"):
+            """
+            "sc:1,1500"
+            {
+              "method": "set",
+              "params": {
+                "servo_i": 1,
+                "target": "center"
+                "pulse": 1500
+              }
+            }
+            """
+            # {"servo_i": servo_i, "pulse": pulse}
+            ret = self._parse_params_set(cmd_params)
+            if ret.get("result") == "ERROR":
+                return ret
 
-                cmd_data["params"] = {"angle_diffs": angle_diffs}
+            cmd_data["params"] = {
+                "servo_i": ret["servo_i"],
+                "target": self.SET_TARGET[cmd_name],
+                "pulse": ret["pulse"],
+            }
 
-            elif cmd_name in ["sl", "ms", "is"]:
-                try:
-                    sec = float(cmd_params)
-                    if sec < 0:
-                        return self._create_error_data(
-                            "INVALID_PARAM", cmd_str
-                        )
-                    cmd_data["params"] = {"sec": sec}
-                except Exception as e:
-                    self.__log.warning(errmsg(e))
-                    return self._create_error_data("INVALID_PARAM", cmd_str)
+        elif cmd_name in ["ca", "zz", "qs", "qq", "wa", "ww"]:
+            pass
 
-            elif cmd_name == "st":
-                try:
-                    _n = int(cmd_params)
-                    if _n < 1:
-                        return self._create_error_data(
-                            "INVALID_PARAM", cmd_str
-                        )
-                    cmd_data["params"] = {"step_n": _n}
-                except Exception as e:
-                    self.__log.warning(errmsg(e))
-                    return self._create_error_data("INVALID_PARAM", cmd_str)
-
-            elif cmd_name == "mp":
-                if not cmd_params:
-                    return self._create_error_data("INVALID_PARAM", cmd_str)
-
-                try:
-                    sv_idx_str, p_diff_str = cmd_params.split(",")
-                    sv_idx = int(sv_idx_str)
-                    p_diff = int(p_diff_str)
-
-                    cmd_data["params"] = {
-                        "servo_i": sv_idx,
-                        "pulse_diff": p_diff,
-                    }
-                except Exception as e:
-                    self.__log.warning(errmsg(e))
-                    return self._create_error_data("INVALID_PARAM", cmd_str)
-
-            elif cmd_name in ("sc", "sn", "sx"):
-                """
-                XXX TBD: パスル指定できるよにすべき？
-
-                "sc:1,1500"
-
-                {
-                  "method": "set",
-                  "params": {
-                    "servo_i": 1,
-                    "target": "center"
-                    "pulse": 1500
-                  }
-                }
-                """
-                try:
-                    params = cmd_params.split(",", 1)
-
-                    servo_i = int(params[0])
-
-                    pulse: int | None = None
-                    if len(params) > 1:
-                        pulse = int(params[1])
-
-                    target = self.SET_TARGET[cmd_name]
-
-                    self.__log.debug(
-                        "servo_i=%s,target=%s,pulse=%s",
-                        servo_i,
-                        target,
-                        pulse,
-                    )
-
-                    cmd_data["params"] = {
-                        "servo_i": servo_i,
-                        "target": target,
-                        "pulse": pulse,
-                    }
-                except Exception as e:
-                    self.__log.warning(errmsg(e))
-                    return self._create_error_data("INVALID_PARAM", cmd_str)
-
-            elif cmd_name in ["ca", "zz", "qs", "qq", "wa", "ww"]:
-                pass
-
-        except (ValueError, TypeError, IndexError) as _e:
-            self.__log.error("%s: %s", type(_e).__name__, _e)
-            return self._create_error_data("INVALID_PARAM", cmd_str)
+        else:
+            _err_data = self._mk_err_data("???", "INVALID_CMD", cmd_str)
+            self.__log.error("%s", _err_data)
+            return _err_data
 
         self.__log.debug("cmd_data=%s", cmd_data)
         return cmd_data
@@ -281,14 +356,13 @@ class CmdParser:
 
         cmd_data_list = []
 
-        for cmd_str in cmd_line.strip().split():  # .strip() を追加
+        for cmd_str in cmd_line.strip().split():
             cmd_data = self.cmdstr_to_json(cmd_str)
-            # self.__log.debug("cmd_data=%s", cmd_data)
 
             cmd_data_list.append(cmd_data)
 
-            if cmd_data.get("err"):
-                break
+            # if cmd_data.get("err"):
+            #     break
 
         return cmd_data_list
 
