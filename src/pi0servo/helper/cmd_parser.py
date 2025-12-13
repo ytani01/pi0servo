@@ -46,7 +46,8 @@ class CmdParser:
                 self.settings_files.append(file_path)
         self.__log.info(
             "settings_file: select %a from %s",
-            self.settings_files[0], self.settings_files
+            self.settings_files[0],
+            self.settings_files,
         )
 
         if self.settings_files:
