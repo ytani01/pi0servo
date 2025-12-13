@@ -15,7 +15,7 @@ from ..utils.mylogger import errmsg, get_logger
 class CmdParser:
     """String Command to JSON."""
 
-    CONF_PATH = ["/etc", "~", "."]
+    CONF_PATH = [".", "~", "/etc"]  # 優先度順
     CONF_FILENAME = "cmds.toml"
 
     ANGLE_MIN = -90
@@ -35,17 +35,24 @@ class CmdParser:
         self.__log = get_logger(self.__class__.__name__, self.__debug)
         self.__log.debug("")
 
+        #
+        # 設定ファイルの読み込み
+        #
+        # 設定ファイルの
         self.settings_files = []
         for p in self.CONF_PATH:
             file_path = os.path.expanduser(f"{p}/{self.CONF_FILENAME}")
             if os.path.exists(file_path):
                 self.settings_files.append(file_path)
-        self.__log.info("settings_files=%s", self.settings_files)
+        self.__log.info(
+            "settings_file: select %a from %s",
+            self.settings_files[0], self.settings_files
+        )
 
         if self.settings_files:
             try:
                 # 上書き読み込みせず、一つだけ読み込む
-                self.conf = Dynaconf(settings_files=[self.settings_files[-1]])
+                self.conf = Dynaconf(settings_files=[self.settings_files[0]])
             except Exception as e:
                 self.__log.error(errmsg(e))
                 # raise e
@@ -57,7 +64,7 @@ class CmdParser:
             )
             raise FileExistsError
 
-        self.__log.info("conf=%s", self.conf)
+        self.__log.debug("conf=%s", self.conf)
 
     @property
     def cmd_map(self):
