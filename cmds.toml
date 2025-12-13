@@ -1,57 +1,47 @@
+#
 # Don't edit this file
+#
 [mv]
 method = "move_all_angles_sync"
 paramtype = "angles"
-info = "mv:30,-20  mv:c,n,x  mv:.,=,c,30"
+info = "move all servos (e.g. mv:30,-20  mv:c,n,x  mv:.,=,c,30)"
 [mr]
 method = "move_all_angles_sync_relative"
 paramtype = "angle_diffs"
-info = "mr:10,-20"
+info = "move all servos relative (e.g. mr:10,-20)"
 [sl]
 method = "sleep"
 paramtype = "sec"
-info = "sl:1  sl:.5"
+info = "sleep (e.g. sl:1  sl:.5)"
 [ms]
 method = "move_sec"
 paramtype = "sec"
-info = "ms:1  ms:.5"
+info = "set move second (e.g. ms:1  ms:.5)"
 [st]
 method = "step_n"
 paramtype = "step_n"
-info = "st:50  st:2"
+info = "set number of steps (e.g. st:50  st:2)"
 [is]
 method = "interval"
 paramtype = "sec"
-info = "is:1  is:.5"
+info = "set interval (e.g. is:1  is:.5)"
 [mp]
 method = "move_pulse_relative"
 paramtype = "move_pulse"
-info = "mp:0,100  mp:1,-200"
+info = "move single servo by pulse (e.g. mp:0,100  mp:1,-200)"
 [cb]
 method = "set"
 paramtype = "calib"
-info = "cb:0,c  cb:1,n,500  cb:2,x,2500"
-[ca]
-method = "cancel"
-paramtype = ""
-info = ""
-[zz]
-method = "cancel"
-paramtype = ""
-info = ""
-[qs]
-method = "qsize"
-paramtype = ""
-info = ""
+info = "calibrate single servo (e.g. cb:0,c  cb:1,n,500  cb:2,x,2500)"
 [qq]
 method = "qsize"
 paramtype = ""
-info = ""
-[wa]
-method = "wait"
-paramtype = ""
-info = ""
+info = "get queue size"
 [ww]
 method = "wait"
-paramtype = ""  # abc
-info = ""
+paramtype = ""
+info = "wait for competion"
+[zz]
+method = "cancel"
+paramtype = ""
+info = "cancel all queued commands"

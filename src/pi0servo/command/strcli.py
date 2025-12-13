@@ -87,16 +87,8 @@ class StrCliApp:
                 continue
 
             if linestr.lower() in ["?", "h", "help"]:
-                for c in sorted(self.parser.conf.to_dict()):
-                    print(
-                        f"  {c.lower()}: {self.parser.conf[c]['method']:34}",
-                        end="",
-                    )
-                    info = self.parser.conf[c]["info"]
-                    if info:
-                        print(f"{info}")
-                    else:
-                        print()
+                print()
+                print(f"{self.parser.get_help()}")
                 continue
 
             req = self.parser.parse_to_jsonlist(linestr)
