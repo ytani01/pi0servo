@@ -330,3 +330,32 @@ class CmdParser:
 
         self.__log.debug('_json_data="%s"', _json_data)
         return json.dumps(_json_data)
+
+    def get_cmd_help(self, cmd: str):
+        """Get help string."""
+
+        cmd_lower = cmd.lower()
+        cmd_upper = cmd.upper()
+
+        try:
+            help_str = f"{cmd_lower}: "
+            info = self.conf[cmd_upper]["info"]
+            if info:
+                help_str += info
+            help_str += "\n"
+        except Exception as e:
+            help_str = errmsg(e)
+
+        return help_str
+
+    def get_help(self, cmd: str | None = None):
+        """Get help"""
+
+        if cmd:
+            return self.get_cmd_help(cmd)
+
+        help_str = ""
+        for c in sorted(self.conf.to_dict()):
+            help_str += self.get_cmd_help(c)
+
+        return help_str

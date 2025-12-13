@@ -3,11 +3,10 @@
 #
 from importlib.metadata import version
 
-if __package__:
-    __version__ = version(__package__)
-else:
-    __version__ = "_._._"
-
+from .command.calib import CalibApp
+from .command.jsoncli import JsonCliApp
+from .command.servo import ServoApp
+from .command.strcli import StrCliApp
 from .core.calibrable_servo import CalibrableServo
 from .core.multi_servo import MultiServo
 from .core.piservo import PiServo
@@ -22,6 +21,11 @@ from .utils.onekeycli import OneKeyCli
 from .utils.scriptrunner import ScriptRunner
 from .utils.servo_config_manager import ServoConfigManager
 
+if __package__:
+    __version__ = version(__package__)
+else:
+    __version__ = "_._._"
+
 __all__ = [
     "PiServo",
     "CalibrableServo",
@@ -29,6 +33,10 @@ __all__ = [
     "CmdParser",
     "ThreadWorker",
     "ServoConfigManager",
+    "CalibApp",
+    "JsonCliApp",
+    "ServoApp",
+    "StrCliApp",
     "__version__",
     "click_common_opts",
     "errmsg",

@@ -5,7 +5,8 @@ import pprint
 
 import blessed
 
-from pi0servo import CalibrableServo, get_logger
+from ..core.calibrable_servo import CalibrableServo
+from ..utils.mylogger import get_logger
 
 
 class CalibApp:
