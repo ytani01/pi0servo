@@ -3,7 +3,8 @@
 #
 import time
 
-from pi0servo import PiServo, get_logger
+from ..core.piservo import PiServo
+from ..utils.mylogger import get_logger
 
 
 class ServoApp:

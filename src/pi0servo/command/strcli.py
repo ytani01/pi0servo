@@ -87,12 +87,12 @@ class StrCliApp:
                 continue
 
             if linestr.lower() in ["?", "h", "help"]:
-                for c in sorted(self.parser.cmd_map):
+                for c in sorted(self.parser.conf.to_dict()):
                     print(
-                        f"  {c}: {self.parser.cmd_map[c]['method']:34}",
+                        f"  {c.lower()}: {self.parser.conf[c]['method']:34}",
                         end="",
                     )
-                    info = self.parser.cmd_map[c]["info"]
+                    info = self.parser.conf[c]["info"]
                     if info:
                         print(f"{info}")
                     else:
