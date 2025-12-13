@@ -4,13 +4,19 @@
 """cmd_to_json.py."""
 
 import json
+import os
 from typing import Any
+
+from dynaconf import Dynaconf
 
 from ..utils.mylogger import errmsg, get_logger
 
 
 class CmdParser:
     """String Command to JSON."""
+
+    CONF_PATH = ["/etc", "~", "."]
+    CONF_FILENAME = "cmds.toml"
 
     ANGLE_MIN = -90
     ANGLE_CENTER = 0
@@ -29,60 +35,29 @@ class CmdParser:
         self.__log = get_logger(self.__class__.__name__, self.__debug)
         self.__log.debug("")
 
-        # コマンド文字列とメソッド名、パラメータのパーサーのマッピング
-        self._cmd_map = {
-            "mv": {
-                "method": "move_all_angles_sync",
-                "params": self._parse_params_angles,
-                "info": "mv:30,-20  mv:c,n,x  mv:.,=,c,30",
-            },
-            "mr": {
-                "method": "move_all_angles_sync_relative",
-                "params": self._parse_params_angle_diffs,
-                "info": "mr:10,-20",
-            },
-            # move paramters
-            "sl": {
-                "method": "sleep",
-                "params": self._parse_params_sec,
-                "info": "sl:1  sl:.5",
-            },
-            "ms": {
-                "method": "move_sec",
-                "params": self._parse_params_sec,
-                "info": "ms:1  ms:.5",
-            },
-            "st": {
-                "method": "step_n",
-                "params": self._parse_params_step_n,
-                "info": "st:50  st:2",
-            },
-            "is": {
-                "method": "interval",
-                "params": self._parse_params_sec,
-                "info": "is:1  is:.5",
-            },
-            # for calibration
-            "mp": {
-                "method": "move_pulse_relative",
-                "params": self._parse_params_move_pulse,
-                "info": "mp:0,100  mp:1,-200",
-            },
-            "cb": {
-                "method": "set",
-                "params": self._parse_params_cb,
-                "info": "cb:0,c  cb:1,n,500  cb2,x,2500",
-            },
-            # cancel
-            "ca": {"method": "cancel", "params": None, "info": ""},
-            "zz": {"method": "cancel", "params": None, "info": ""},
-            # qsize
-            "qs": {"method": "qsize", "params": None, "info": ""},
-            "qq": {"method": "qsize", "params": None, "info": ""},
-            # wait
-            "wa": {"method": "wait", "params": None, "info": ""},
-            "ww": {"method": "wait", "params": None, "info": ""},
-        }
+        self.settings_files = []
+        for p in self.CONF_PATH:
+            file_path = os.path.expanduser(f"{p}/{self.CONF_FILENAME}")
+            if os.path.exists(file_path):
+                self.settings_files.append(file_path)
+        self.__log.info("settings_files=%s", self.settings_files)
+
+        if self.settings_files:
+            try:
+                # 上書き読み込みせず、一つだけ読み込む
+                self.conf = Dynaconf(settings_files=[self.settings_files[-1]])
+            except Exception as e:
+                self.__log.error(errmsg(e))
+                # raise e
+        else:
+            self.__log.error(
+                "no settings file(%a) in %s",
+                self.CONF_FILENAME,
+                self.CONF_PATH,
+            )
+            raise FileExistsError
+
+        self.__log.info("conf=%s", self.conf)
 
     @property
     def cmd_map(self):
@@ -254,7 +229,7 @@ class CmdParser:
 
         return {"servo_i": servo_i, "pulse_diff": pulse_diff}
 
-    def _parse_params_cb(self, cmd_params: str) -> dict:
+    def _parse_params_calib(self, cmd_params: str) -> dict:
         """Parse params: ``cb->set``method (servo_i, target, pulse)."""
         self.__log.debug("cmd_params=%a", cmd_params)
 
@@ -275,8 +250,7 @@ class CmdParser:
 
         return {"servo_i": servo_i, "target": target, "pulse": pulse}
 
-    def cmdstr_to_json(self, cmd_str: str) -> dict:
-        # XXX TBD: mccabe: Cyclomatic complexity too high: 17 (threshold 15)
+    def parse_to_json(self, cmd_str: str) -> dict:
         """Command string to command data(dict).
 
         Args:
@@ -297,41 +271,41 @@ class CmdParser:
         cmd_parts = cmd_str.split(":", 1)
 
         cmd_name = cmd_parts[0].lower()
+        cmd_params = ""
         if len(cmd_parts) > 1:
             cmd_params = cmd_parts[1]
-        else:
-            cmd_params = ""
 
-        if cmd_name not in self.cmd_map:
+        if cmd_name not in self.conf:
             _err_data = self._mk_err_data("???", "METHOD_NOT_FOUND", cmd_str)
             self.__log.error("%s", _err_data)
             return _err_data
 
         # e.g. "mv" --> "move_all_angles_sync"
-        method_name = self.cmd_map[cmd_name]["method"]
-        params_parser = self.cmd_map[cmd_name]["params"]
+        method_name = self.conf[cmd_name]["method"]
+        paramtype = self.conf[cmd_name]["paramtype"]
 
         # cmd_dataの初期化
         cmd_data: dict[str, Any] = {"method": method_name}
 
         # パラメータのパーズ
-        if params_parser:
-            ret = params_parser(cmd_params)
-            if ret.get("result") == "ERROR":
-                return ret
+        if paramtype:
+            params_parser = getattr(self, "_parse_params_" + paramtype)
+            if params_parser:
+                ret = params_parser(cmd_params)
+                if ret.get("result") == "ERROR":
+                    return ret
+                cmd_data["params"] = ret
 
-            cmd_data["params"] = ret
-
-        self.__log.debug("cmd_data=%s", cmd_data)
+        self.__log.info("cmd_data=%s", cmd_data)
         return cmd_data
 
-    def cmdstr_to_jsonlist(self, cmd_line: str) -> list[dict]:
+    def parse_to_jsonlist(self, cmd_line: str) -> list[dict]:
         """Command line to command string list."""
 
         cmd_data_list = []
 
         for cmd_str in cmd_line.strip().split():
-            cmd_data = self.cmdstr_to_json(cmd_str)
+            cmd_data = self.parse_to_json(cmd_str)
 
             cmd_data_list.append(cmd_data)
 
@@ -340,11 +314,11 @@ class CmdParser:
 
         return cmd_data_list
 
-    def cmdstr_to_jsonliststr(self, cmd_line: str) -> str:
+    def parse_to_jsonliststr(self, cmd_line: str) -> str:
         """Dict形式をJSON文字列に変換."""
         # self.__log.debug("cmd_line=%s", cmd_line)
 
-        _json_data: list[dict] | dict = self.cmdstr_to_jsonlist(cmd_line)
+        _json_data: list[dict] | dict = self.parse_to_jsonlist(cmd_line)
 
         self.__log.debug('_json_data="%s"', _json_data)
         return json.dumps(_json_data)

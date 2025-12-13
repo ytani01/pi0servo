@@ -7,10 +7,10 @@ import click
 import pigpio
 
 from . import __version__
-from .command.cmd_calib import CalibApp
-from .command.cmd_jsoncli import CmdJsonCli
-from .command.cmd_servo import CmdServo
-from .command.cmd_strcli import CmdStrCli
+from .command.calib import CalibApp
+from .command.jsoncli import JsonCliApp
+from .command.servo import ServoApp
+from .command.strcli import StrCliApp
 from .core.calibrable_servo import CalibrableServo
 from .helper.commonlib import CommonLib
 from .utils.clickutils import click_common_opts
@@ -77,7 +77,7 @@ def servo(ctx, pin: int, pulse: int, wait_sec: float, debug: bool) -> None:
     app = None
     try:
         pi = get_pi(debug)
-        app = CmdServo(pi, pin, pulse, wait_sec, debug=debug)
+        app = ServoApp(pi, pin, pulse, wait_sec, debug=debug)
         app.main(ctx)
 
     except Exception as _e:
@@ -179,7 +179,7 @@ def json_cli(ctx, pins_str, history_file, verbose, debug):
     pi = None
     try:
         pi = get_pi(debug)
-        app = CmdJsonCli(
+        app = JsonCliApp(
             prompt_str, pi, pins, history_file, verbose, debug=debug
         )
         app.main()
@@ -228,7 +228,7 @@ def str_cli(ctx, pins_str, history_file, script_file, debug):
 
         prompt_str = cmd_name + "> "
 
-        app = CmdStrCli(
+        app = StrCliApp(
             pi,
             pins,
             prompt_str,

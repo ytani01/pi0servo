@@ -6,7 +6,7 @@ import time
 from pi0servo import PiServo, get_logger
 
 
-class CmdServo:
+class ServoApp:
     """servo command"""
 
     def __init__(self, pi, pin, pulse, sec=1.0, debug=False):

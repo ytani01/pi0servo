@@ -65,7 +65,7 @@ class TestCmdParser:
             "error": "INVALID_CMD_FORMAT",
             "data": "123",
         }
-        result = instance.cmdstr_to_json(cmd_str)
+        result = instance.parse_to_json(cmd_str)
         assert result == expected_json_obj
 
     def test_cmdstr_to_jsonlist_empty_line(self):
@@ -73,7 +73,7 @@ class TestCmdParser:
         instance = CmdParser()
         cmd_line = ""
         expected_json_obj = []
-        result = instance.cmdstr_to_jsonlist(cmd_line)
+        result = instance.parse_to_jsonlist(cmd_line)
         assert result == expected_json_obj
 
     def test_cmdstr_to_json_negative_sec(self):
@@ -85,7 +85,7 @@ class TestCmdParser:
             "params": "-0.5",
             "error": "< 0",
         }
-        result = instance.cmdstr_to_json(cmd_str)
+        result = instance.parse_to_json(cmd_str)
         assert result == expected_json_obj
 
     def test_cmdstr_to_json_step_n_less_than_one(self):
@@ -97,7 +97,7 @@ class TestCmdParser:
             "params": "0",
             "error": "< 1",
         }
-        result = instance.cmdstr_to_json(cmd_str)
+        result = instance.parse_to_json(cmd_str)
         assert result == expected_json_obj
 
     @pytest.mark.parametrize(
@@ -373,7 +373,7 @@ class TestCmdParser:
         self, cmd_parser_instance, cmd_str, expected_json_obj
     ):
         """cmdstr_to_jsonliststrのテスト"""
-        result_json_str = cmd_parser_instance.cmdstr_to_jsonliststr(cmd_str)
+        result_json_str = cmd_parser_instance.parse_to_jsonliststr(cmd_str)
         result_obj = json.loads(result_json_str)
         assert result_obj == expected_json_obj
 
@@ -391,7 +391,7 @@ class TestCmdParser:
                 "params": {"angles": ["max", "min"]},
             },
         ]
-        result = cmd_parser_instance.cmdstr_to_jsonliststr(cmd_line)
+        result = cmd_parser_instance.parse_to_jsonliststr(cmd_line)
         result_obj = json.loads(result)
         assert result_obj == expected_json_obj
 
@@ -411,6 +411,6 @@ class TestCmdParser:
             },
             {"method": "sleep", "params": {"sec": 0.1}},
         ]
-        result = cmd_parser_instance.cmdstr_to_jsonliststr(cmd_line)
+        result = cmd_parser_instance.parse_to_jsonliststr(cmd_line)
         result_obj = json.loads(result)
         assert result_obj == expected_json_obj

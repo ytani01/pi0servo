@@ -26,6 +26,22 @@ dependencies = [
     "fastapi",
     "uvicorn",
     "json-rpc",
+    "dynaconf",
+]
+
+[dependency-groups]
+dev = [
+    "flake8>=7.3",
+    "mypy>=1.17.0",
+    "pytest>=8.4.1",
+    "pytest-mock",
+    "ruff>=0.12.3",
+    "hatch",
+    "twine>=6.2.0",
+    "ruff-lsp>=0.0.62",
+    "isort>=7.0.0",
+]
+samples = [
 ]
 
 [build-system]
@@ -70,24 +86,9 @@ docstring-code-line-length = 78
 [tool.pytest.ini_options]
 pythonpath = "tests"
 
-[dependency-groups]
-dev = [
-    "flake8>=7.3",
-    "mypy>=1.17.0",
-    "pytest>=8.4.1",
-    "pytest-mock",
-    "ruff>=0.12.3",
-    "hatch",
-    "twine>=6.2.0",
-    "ruff-lsp>=0.0.62",
-    "isort>=7.0.0",
-]
-samples = [
-]
-
 [[tool.mypy.overrides]]
 module = [
-       'pigpio', 'fastapi', 'requests', 'jsonrpc', 'click', 'blessed',
+       'pigpio', 'fastapi', 'requests', 'jsonrpc', 'click', 'blessed', 'dynaconf',
        'pi0servo.web.json_api'
 ]
 ignore_missing_imports = true
